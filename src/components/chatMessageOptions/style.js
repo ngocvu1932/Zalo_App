@@ -3,16 +3,18 @@ import { StyleSheet } from 'react-native'
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#009AFA',
+        // backgroundColor: '#F5F6F8',
+        backgroundColor: '#FFFFFF',
     }, 
 
     header: {
-        flexDirection: 'row',
-        width: "100%",
-        height: 55,
-        alignItems: "center",
-        backgroundColor: '#009AFA',
-        justifyContent: 'flex-start',
+        width: '100%',
+        height: 90,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        justifyContent: 'flex-end'
     },
 
     txtInHeader: {
@@ -24,8 +26,12 @@ export const styles = StyleSheet.create({
     },
     
     body: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#F5F6F8',
+        position: 'absolute',
+        top: 90,
+        left: 0,
+        right: 0,
+        height: '100%',
     },
 
     iconInPress: {
@@ -56,9 +62,9 @@ export const styles = StyleSheet.create({
     },
 
     pressbtnOP :{
-        height: 70,
-        width: '25%',
-        justifyContent: 'center',
+        height: 90,
+        width: '20%',
+        justifyContent: 'flex-start',
         alignItems: 'center',
     },
 
@@ -69,16 +75,20 @@ export const styles = StyleSheet.create({
         paddingLeft: 15,
         paddingRight: 15,
     },
-    encodeEndWrapper:{
+
+    btnOpts:{
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
         height: 55,
+        backgroundColor: '#ffffff'
     },
+
     txt:{
-        fontSize: 16,
+        fontSize: 17,
         marginLeft: 15
     },
+
     imageContainer:{
         flexDirection: 'row',
         alignItems: 'center',
@@ -88,9 +98,24 @@ export const styles = StyleSheet.create({
         paddingLeft: 15,
         paddingRight: 15,
     },
+
     img:{
         height: 70,
         width: 70,
         padding:10
-    }
+    },
+
+    line1: {
+        backgroundColor: '#FFFFFF',
+        width: '13%'
+    },
+
+    line2: {
+        backgroundColor: '#F1F2F4',
+        width: '87%'
+    },
+
+    line: {
+        flexDirection: 'row'
+    },
 })

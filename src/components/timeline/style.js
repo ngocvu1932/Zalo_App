@@ -3,25 +3,23 @@ import { StyleSheet } from 'react-native'
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // justifyContent: 'center',
-        // alignItems: 'center'
         backgroundColor: '#009AFA',
     },
 
     header: {
-        flexDirection: 'row',
         width: '100%',
-        height: 55,
+        height: 90,
         alignItems: 'center',
         backgroundColor: '#009AFA',
+        justifyContent: 'flex-end'
     },
 
     txtInHeader: {
-        fontSize: 18,
+        fontSize: 17,
         color: '#F1FFFF',
-        width: '60%',
         height: 30,
-        marginLeft: 15,
+        marginLeft: 10,
+        flex: 1,
     },
     
     body: {

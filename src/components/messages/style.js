@@ -3,22 +3,19 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#009AFA',
+    backgroundColor: '#FFFFFF', 
   },
   // header
   header: {
-    flexDirection: 'row',
     width: '100%',
-    height: 55,
-    alignItems: 'center',
-    backgroundColor: '#009AFA', 
-    justifyContent: 'space-between',
+    height: 90,
+    backgroundColor: 'red',
+    justifyContent: 'flex-end',
   },
 
   body: {
+    backgroundColor: '#FFFFFF',
     flex: 1,
-    backgroundColor: '#F4F5F7', 
-    // marginTop: 78,
   },
 
   btnSelectChat: {
@@ -26,23 +23,26 @@ export const styles = StyleSheet.create({
     height: 80, 
     marginBottom: 1, 
     alignItems: 'center' ,
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
 
   icon: {
-    color: "white",
+    marginLeft: 10,
+    color: 'white'
   },
 
   searchTxt: {
     color: "white",
-    fontSize: 20,
+    fontSize: 17,
     width: "70%",
     marginLeft: 10,
+    height: 40,
   },
 
   searchBtnWrapper: {
     flexDirection: "row",
     marginLeft: 15,
+    backgroundColor: 'red'
   },
 
   lastMessage_content: {
@@ -60,8 +60,24 @@ export const styles = StyleSheet.create({
     color: "black"
   },
 
-  actionIconsWrapper: {
+  actionIcons: {
     flexDirection: 'row',
     marginRight: 10
+  },
+
+  line1: {
+    height: 1,
+    backgroundColor: '#FFFFFF',
+    width: '15%'
+  },
+
+  line2: {
+    height: 1,
+    backgroundColor: '#F1F2F4',
+    width: '85%'
+  },
+
+  line: {
+    flexDirection: 'row'
   },
 });

@@ -3,30 +3,35 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#009AFA',
+        backgroundColor: '#E2E9F1',
     },
 
-    headerWrapper: {
-        flexDirection: 'row',
-        width: "100%",
-        height: 70,
+    header: {
+        width: '100%',
+        height: 90,
         alignItems: "center",
-        backgroundColor: '#009AFA',
-        justifyContent: 'space-between', // Thêm thuộc tính justifyContent
+        justifyContent: 'flex-end',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
     },
 
     body: {
         flex: 1,
+        position: 'absolute',
+        top: 90,
+        left: 0,
+        right: 0,
         backgroundColor: '#E2E9F1',
-        width: "100%",
-        height: 400,
-        // backgroundColor: 'blue'
+        width: '100%',
+        height: '100%',
+        paddingBottom: 90 + 85,
     },
 
     icon: {
         color: "white",
     },
-
 
     nameTxt: {
         color: "white",
@@ -40,34 +45,34 @@ export const styles = StyleSheet.create({
         opacity: 0.8
     },
   
-    // body
-    footerWrapper: {
-        flexDirection: 'row',
+    footer: {
         width: "100%",
-        height: 80,
-        alignItems: "center",
-        justifyContent: "space-between",
         backgroundColor: '#FFFFFF',
         zIndex: 0,
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 85,
     },
    
-    messageTxt:{
-        color:"black",
-        fontSize:22, // Loại bỏ dấu nháy kép ở giá trị số
-        opacity:0.8,
-        lineHeight:48,
+    messageTxt: {
+        flex: 1, 
+        fontSize: 18, 
+        marginLeft: 10,
+        textAlign: 'left',
+        width: '90%',
+        textAlignVertical: 'center',
     },
 
     viewEnd: {
         alignItems: 'flex-end', 
         width: '100%',
-        // backgroundColor: 'orange'
     },
 
     viewStart: {
         alignItems: 'flex-start', 
         width: '100%',
-        // backgroundColor: 'blue'
     },
 
     messsagePressEnd: { 
@@ -150,5 +155,19 @@ export const styles = StyleSheet.create({
         paddingTop: 5,
         fontSize: 12,
         opacity: 0.8
+    },
+
+    btnOpts: {
+        height: 40, 
+        width: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    btnOptsIcon: {
+        height: 30, 
+        width: 30, 
+        justifyContent: 'center', 
+        alignItems: 'center'
     }
 })

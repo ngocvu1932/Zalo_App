@@ -6,14 +6,24 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faArrowRightFromBracket, faBrush, faChevronLeft, faChevronRight, faCircleInfo, faCircleNotch, faCloudArrowDown, faMagnifyingGlass,  faPhone, faShieldVirus, faUserGear, faUserLock } from '@fortawesome/free-solid-svg-icons'
 import { faAddressBook, faBell, faCircleQuestion, faClock, faCommentDots } from '@fortawesome/free-regular-svg-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CommonActions } from '@react-navigation/native'
+import { CommonActions } from '@react-navigation/native';
+import axios from '../../config/axios'
+import { LinearGradient } from 'expo-linear-gradient'
 
 export const Setting = ({navigation}) => {
   const clearAllData = async () => {
     try {
-      await AsyncStorage.clear();
-      console.log('Tất cả dữ liệu đã được xóa thành công!');
-      resetToScreen(navigation, 'Login');
+      const res = await axios.put('/users/updateOnline', {time: new Date()});
+      if (res.errCode === 0) {
+        const response = await axios.post('/auth/logout');
+        if (response.errCode === 0) {
+          await AsyncStorage.clear();
+          console.log('Tất cả dữ liệu đã được xóa thành công!');
+          resetToScreen(navigation, 'Login');
+        } else {
+          console.log('Lỗi khi xóa dữ liệu và đăng xuất');
+        }
+      }
     } catch (error) {
       console.log('Lỗi khi xóa dữ liệu:', error);
     }
@@ -26,15 +36,28 @@ export const Setting = ({navigation}) => {
     }));
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
-          <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
-          <Text style={styles.txtInHeader}>Cài đặt</Text> 
-        </Pressable>
-        <FontAwesomeIcon style={{marginRight: 10}} color='#F1FFFF' size={23} icon={faMagnifyingGlass} />
+  const renderLine = () => (
+    <View style={styles.line}>
+      <View style={styles.line1} >
+        <Text> </Text>
       </View>
+      <View style={styles.line2}>
+        <Text> </Text>
+      </View>
+    </View>
+  )
+
+  return (
+    <View style={styles.container}>
+      <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
+        <View style={{height: '55%', width: '100%', alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'}}>
+          <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
+            <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
+            <Text style={styles.txtInHeader}>Cài đặt</Text> 
+          </Pressable>
+          <FontAwesomeIcon style={{marginRight: 10}} color='#F1FFFF' size={23} icon={faMagnifyingGlass} />
+        </View>
+      </LinearGradient>
 
       <ScrollView style={styles.body}>        
         <Pressable style={styles.pressShield}  onPress={()=>{navigation.navigate('AccountAndSecurity')}}>
@@ -43,15 +66,7 @@ export const Setting = ({navigation}) => {
           <FontAwesomeIcon size={15} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable> 
 
-        {/* Làm màu kẻ vạch ngang */}
-        <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+        {renderLine()}
         
         <Pressable style={styles.pressShield}  onPress={()=>{navigation.navigate('Privacy')}}>
           <FontAwesomeIcon style={{marginLeft: 15}} size={22} color='#1A66D4' icon={faUserLock} />
@@ -68,15 +83,7 @@ export const Setting = ({navigation}) => {
           <FontAwesomeIcon size={15} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable>
 
-         {/* Làm màu kẻ vạch ngang */}
-        <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+         {renderLine()}
 
         <Pressable style={[styles.pressShield, { height: 65}]} onPress={()=>{alert('Sao lưu và khôi phục')}}>
           <FontAwesomeIcon style={{marginLeft: 15}} size={22} color='#1A66D4' icon={faCloudArrowDown} />
@@ -93,15 +100,7 @@ export const Setting = ({navigation}) => {
           <FontAwesomeIcon size={15} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable>
 
-         {/* Làm màu kẻ vạch ngang */}
-         <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+         {renderLine()}
 
         <Pressable style={[styles.pressShield]} onPress={()=>{navigation.navigate('SettingMessage')}}>
           <FontAwesomeIcon style={{marginLeft: 15}} size={22} color='#1A66D4' icon={faCommentDots} />
@@ -109,15 +108,7 @@ export const Setting = ({navigation}) => {
           <FontAwesomeIcon size={15} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable>
 
-         {/* Làm màu kẻ vạch ngang */}
-         <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+         {renderLine()}
 
         <Pressable style={styles.pressShield}  onPress={()=>{navigation.navigate('SettingCalling')}}>
           <FontAwesomeIcon style={{marginLeft: 15}} size={22} color='#1A66D4' icon={faPhone} />
@@ -125,15 +116,7 @@ export const Setting = ({navigation}) => {
           <FontAwesomeIcon size={15} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable>
 
-         {/* Làm màu kẻ vạch ngang */}
-         <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+         {renderLine()}
 
         <Pressable style={styles.pressShield}  onPress={()=>{navigation.navigate('SettingTimeline')}}>
           <FontAwesomeIcon style={{marginLeft: 15}} size={22} color='#1A66D4' icon={faClock} />
@@ -141,15 +124,7 @@ export const Setting = ({navigation}) => {
           <FontAwesomeIcon size={15} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable>
         
-         {/* Làm màu kẻ vạch ngang */}
-         <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+         {renderLine()}
 
         <Pressable style={styles.pressShield}  onPress={()=>navigation.navigate('SettingContact')}>
           <FontAwesomeIcon style={{marginLeft: 15}} size={22} color='#1A66D4' icon={faAddressBook} />
@@ -157,15 +132,7 @@ export const Setting = ({navigation}) => {
           <FontAwesomeIcon size={15} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable>
         
-         {/* Làm màu kẻ vạch ngang */}
-         <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+         {renderLine()}
 
         <Pressable style={styles.pressShield}  onPress={()=>{alert('Giao diện và ngôn ngữ')}}> 
           <FontAwesomeIcon style={{marginLeft: 15}} size={22} color='#1A66D4' icon={faBrush} />
@@ -179,15 +146,7 @@ export const Setting = ({navigation}) => {
           <FontAwesomeIcon size={15} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable>
 
-        {/* Làm màu kẻ vạch ngang */}
-        <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+        {renderLine()}
 
         <Pressable style={styles.pressShield}  onPress={()=>{alert('Liên hệ hỗ trợ')}}> 
           <FontAwesomeIcon style={{marginLeft: 15}} size={22} color='#1A66D4' icon={faCircleQuestion} />
@@ -203,15 +162,7 @@ export const Setting = ({navigation}) => {
           <FontAwesomeIcon size={15} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable>
 
-        {/* Làm màu kẻ vạch ngang */}
-        <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+        {renderLine()}
 
         <View style={styles.viewLogout}> 
           <Pressable style={styles.pressLogout} onPress={()=> clearAllData()}> 
@@ -219,8 +170,9 @@ export const Setting = ({navigation}) => {
             <Text style={{fontSize: 20, fontWeight: '500'}}> Đăng xuất</Text>
           </Pressable>
         </View>
+        <View style={{width: '100%', height: 100}}></View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }
 

@@ -3,19 +3,13 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        position:'relative',
         backgroundColor: '#F5F6F8'
     },
     
     header: {
         flexDirection: 'row',
-        width: '100%',
-        height: 55,
         alignItems: 'center',
         justifyContent: 'space-between',
-        position: 'absolute',
-        zIndex: 10,
-        marginTop: 30,
     },
 
     txtInHeader: {
@@ -44,9 +38,9 @@ export const styles = StyleSheet.create({
     },
 
     btnHeader: {
-        height: 40, 
-        width: 40, 
+        height: 35, 
+        width: 35, 
         justifyContent: 'center', 
-        alignItems: 'center'
+        alignItems: 'center',
     },
 });

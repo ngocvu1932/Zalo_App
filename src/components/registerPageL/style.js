@@ -3,16 +3,19 @@ import { StyleSheet } from 'react-native'
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // justifyContent: 'center',
-        // alignItems: 'center'
         backgroundColor: '#009AFA',
     },
 
     header: {
         width: '100%',
-        height: 55,
-        backgroundColor: '#009AFA',
-        justifyContent: 'center'
+        height: 90,
+        justifyContent: 'flex-end',
+    },
+
+    body: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        alignItems: 'center'
     },
 
     pressBack: {
@@ -20,32 +23,20 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         width: 250,
         height: 40,
-        // backgroundColor: 'red',
-        // justifyContent: 'center'
     },
 
     txtInHeader: {
-        fontSize: 21,
+        fontSize: 20,
         color: '#F1FFFF',
         marginLeft: 10,
-        marginBottom: 2
     }, 
-    
-    body: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-        paddingBottom: 200,
-        alignItems: 'center'
-    },
 
     textNameI: {
-        borderBottomWidth: 2, 
+        borderBottomWidth: 1, 
         borderBottomColor: '#1ED0F1', 
-        // backgroundColor: 'red',
         height: 40,
         width: '100%',
         fontSize: 18,
-        // paddingLeft: 10
         marginTop: 10
     },
 

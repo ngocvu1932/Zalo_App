@@ -1,4 +1,4 @@
-import { Text, View, FlatList, Image, Pressable, TextInput } from 'react-native'
+import { Text, View, FlatList, Image, Pressable, TextInput, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { styles } from './style'
 import moment from "moment";
@@ -8,7 +8,7 @@ import axios, { setAuthorizationAxios } from '../../config/axios'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CommonActions } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { setListFriend } from '../../redux/friendSlice'; 
+import { LinearGradient } from 'expo-linear-gradient';
 
 export const Messages = ({ navigation }) => {
   const user = useSelector(state => state.user);
@@ -17,14 +17,20 @@ export const Messages = ({ navigation }) => {
   const [access_token, setAccess_Token] = useState('');
   const [chatInfo, setChatInfo] = useState([]);
   const dispatch = useDispatch();
-  var isCreate = useSelector(state => state.isCreateGroup.isCreateGroup);
+  const [loadAgain, setLoadAgain] =useState();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setLoadAgain(new Date());
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   useEffect(() => {
     setAccess_Token(user.user?.access_token);
     setAuthorizationAxios(user.user?.access_token);
   }, [user])
-
-  // console.log('chatData:', chatData);
 
   // Load chat 
   useEffect(() => {
@@ -44,7 +50,7 @@ export const Messages = ({ navigation }) => {
     };
 
     fetchChat();
-  }, [access_token, isCreate]);
+  }, [access_token, loadAgain]);
 
   useEffect(() => {
     const dataChat = chatData.map((item) => {
@@ -58,7 +64,8 @@ export const Messages = ({ navigation }) => {
             updatedAt: item.updatedAt,
             userId: item.participants[1].id,
             type: "PRIVATE_CHAT",
-            lastedMessage: item.lastedMessage
+            lastedMessage: item.lastedMessage,
+            lastedOnline: item.participants[1].lastedOnline
           };
         } else {
           return {
@@ -69,7 +76,8 @@ export const Messages = ({ navigation }) => {
             updatedAt: item.updatedAt,
             userId: item.participants[0].id,
             type: "PRIVATE_CHAT",
-            lastedMessage: item.lastedMessage
+            lastedMessage: item.lastedMessage,
+            lastedOnline: item.participants[0].lastedOnline
           };
         }
       } else if (item.type.includes('GROUP_CHAT')) {
@@ -97,116 +105,82 @@ export const Messages = ({ navigation }) => {
     }));
   };
 
-  useEffect(() => {
-    fetchFriendList();
-  }, [])
-
-
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Đang tải dữ liệu...</Text>
-      </View>
-    );
-  }
-
   const renderItem = ({ item }) => {
-    console.log('item:', item.avatar);
+    const { lastedMessage, ...rest } = item;
     return (
-      <Pressable style={styles.btnSelectChat} onPress={() => {
-        navigation.navigate('ChatMessage', { items: item });
-      }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '95%' }}>
-          {item.avatar.includes('rgb') ?
-            <View style={{ height: 45, width: 45, borderRadius: 30, backgroundColor: item.avatar, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{width: '100%'}}>
+        <Pressable style={styles.btnSelectChat} onPress={() => {navigation.navigate('ChatMessage', { items: {...rest} })}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '95%' }}>
+            {item.avatar.includes('rgb') ?
+              <View style={{ height: 45, width: 45, borderRadius: 30, backgroundColor: item.avatar, justifyContent: 'center', alignItems: 'center' }}>
+              </View>
+              :
+              <Image source={{uri: item.avatar}} style={{height: 45, width: 45, borderRadius: 30}}></Image>
+            }
+
+            <View style={{ flex: 1, marginLeft: 15 }}>
+              <Text style={{ fontSize: 20, marginBottom: 3 }}>{item.userName}</Text>
+              <Text style={{ marginTop: 3 }}>
+                {
+                  item.lastedMessage?.type === 'TEXT' ?
+                    item.lastedMessage?.content
+                    : item.lastedMessage?.type === 'IMAGE' ? 'Đã gửi 1 ảnh' : 'Đã gửi 1 video'
+                }
+
+              </Text>
             </View>
-            :
-            <Image source={{uri: item.avatar}} style={{height: 45, width: 45, borderRadius: 30}}></Image>
-          }
-
-          <View style={{ flex: 1, marginLeft: 15 }}>
-            <Text style={{ fontSize: 20, marginBottom: 3 }}>{item.userName}</Text>
-            <Text style={{ marginTop: 3 }}>
-              {
-                item.lastedMessage?.type === 'TEXT' ?
-                  item.lastedMessage?.content
-                  : item.lastedMessage?.type === 'IMAGE' ? 'Đã gửi 1 ảnh' : 'Đã gửi 1 video'
-              }
-
-            </Text>
+            <Text>{moment.utc(item.lastedMessage?.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>
           </View>
-          <Text>{moment.utc(item.lastedMessage?.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>
-        </View>
-        <View></View>
-
-      </Pressable>
+        </Pressable>
+        {renderLine()}
+      </View>
     )
   };
 
-
-  // thuan
-  async function fetchFriendList() {
-    try {
-      const res = await axios.get(`/users/friends?page=${1}&limit=${10}`);
-      if (res.errCode === 0) {
-        const newItem = []
-        for (let i = 0; i < res.data.length; i++) {
-          if (res.data[i].user1Id == user.user.user.id) {
-            newItem.push(res.data[i].user2)
-          } else {
-            newItem.push(res.data[i].user1)
-          }
-        }
-        dispatch(setListFriend(newItem));
-      }
-    } catch (error) {
-      console.log("error", error);
-    }
-  }
-
-  const handleAvatar = (item) => {
-    const fullName = item.userName
-    const words = fullName.split(' ');
-    const lastWord = words[words.length - 1];
-    const secondLastWord = words.length > 1 ? words[words.length - 2] : '';
-    const [r, g, b] = item?.avatar?.match(/\d+/g)
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return {
-      initials: (secondLastWord.charAt(0) || '') + (lastWord.charAt(0) || ''),
-      color: brightness > 125 ? 'black' : 'white'
-    }
-  }
+  const renderLine = () => (
+    <View style={styles.line}>
+      <View style={styles.line1} >
+        <Text> </Text>
+      </View>
+      <View style={styles.line2}>
+        <Text> </Text>
+      </View>
+    </View>
+  )
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.searchBtnWrapper}>
-          <FontAwesomeIcon size={27} style={styles.icon} icon={faSearch} />
-          <TextInput style={styles.searchTxt} placeholder="Tìm kiếm" />
-        </View>
+    <View style={styles.container}>
+      <LinearGradient colors={['#008BFA', '#00ACF4']} style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+        <View style={{height: '55%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around'}}>
+          <FontAwesomeIcon size={22} style={styles.icon} icon={faSearch} />
+          <TextInput style={styles.searchTxt} placeholder="Tìm kiếm" placeholderTextColor={'#FFFFFF'}/>
+          
+          <View style={styles.actionIcons}>
+            <Pressable onPress={() => {navigation.navigate('QRCodeScanner')}}>
+              <FontAwesomeIcon size={22} style={styles.icon} icon={faQrcode} />
+            </Pressable>
 
-        <View style={styles.actionIconsWrapper}>
-          <Pressable onPress={() => {
-            navigation.navigate('QRCodeScanner');
-          }}>
-            <FontAwesomeIcon size={25} style={styles.icon} icon={faQrcode} />
-          </Pressable>
-
-          <Pressable onPress={() => {
-            // navigation.navigate('QRReader');
-          }}>
-            <FontAwesomeIcon size={25} style={[styles.icon, { marginLeft: 10 }]} icon={faPlus} />
-          </Pressable>
+            <Pressable onPress={() => {navigation.navigate('QRReader')}}>
+              <FontAwesomeIcon size={22} style={[styles.icon, { marginLeft: 15 }]} icon={faPlus} />
+            </Pressable>
+          </View>
         </View>
-      </View>
+      </LinearGradient>
 
       <View style={styles.body}>
-        <FlatList
-          data={chatInfo}
-          renderItem={renderItem}
-        // keyExtractor={item => item._id}
-        />
+        {isLoading ? 
+            <View style={{justifyContent: 'center', alignItems: 'center', height: '100%'}}>
+              <ActivityIndicator size="large" color="black" />
+            </View> 
+          : 
+          <FlatList
+            data={chatInfo}
+            renderItem={renderItem}
+            keyExtractor={item => item._id}
+          />
+        }
+        <View style={{height: 300}}></View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };

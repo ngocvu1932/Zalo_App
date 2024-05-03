@@ -3,26 +3,19 @@ import { StyleSheet } from 'react-native'
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // justifyContent: 'center',
-        // alignItems: 'center'
         backgroundColor: '#009AFA',
-        // backgroundColor: 'red',
     },
 
     header: {
-        flexDirection: 'row',
         width: '100%',
-        height: 55,
-        alignItems: 'center',
-        backgroundColor: '#009AFA',
-        justifyContent: 'space-between'
+        height: 90,
+        justifyContent: 'flex-end'
     },
 
     txtInHeader: {
         flex: 1,
-        fontSize: 18,
+        fontSize: 17,
         color: '#F1FFFF',
-        width: '60%',
         height: 30,
         marginLeft: 10,
     }, 
@@ -30,6 +23,9 @@ export const styles = StyleSheet.create({
     body: {
         flex: 1,
         backgroundColor: '#F1F2F4',
+        // backgroundColor: 'red',
+        // height: '100%',
+        width: '100%',
     },
 
     pressViewInfo: {
@@ -117,17 +113,16 @@ export const styles = StyleSheet.create({
         width: 40,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 10
     },
 
     line1: {
-        height: 2,
+        height: 1,
         backgroundColor: '#FFFFFF',
         width: '15%'
     },
 
     line2: {
-        height: 2,
+        height: 1,
         backgroundColor: '#F1F2F4',
         width: '85%'
     },

@@ -3,25 +3,24 @@ import { StyleSheet } from 'react-native'
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF'
+        backgroundColor: '#FFFFFF',
+        height: '100%'
     },
 
     txtZaloX: {
         fontSize: 40,
         fontWeight: 'bold',
-        color: '#0471F2'
+        color: '#0471F2',
+        marginTop: 30
     },
 
     btnLogin: {
-        width: 260,
-        height: 50,
+        height: 45,
         backgroundColor: '#008FFF',
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 100
     }, 
 
     txtLogin: {

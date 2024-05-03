@@ -8,6 +8,7 @@ import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import firebase from 'firebase/compat/app';
 import { firebaseConfig } from '../../utils/firebase_config'
+import { LinearGradient } from 'expo-linear-gradient';
 
 export const RegisterPage2 = ({ navigation, route }) => {
   const { name } = route.params;
@@ -56,17 +57,15 @@ export const RegisterPage2 = ({ navigation, route }) => {
   };
 
   return (
-    <SafeAreaProvider style={styles.container}>
-      <FirebaseRecaptchaVerifierModal
-        ref={recaptchaVerifiedRef}
-        firebaseConfig={firebaseConfig}
-      />   
-      <View style={styles.header}>
-        <Pressable style={styles.pressBack} onPress={() => { navigation.goBack() }}>
-          <FontAwesomeIcon icon={faChevronLeft} style={{ marginLeft: 10 }} color='#F5F8FF' size={20} />
-          <Text style={styles.txtInHeader}>Tạo tài khoản</Text>
-        </Pressable>
-      </View>
+    <View style={styles.container}>
+      <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
+        <View style={{height: '55%', justifyContent: 'center'}}>
+          <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
+            <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
+            <Text style={styles.txtInHeader}>Tạo tài khoản</Text> 
+          </Pressable>
+        </View>
+      </LinearGradient>
 
       <View style={styles.body}>
         <View style={{ backgroundColor: '#F9FAFE', width: '100%', height: 30, justifyContent: 'center' }}>
@@ -104,6 +103,7 @@ export const RegisterPage2 = ({ navigation, route }) => {
         </Pressable>
       </View>
       {/* Toast component here */}
-    </SafeAreaProvider>
+      <FirebaseRecaptchaVerifierModal ref={recaptchaVerifiedRef} firebaseConfig={firebaseConfig} />   
+    </View>
   )
 }

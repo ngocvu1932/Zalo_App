@@ -4,6 +4,7 @@ import { styles } from './style'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faChevronLeft, faChevronRight} from '@fortawesome/free-solid-svg-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 
 export const SettingContact = ({navigation}) => {
   const [isToggled, setToggled] = useState(false);
@@ -12,14 +13,26 @@ export const SettingContact = ({navigation}) => {
     setToggled(!isToggled);
   }; 
  
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
-          <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
-          <Text style={styles.txtInHeader}>Danh bạ</Text> 
-        </Pressable>
+  const renderLine = () => (
+    <View style={styles.line}>
+      <View style={styles.line1} >
+        <Text> </Text>
       </View>
+      <View style={styles.line2}>
+        <Text> </Text>
+      </View>
+    </View>
+  )
+  return (
+    <View style={styles.container}>
+      <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
+        <View style={{height: '55%', justifyContent: 'center'}}>
+          <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
+            <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
+            <Text style={styles.txtInHeader}>Danh bạ</Text> 
+          </Pressable>
+        </View>
+      </LinearGradient>
 
       <ScrollView style={styles.body}>   
         <Pressable style={[styles.pressBirthDay, {height: 70}]} onPress={()=> alert('Phân loại nhật ký')}>
@@ -30,15 +43,7 @@ export const SettingContact = ({navigation}) => {
           <Text style={{fontSize: 15, marginRight: 15}}>Thủ công</Text>
         </Pressable>
 
-          {/* Làm màu kẻ vạch ngang */}
-          <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+        {renderLine()}
 
         <Pressable style={[styles.pressBirthDay]} onPress={()=> alert('Hiện liên hệ trong danh bạ')}>
           <Text style={styles.textBirthDay}>Hiện liên hệ trong danh bạ</Text>
@@ -47,7 +52,6 @@ export const SettingContact = ({navigation}) => {
 
         <View style={[styles.viewLogin]}>
           <Text style={styles.txtTitle}>Nguồn tìm kiếm và kết bạn</Text>
-          
           <View style={[styles.pressBirthDay, {height: 75}]}>
             <View>
               <Text style={styles.textBirthDay}>Tự động kết bạn từ danh bạ máy</Text>
@@ -59,15 +63,7 @@ export const SettingContact = ({navigation}) => {
             </Pressable> 
           </View>
           
-          {/* Làm màu kẻ vạch ngang */}
-          <View style={styles.line}>
-            <View style={styles.line1} >
-              <Text> </Text>
-            </View>
-            <View style={styles.line2}>
-              <Text> </Text>
-            </View>
-          </View>
+          {renderLine()}
 
           <Pressable style={[styles.pressBirthDay]} onPress={()=> alert('Quản lý nguồn tìm kiếm và kết bạn')}>
             <Text style={styles.textBirthDay}>Quản lý nguồn tìm kiếm và kết bạn</Text>
@@ -75,7 +71,7 @@ export const SettingContact = ({navigation}) => {
           </Pressable>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }
 

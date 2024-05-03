@@ -1,21 +1,109 @@
-import React from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { FlatList, Pressable, Text, View } from "react-native";
+import axios from "../../config/axios";
+import moment from "moment";
+import { styles } from "./style";
+import { socket } from "../../config/io";
 
 export const FriendRequestSent = ({ navigation }) => {
-  return (
-    <ScrollView style={{height:"100%", backgroundColor:'white'}}>
-      <Pressable style={{backgroundColor:"white"}}>
-        <View style={{flexDirection:'row', width:"100%", alignItems:"center", paddingLeft:20, paddingRight:20}}>
-          <View style={{height: 45, width: 45, borderRadius: 30, backgroundColor: `green`}}></View>
-          <View style={{flex:1, flexDirection :"column", marginLeft:15, padding:10}}>
-            <Text style={{fontWeight:"bold"}}>Trần Minh Thuận</Text>
-            <Text>Muốn kết bạn</Text>
-          </View>
-          <Pressable style={{backgroundColor:'#EAEDF0', justifyContent:'center', padding:8, borderRadius:10, borderBlockColor:"black", borderWidth:1}}>
-            <Text style={{color:'black', fontWeight:"bold"}}>Thu hồi</Text>
-          </Pressable>
+  const [loadAgain, setLoadAgain] = useState();
+  const [listFriendRequestSent, setListFriendRequestSent] = useState([]);
+  const [loadAgainSocket, setLoadAgainSocket] =useState();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setLoadAgainSocket(new Date());
+      setLoadAgain(new Date());
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  // socket
+  useEffect(() => {
+    socket.then(socket => {
+      socket.on('need-accept-addFriend', (data) => {
+        setLoadAgain(data.createdAt);
+        console.log('Is received FriendRequestSent: ', data.createdAt);
+      });
+    });
+
+    return () => {
+      socket.then(socket => {
+        socket.off('need-accept-addFriend');
+      });
+    };
+  }, [loadAgainSocket]);
+
+  // lấy lời mời đã gửi
+  useEffect(()=> {
+    const getAllFriendRequestSent = async () => {
+      try {
+        const response = await axios.get('/users/notifications/friendShip/sentInvited');
+        if (response.errCode === 0) {
+          setListFriendRequestSent(response.data);
+        } else { 
+          console.log('Error 2:', response);
+        }
+      } catch (error) {
+        console.log('Error 1:', error);
+      }
+    }
+
+    getAllFriendRequestSent();
+  }, [loadAgain])
+
+  // Send request add friend and recall request add friend
+  const sendRequestAddFriend = async (idUserGet) => {
+    try {
+      const response = await axios.post(`/users/friendShip`, {
+        userId: idUserGet, 
+        content: 'Xin chào, tôi muốn kết bạn với bạn'
+      });
+
+      if (response.errCode === 3) {
+        setLoadAgain(new Date());
+        socket.then(socket => {
+          socket.emit('send-add-friend', {createdAt: new Date()});
+        });
+      } else {
+        setLoadAgain(new Date());
+      }
+    } catch (error) {
+      console.log('Error 4: ', error.message);
+    }
+  };
+
+  const renderItem = ({item}) => {
+    const now = moment();
+    const createdAt = moment(item.createdAt);
+    const duration = moment.duration(now.diff(createdAt));
+    return (
+      <Pressable style={styles.btnMain} onPress={()=> {navigation.navigate('Profile', {phoneNumber: item.friendShip.receiver.phoneNumber})}}>
+        {item.friendShip.receiver.avatar.includes('rgb') ? 
+            <View style={[styles.viewAvt, {backgroundColor: item.friendShip.receiver.avatar}]}></View> 
+          : ''   
+        }
+        <View style={{flex: 1, marginLeft: 10}}>
+          <Text style={{fontSize: 16, fontWeight: 400}}>{item.friendShip.receiver.userName}</Text>
+          <Text style={{fontSize: 14}}>{duration.days() > 0 ? `${duration.days()} ngày trước  ` : duration.hours() > 0 ? `${duration.hours()} giờ trước  ` : duration.minutes() > 0 ? `${duration.minutes()} phút trước  ` : duration.seconds() > 0 ? `${duration.seconds()} giây trước  ` : 'Ngay bây giờ  ' }</Text>
         </View>
+
+        <Pressable style={styles.btnRecall} onPress={()=> sendRequestAddFriend(item.friendShip.receiver.id)}>
+          <Text style={{fontSize: 15}}>Thu hồi</Text>
+        </Pressable>
       </Pressable>
-    </ScrollView>
+    )
+  }
+
+  return (
+    <View style={{height:"100%", backgroundColor:'white'}}>
+      <FlatList
+        data={listFriendRequestSent}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+      ></FlatList>
+      
+    </View>
   );
 };

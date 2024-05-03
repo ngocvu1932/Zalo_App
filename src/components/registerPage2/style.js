@@ -3,18 +3,19 @@ import { StyleSheet } from 'react-native'
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // justifyContent: 'center',
-        // alignItems: 'center'
-        // backgroundColor: 'blue',
         backgroundColor: '#009AFA',
     },
 
     header: {
-        marginTop: 25,
         width: '100%',
-        height: 55,
-        backgroundColor: '#009AFA',
-        justifyContent: 'center'
+        height: 90,
+        justifyContent: 'flex-end',
+    },
+
+    body: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        alignItems: 'center'
     },
 
     pressBack: {
@@ -32,13 +33,6 @@ export const styles = StyleSheet.create({
         marginLeft: 10,
         marginBottom: 2
     }, 
-    
-    body: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-        paddingBottom: 200,
-        alignItems: 'center'
-    },
 
     blue: {
         backgroundColor: '#127FFF'

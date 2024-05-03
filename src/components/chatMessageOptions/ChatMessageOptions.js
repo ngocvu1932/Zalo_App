@@ -3,15 +3,18 @@ import React, {useRef, useState} from 'react'
 import { styles } from './style'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { faMagnifyingGlass, faLock, faStar, faUser,faWandMagicSparkles, faBell, faPencil, faClock, faImage, faUserPlus, faPersonCirclePlus, faUserGroup, faThumbtack, faEyeSlash, faPhoneFlip, faTrash, faChevronLeft} from '@fortawesome/free-solid-svg-icons' 
+import { faMagnifyingGlass, faWandMagicSparkles, faPencil, faUserPlus, faPersonCirclePlus, faUserGroup, faThumbtack, faEyeSlash, faPhoneFlip, faTrash, faChevronLeft} from '@fortawesome/free-solid-svg-icons' ;
+import { faStar, faClock, faImage, faUser, faBell, } from '@fortawesome/free-regular-svg-icons';
 import axios from '../../config/axios'
-import Toast from 'react-native-easy-toast'
+import Toast from 'react-native-easy-toast';
+import { LinearGradient } from 'expo-linear-gradient';
  
 export const ChatMessageOptions = ({navigation, route}) => {
     const {items} = route.params; 
     const [isEnabled, setIsEnabled] = useState(false); 
+    const [isUser, setIsUser] = useState(false); 
     const toastRef = useRef(null);
-    console.log( 'ddd',items);
+    // console.log( 'ddd',items);
     
     const toggleSwitch = () => {
       setIsEnabled(previousState => !previousState);
@@ -30,25 +33,32 @@ export const ChatMessageOptions = ({navigation, route}) => {
                 }, 1000)
             }
         } catch (error) {
-            console.log(error);
+            console.log('Error: ',error);
         }
     } 
 
+    const renderLine = (height) => (
+        <View style={styles.line}>
+            <View style={[styles.line1, {height: height}]}></View>
+            <View style={[styles.line2, {height: height}]}></View>
+        </View>
+    )
+
     return (
-        <SafeAreaView style={styles.container}>  
-            <View style={styles.header}>
-                <Pressable onPress={()=>{
-                    navigation.navigate('ChatMessage', {items: items})
-                }}>
-                    <FontAwesomeIcon style={{marginLeft: 15}} color='#F1FFFF' size={21} icon={faChevronLeft} />
-                </Pressable>
-                <Text style={styles.txtInHeader}>Tùy chọn</Text>
-            </View>
+        <View style={styles.container}>  
+            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']} style={styles.header}>
+                <View style={{height: '55%', justifyContent: 'center'}}>
+                    <Pressable style={{flexDirection: 'row', height: 40, alignItems: 'center'}} onPress={()=>{navigation.navigate('ChatMessage', {items: items})}}>
+                        <FontAwesomeIcon style={{marginLeft: 15}} color='#F1FFFF' size={21} icon={faChevronLeft} />
+                        <Text style={styles.txtInHeader}>Tùy chọn</Text>
+                    </Pressable>
+                </View>
+            </LinearGradient>
 
             <ScrollView style={styles.body}>
-                <View>
+                <View style={{alignItems: 'center', backgroundColor: '#FFFFFF'}}>
                     <Pressable disabled={items.type.includes('GROUP_CHAT')} style={{alignItems: 'center', marginTop: 20}} onPress={()=>{
-                        navigation.navigate('Profile', {phoneNumber: items.phoneNumber })
+                        navigation.navigate('Profile', {phoneNumber: items.phoneNumber, isUser: isUser })
                     }}>
                         { items.avatar.includes('rgb') ?
                             <View style={{height: 100, width: 100, borderRadius: 55, backgroundColor: items.avatar}}></View>
@@ -58,75 +68,81 @@ export const ChatMessageOptions = ({navigation, route}) => {
                         <Text style={{fontSize: 18, fontWeight: 'bold', marginTop: 10}}>{items.userName}</Text>
                     </Pressable>
 
-                    <View style={{ flexDirection: 'row', marginTop: 20}}>
+                    <View style={{flex: 1, flexDirection: 'row', marginTop: 20, width: '80%', justifyContent: 'space-between', marginBottom: 5}}>
                         <Pressable style={styles.pressbtnOP}>
                             <View style={styles.iconInPress}>
-                                <FontAwesomeIcon color='#515152' size={22} icon={faMagnifyingGlass} />
+                                <FontAwesomeIcon color='#808388' size={22} icon={faMagnifyingGlass} />
                             </View>
-                            <Text style={{marginTop:10}} >Tìm tin nhắn</Text>
+                            <Text style={{marginTop:10, textAlign: 'center'}} >Tìm tin nhắn</Text>
                         </Pressable> 
                         
                         {items.type=="PRIVATE_CHAT" ? (
-                            <Pressable onPress={()=> {navigation.navigate('Profile', {phoneNumber: items.phoneNumber })}} style={styles.pressbtnOP}>
+                            <Pressable onPress={()=> {navigation.navigate('Profile', {phoneNumber: items.phoneNumber , isUser: isUser})}} style={styles.pressbtnOP}>
                                 <View style={styles.iconInPress}>
-                                    <FontAwesomeIcon color='#515152' size={22} icon={faUser} />
+                                    <FontAwesomeIcon color='#808388' size={22} icon={faUser} />
                                 </View>
-                                <Text style={{marginTop:10}} >Xem thông tin</Text>
+                                <Text style={{marginTop:10, textAlign: 'center'}}>Xem thông tin</Text>
                             </Pressable>
                         ) : (
                             <Pressable onPress={()=> {navigation.navigate('AddMember', {items:items})}} style={styles.pressbtnOP}>
                                 <View style={styles.iconInPress}>
-                                    <FontAwesomeIcon color='#515152' size={22} icon={faUserPlus} />
+                                    <FontAwesomeIcon color='#808388' size={22} icon={faUserPlus} />
                                 </View>
-                                <Text style={{marginTop:10}} >Thêm</Text>
+                                <Text style={{marginTop:10, textAlign: 'center'}}>Thêm thành viên</Text>
                             </Pressable>
                         )}
                         
                         <Pressable style={styles.pressbtnOP}>
                             <View style={styles.iconInPress}>
-                                <FontAwesomeIcon color='#515152' size={22} icon={faWandMagicSparkles} />
+                                <FontAwesomeIcon color='#808388' size={22} icon={faWandMagicSparkles} />
                             </View>
-                            <Text style={{marginTop:10}} >Đổi hình nền</Text>
+                            <Text style={{marginTop:10, textAlign: 'center'}} >Đổi hình nền</Text>
                         </Pressable>
 
                         <Pressable style={styles.pressbtnOP}>
                             <View style={styles.iconInPress}>
-                                <FontAwesomeIcon color='#515152' size={22} icon={faBell} />
+                                <FontAwesomeIcon color='#808388' size={22} icon={faBell} />
                             </View>
-                            <Text style={{marginTop:10}} >Tắt thông báo</Text>
+                            <Text style={{marginTop:10, textAlign: 'center'}} >Tắt thông báo</Text>
                         </Pressable>
                     </View>
+                </View>
 
-                    <>
+                <View style={{marginTop: 10}}>
                     {items.type=="PRIVATE_CHAT" ? (
                         <View>
-                            <Pressable style={styles.encodeEndWrapper}>
-                            <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faLock} />
-                            <Text style={styles.txt}>Mã hóa đầu cuối</Text>
-                            </Pressable>
-                            <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faPencil} />
+                            <Pressable style={styles.btnOpts}>
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faPencil} />
                                 <Text style={styles.txt}>Đổi tên gợi nhớ</Text>
                             </Pressable>
-                            <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faStar} />
+
+                            {renderLine(1)}
+
+                            <View style={styles.btnOpts}>
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faStar} />
                                 <Text style={styles.txt}>Đánh dấu bạn thân</Text>
                                 <View style={{ flex: 1, alignItems: 'flex-end', marginRight: 15 }}>
-                                <Switch
-                                    trackColor={{ false: "#767577", true: "#81b0ff" }}
-                                    thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-                                    ios_backgroundColor="#3e3e3e"
-                                    onValueChange={toggleSwitch}
-                                    value={isEnabled} 
-                                /> 
+                                    <Switch
+                                        trackColor={{ false: "#767577", true: "#81b0ff" }}
+                                        thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+                                        ios_backgroundColor="#3e3e3e"
+                                        onValueChange={toggleSwitch}
+                                        value={isEnabled} 
+                                    /> 
                                 </View>
-                            </Pressable>
-                            <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faClock} />
+                            </View>
+
+                            {renderLine(1)}
+
+                            <Pressable style={styles.btnOpts}>
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faClock} />
                                 <Text style={styles.txt}>Nhật ký chung</Text>
                             </Pressable>
-                            <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faImage} />
+
+                            {renderLine(1)}
+
+                            <Pressable style={styles.btnOpts}>
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faImage} />
                                 <Text style={styles.txt}>Ảnh, file, link đã gởi</Text>
                             </Pressable>
                             <View style={styles.bottomContainer}>
@@ -138,27 +154,27 @@ export const ChatMessageOptions = ({navigation, route}) => {
                             </View>
                             </View>
                             <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faUserPlus} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faUserPlus} />
                                 <Text style={styles.txt}>Tạo nhóm với Trần Minh Thuận</Text>
                             </Pressable>
                             <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faPersonCirclePlus} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faPersonCirclePlus} />
                                 <Text style={styles.txt}>Thêm Trần Minh Thuận vào nhóm</Text>
                             </Pressable>
                             <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faUserGroup} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faUserGroup} />
                                 <Text style={styles.txt}>Xem nhóm chung</Text>
                             </Pressable>
                             <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faThumbtack} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faThumbtack} />
                                 <Text style={styles.txt}>Ghim trò chuyện</Text>
                             </Pressable>
                             <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faEyeSlash} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faEyeSlash} />
                                 <Text style={styles.txt}>Ẩn trò chuyện</Text>
                             </Pressable>
                             <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faPhoneFlip} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faPhoneFlip} />
                                 <Text style={styles.txt}>Báo cuộc gọi đến</Text>
                             </Pressable>
                             <Pressable style={styles.encodeEndWrapper}>
@@ -169,11 +185,11 @@ export const ChatMessageOptions = ({navigation, route}) => {
                     ) : items.type == "GROUP_CHAT" ?(
                         <View>
                             <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faPencil} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faPencil} />
                                 <Text style={styles.txt}>Đổi tên nhóm</Text>
                             </Pressable>
                             <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faStar} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faStar} />
                                 <Text style={styles.txt}>Đánh dấu nhóm</Text>
                                 <View style={{ flex: 1, alignItems: 'flex-end', marginRight: 15 }}>
                                 <Switch
@@ -186,11 +202,11 @@ export const ChatMessageOptions = ({navigation, route}) => {
                                 </View>
                             </Pressable>
                             <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faClock} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faClock} />
                                 <Text style={styles.txt}>Nhật ký nhóm</Text>
                             </Pressable>
                             <Pressable style={styles.encodeEndWrapper}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faImage} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faImage} />
                                 <Text style={styles.txt}>Ảnh, file, link đã gởi</Text>
                             </Pressable>
                             <View style={styles.bottomContainer}>
@@ -204,15 +220,15 @@ export const ChatMessageOptions = ({navigation, route}) => {
                             <Pressable style={styles.encodeEndWrapper} onPress={()=>{
                                 navigation.navigate('ManagerGroupMembers', {items:items})
                             }}>
-                                <FontAwesomeIcon style={{marginLeft: 15}} color='#515152' size={22} icon={faUserGroup} />
+                                <FontAwesomeIcon style={{marginLeft: 15}} color='#808388' size={22} icon={faUserGroup} />
                                 <Text style={styles.txt}>Xem thành viên</Text>
                             </Pressable>
                         </View>
-                    ) : (<View></View>)}
-                    </>
-                </View>
+                        ) : (<View></View>)}
+                    </View>
+                <View style={{height: 200}}></View>
             </ScrollView>
             <Toast style={{backgroundColor: 'green'}} ref={toastRef} position='center' />
-        </SafeAreaView>
+        </View>
     )
 }

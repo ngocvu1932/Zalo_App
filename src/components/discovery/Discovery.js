@@ -1,21 +1,22 @@
 import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import React from 'react'
 import { styles } from './style'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faChevronRight, faMagnifyingGlass, faQrcode } from '@fortawesome/free-solid-svg-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 
 export const Discovery = () => {
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        {/* <Text>Discovery</Text> */}
-        <FontAwesomeIcon style={{marginLeft: 15}} color='#F1FFFF' size={27} icon={faMagnifyingGlass} />
-        <TextInput style={styles.txtInHeader} placeholder='Tìm kiếm'></TextInput>
-        <Pressable>
-          <FontAwesomeIcon style={{marginLeft: 60}} color='#F1FFFF' size={22} icon={faQrcode} />
-        </Pressable>
-      </View>
+    <View style={styles.container}>
+      <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
+        <View style={{height: '55%', flexDirection: 'row', width: '100%', alignItems: 'center', justifyContent: 'space-between'}}>
+          <FontAwesomeIcon style={{marginLeft: 10}} color='#F1FFFF' size={22} icon={faMagnifyingGlass} />
+          <TextInput style={styles.txtInHeader} placeholder='Tìm kiếm' placeholderTextColor={'#FFFFFF'}></TextInput>
+          <Pressable style={{height: 40, width: 40, justifyContent: 'center', alignItems: 'center', marginRight: 5}}>
+            <FontAwesomeIcon style={{}} color='#F1FFFF' size={22} icon={faQrcode} />
+          </Pressable>
+        </View>
+      </LinearGradient>
 
       <ScrollView style={styles.body}>
         <Pressable style={styles.pressZaloVideo} >
@@ -83,8 +84,9 @@ export const Discovery = () => {
         <Text> hehe </Text>
         <Text> hehe </Text>
         
+        <View style={{height: 300, width: '100%'}}></View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }
 

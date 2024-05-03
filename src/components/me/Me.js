@@ -1,26 +1,29 @@
 import { Alert, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { styles } from './style'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faChevronRight, faCircleNotch, faCloud, faCrown, faGear, faMagnifyingGlass, faMusic, faQrcode, faShieldVirus, faUserGear, faUserLock, faWallet } from '@fortawesome/free-solid-svg-icons'
-import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export const Me = ({navigation}) => {
   const user = useSelector(state => state.user)
-  console.log(user.user?.user.avatar);
+  const [isUser, setIsUser] = useState(true);
+
   return ( 
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <FontAwesomeIcon style={{marginLeft: 15}} color='#F1FFFF' size={27} icon={faMagnifyingGlass} />
-        <TextInput style={styles.txtInHeader} placeholder='Tìm kiếm'></TextInput> 
-        <Pressable style={styles.btnSetting} onPress={()=> {navigation.navigate('Setting')}}>
-          <FontAwesomeIcon color='#F1FFFF' size={22} icon={faGear} /> 
-        </Pressable>
-      </View>
+    <View style={styles.container}>
+      <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', height: '55%', alignItems: 'center'}}>
+          <FontAwesomeIcon style={{marginLeft: 10}} color='#F1FFFF' size={22} icon={faMagnifyingGlass} />
+          <TextInput style={styles.txtInHeader} placeholder='Tìm kiếm' placeholderTextColor={'#FFFFFF'}></TextInput> 
+          <Pressable style={styles.btnSetting} onPress={()=> {navigation.navigate('Setting')}}>
+            <FontAwesomeIcon color='#F1FFFF' size={22} icon={faGear} /> 
+          </Pressable>
+        </View>
+      </LinearGradient>
 
       <ScrollView style={styles.body}>
-        <Pressable style={styles.pressViewInfo} onPress={()=>{navigation.navigate('Profile', {phoneNumber: user.user?.user.phoneNumber})}}>
+        <Pressable style={styles.pressViewInfo} onPress={()=>{navigation.navigate('Profile', {phoneNumber: user.user?.user.phoneNumber, isUser: isUser})}}>
           { user.user?.user?.avatar.includes('rgb') ? 
               <View style={[styles.avatar, {backgroundColor: `${user.user?.user?.avatar}`}]} ></View> 
             :  
@@ -135,6 +138,6 @@ export const Me = ({navigation}) => {
           <FontAwesomeIcon size={15} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }

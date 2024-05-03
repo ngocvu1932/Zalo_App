@@ -4,7 +4,7 @@ import { styles } from './style'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 
-const {width} = Dimensions.get('screen')
+const {width, height} = Dimensions.get('screen')
 
 const data = [
   {
@@ -28,36 +28,34 @@ const data = [
 export const Login = ({navigation}) => {
 
   const renderItem = ({item}) => (
-    <View>
-      {/* <Text> {item.name} </Text> */}
-      <Image source={item.img} style={{height: 330, width: width}} resizeMode='contain' />
+    <View style={{zIndex: 0, width: width, justifyContent: 'center', alignItems: 'center'}}>
+      <Image source={item.img} style={{height: width * 0.75 ,  width: width}} resizeMode='contain' />
     </View>
-  )
+  ) 
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{flex: 2}}>
-        <View style={{marginTop: 30, alignItems: 'center', marginBottom: 130}} >
-          <Text style={styles.txtZaloX}>Zalo</Text>
+      <View style={{flex: 2, width: '100%', alignItems: 'center'}}>
+        <Text style={styles.txtZaloX}>Zalo</Text>
+
+        <View >
+          <FlatList
+            data={data}
+            renderItem={renderItem} 
+            horizontal
+            pagingEnabled
+            snapToAlignment='center'
+            showsHorizontalScrollIndicator={true}
+          ></FlatList>
         </View>
-
-        <FlatList
-          data={data}
-          renderItem={renderItem} 
-          horizontal
-          pagingEnabled
-          snapToAlignment='center'
-          showsHorizontalScrollIndicator={true}
-        ></FlatList>
-
       </View> 
 
-      <View style={{flex: 1}}>  
-        <Pressable style={styles.btnLogin} onPress={()=> { navigation.navigate("LoginPage") }}> 
+      <View style={{flex: 1, justifyContent: 'center', width: '100%', alignItems: 'center'}}>  
+        <Pressable style={[styles.btnLogin, {width: width * 0.7}]} onPress={()=> { navigation.navigate("LoginPage") }}> 
           <Text style={styles.txtLogin}> Đăng nhập </Text>
         </Pressable>  
 
-        <Pressable style={[styles.btnLogin, {marginTop: 15, backgroundColor: '#E9EDF8'}]} onPress={()=> { navigation.navigate("RegisterPageL") }}> 
+        <Pressable style={[styles.btnLogin, {marginTop: 15, backgroundColor: '#E9EDF8', width: width * 0.7}]} onPress={()=> { navigation.navigate("RegisterPageL") }}> 
           <Text style={[styles.txtLogin, {color: 'black'}]}> Tạo tài khoản mới </Text>
         </Pressable>   
       </View>

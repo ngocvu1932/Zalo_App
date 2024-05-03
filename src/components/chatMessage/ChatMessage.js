@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, Image, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, Keyboard,  Modal,  Pressable,  Text, TextInput, View } from "react-native";
 import { styles } from "./style";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faPhone, faVideo, faList, faEllipsis, faMicrophone, faImage, faLaughWink, faChevronLeft, faPaperPlane, faTrashCan, faRotateRight, faCheckDouble, faCheck } from '@fortawesome/free-solid-svg-icons'; // Thay đổi từ faFaceLaughWink thành faLaughWink
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { faPhone, faVideo, faList, faEllipsis,  faLaughWink, faChevronLeft, faPaperPlane, faTrashCan, faRotateRight, faCheckDouble, faCheck, faMicrophoneLines } from '@fortawesome/free-solid-svg-icons';
+import { faImage} from '@fortawesome/free-regular-svg-icons';
 import { socket } from '../../config/io';
 import { useDispatch, useSelector } from 'react-redux';
 import axios, { setAuthorizationAxios } from '../../config/axios';
@@ -12,6 +12,7 @@ import { CommonActions } from '@react-navigation/native';
 import * as ImagePicker from "expo-image-picker";
 import { setIsCreateGroup, setisCreateGroup } from '../../redux/stateCreateGroupSlice';
 import {CLOUD_NAME, UPLOAD_PRESET} from '@env'
+import { LinearGradient } from 'expo-linear-gradient';
 
 export const ChatMessage = ({ navigation, route }) => {
     const dispatch = useDispatch();
@@ -20,6 +21,7 @@ export const ChatMessage = ({ navigation, route }) => {
     const [messages, setMessages] = useState([]);
     const { items } = route.params;
     const user = useSelector(state => state.user);
+    const device = useSelector(state => state.device);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible1, setModalVisible1] = useState(false);
     const flatListRef = useRef();
@@ -28,7 +30,37 @@ export const ChatMessage = ({ navigation, route }) => {
     const [messageIsChooseId, setMessageIsChooseId] = useState('');
     const [loadAgain, setLoadAgain] = useState(false);
     const [isSend, setIsSend] = useState(false);
+    const [isMessage, setIsMessage] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [textInputHeight, setTextInputHeight] = useState(30);
+    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
 
+    const handleContentSizeChange = (event) => {
+        const { height } = event.nativeEvent.contentSize;
+        if (height < 75 && height > 30) { 
+            setTextInputHeight(height);
+        } else if (height <= 30 ){
+            setTextInputHeight(30);
+        }
+    }; 
+
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
+            setIsKeyboardOpen(true);
+            setKeyboardHeight(event.endCoordinates.height)
+        });
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+            setIsKeyboardOpen(false);
+            setKeyboardHeight(0);
+        });
+    
+        return () => {
+            keyboardDidShowListener.remove();
+            keyboardDidHideListener.remove();
+        };
+    }, []);
+    
     useEffect(() => {
         if (textMessage !== '') {
             setIsText(true);
@@ -41,12 +73,20 @@ export const ChatMessage = ({ navigation, route }) => {
         setAuthorizationAxios(user.user?.access_token);
     }, [user])
 
-    // Cập nhật tin nhắn và cuộn xuống dưới cùng của FlatList
+    // cập nhật cuộn flatlist
     useEffect(() => {
-        if (flatListRef.current) {
-            flatListRef.current.scrollToEnd({ animated: true });
+        if ( messages.length > 0 && isKeyboardOpen) {
+            setTimeout(() => scrollToBottomWithOffset(80), 100);
         }
-    }, [messages, isLoadingMessages]);
+    }, [messages, isLoadingMessages, isKeyboardOpen]);
+
+    useEffect(() => {
+        setTimeout(()=> {
+            if (flatListRef.current) {
+                flatListRef.current.scrollToEnd({animated: true});
+            }
+        }, 500);
+    }, []);
 
     // Lấy tin nhắn từ server
     useEffect(() => {
@@ -69,8 +109,11 @@ export const ChatMessage = ({ navigation, route }) => {
                     setMessages(filteredMessages);
                     setIsLoadingMessages(false);
                     setLoadAgain(false);
-                } else {
-                    console.log("Error: ", response);
+                    setIsMessage(true);
+                    setIsLoading(false);
+                } else if (response.errCode === 1) {
+                    setIsMessage(false);
+                    setIsLoading(false);
                 }
             } catch (error) {
                 console.log("Error x: ", error);
@@ -85,16 +128,18 @@ export const ChatMessage = ({ navigation, route }) => {
     useEffect(() => {
         socket.then(socket => {
             socket.emit('setup', items._id); 
-            socket.on('connected', () => {
-                console.log('Connected to server');
+            socket.on('connected', (data) => {
+                console.log('Connected to server chat', data);
             });
 
             socket.on('receive-message', (data) => {
                 if (data.type.includes('TEXT')) {
-                    console.log("Receive messgae: ", data);
+                    console.log("Receive messgae: ", data.content, "|", data.chat);
+                    setIsMessage(true);
                     setMessages(premessages => [...premessages, data]);
                 } else if (data.type.includes('IMAGES')) {
                     console.log("Receive messgae: ", data.urls, "|", data.chat);
+                    setIsMessage(true);
                     setMessages(premessages => [...premessages, data]);
                 }
             });
@@ -121,6 +166,17 @@ export const ChatMessage = ({ navigation, route }) => {
             });
         };
     }, []);
+
+    //cuộn xuống phần tử cuối cùng trong FlatList
+    const scrollToBottomWithOffset = (offset) => {
+        if (flatListRef.current) {
+            const itemCount = messages.length;
+            const itemHeight = 50;
+            const listHeight = itemCount * itemHeight;
+            const bottomOffset = listHeight + offset;
+            flatListRef.current.scrollToOffset({ offset: bottomOffset, animated: true });
+        }
+    };
 
     const openImagePickerAsync = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -151,7 +207,7 @@ export const ChatMessage = ({ navigation, route }) => {
                         name: fileName,
                         type: 'image/*',
                     });
-                    console.log("formData: ", JSON.stringify(formData));
+                    // console.log("formData: ", JSON.stringify(formData));
                     sendToCloud('IMAGES', formData);
                 } else if (asset.type === 'video') {
                     const fileName = asset.uri.split('/').pop();
@@ -160,7 +216,7 @@ export const ChatMessage = ({ navigation, route }) => {
                         name: fileName,
                         type: 'video/mp4',
                     });
-                    console.log("formData: ", JSON.stringify(formData));
+                    // console.log("formData: ", JSON.stringify(formData));
                     sendToCloud('VIDEO', formData);
                 }
             }
@@ -215,6 +271,7 @@ export const ChatMessage = ({ navigation, route }) => {
                         socket.emit('issend-message', dataSend);
                     });
 
+                    setIsMessage(true);
                     setTextMessage('');
                     console.log("Send message:", dataSend.urls, "|", dataSend.chat);
                 } else {
@@ -246,7 +303,7 @@ export const ChatMessage = ({ navigation, route }) => {
         }
 
         try {
-            console.log("Data send: ", dataSend);
+            // console.log("Data send: ", dataSend);
             setMessages(premessages => [...premessages, dataSend]);
             dispatch(setIsCreateGroup());
             const res = await axios.post('/chat/message', {
@@ -259,7 +316,7 @@ export const ChatMessage = ({ navigation, route }) => {
                     socket.emit('send-message', dataSend);
                     socket.emit('issend-message', dataSend);
                 });
-
+                setIsMessage(true);
                 setTextMessage('');
                 console.log("Send message:", dataSend.content, "|", dataSend.chat);
             } else {
@@ -310,7 +367,7 @@ export const ChatMessage = ({ navigation, route }) => {
     };
 
     // render tin nhắn qua FlatList
-    const renderItem = ({ item }) => {
+    const renderItem = ({ item }) => { 
         const firstIduserPositions = {};
         let lastSenderId = null;
 
@@ -587,78 +644,113 @@ export const ChatMessage = ({ navigation, route }) => {
         }));
     };
 
+    const onlineTime = (timeOffline) => {
+        const now = moment();
+        const createdAt = moment(timeOffline);
+        const duration = moment.duration(now.diff(createdAt));
+        return duration.days() > 0 ? `Truy cập ${duration.days()} ngày trước  ` : duration.hours() > 0 ? `Truy cập ${duration.hours()} giờ trước  ` : duration.minutes() > 0 ? `Truy cập ${duration.minutes()} phút trước  ` : duration.seconds() > 0 ? `Truy cập ${duration.seconds()} giây trước  ` : 'Vừa mới truy cập';
+    }
+
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.headerWrapper}>
-                <Pressable style={{ height: 40, justifyContent: 'center' }} onPress={() => { navigation.goBack() }}>
-                    <FontAwesomeIcon icon={faChevronLeft} style={{ marginLeft: 10 }} color='#F5F8FF' size={20} />
-                </Pressable>
-
-                <Pressable style={{ flex: 1, marginLeft: 10 }} onPress={() => navigation.navigate('ChatMessageOptions', { items: items })}>
-                    <Text style={styles.nameTxt}>{items.userName}</Text>
-                    <Text style={[styles.stateTxt]}>{items.type.includes('GROUP_CHAT') ? 'Bấm để xem thông tin' : 'Vừa mới truy cập'}</Text>
-                </Pressable>
-
-                <View style={{ flexDirection: 'row', width: '30%', justifyContent: 'space-between', marginRight: 10 }}>
-                    <Pressable >
-                        <FontAwesomeIcon size={20} style={styles.icon} icon={faPhone} />
+        <View style={[styles.container]}>
+            <LinearGradient colors={['#008BFA', '#00ACF4']} style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+                <View style={{flexDirection: 'row', height: '55%', alignItems: 'center'}}>
+                    <Pressable style={{ height: 40, justifyContent: 'center', width: 40}} onPress={() => { navigation.goBack() }}>
+                        <FontAwesomeIcon icon={faChevronLeft} style={{ marginLeft: 10 }} color='#F5F8FF' size={20} />
                     </Pressable>
 
-                    <Pressable >
-                        <FontAwesomeIcon size={22} style={styles.icon} icon={faVideo} />
+                    <Pressable style={{ flex: 1, marginLeft: 5 }} onPress={() => navigation.navigate('ChatMessageOptions', { items: items })}>
+                        <Text style={styles.nameTxt}>{items.userName}</Text>
+                        <Text style={[styles.stateTxt]}>{items.type.includes('GROUP_CHAT') ? 'Bấm để xem thông tin' : !items.lastedOnline ? 'Vừa mới truy cập' : onlineTime(items.lastedOnline)}</Text>
                     </Pressable>
 
-                    <Pressable onPress={() => {
-                        navigation.navigate('ChatMessageOptions', { items: items })
-                    }}>
-                        <FontAwesomeIcon size={21} style={styles.icon} icon={faList} />
+                    <View style={{ flexDirection: 'row', width: '25%', justifyContent: 'space-between', marginRight: 10 }}>
+                        <Pressable style={styles.btnOptsIcon} >
+                            <FontAwesomeIcon size={20} style={styles.icon} icon={faPhone} />
+                        </Pressable>
+
+                        <Pressable style={styles.btnOptsIcon} >
+                            <FontAwesomeIcon size={21} style={styles.icon} icon={faVideo} />
+                        </Pressable>
+
+                        <Pressable style={styles.btnOptsIcon} onPress={() => {navigation.navigate('ChatMessageOptions', { items: items })}}>
+                            <FontAwesomeIcon size={20} style={styles.icon} icon={faList} />
+                        </Pressable>
+                    </View>
+                </View>
+            </LinearGradient>
+
+            <View style={[styles.body, device.device.includes('ios') ? isKeyboardOpen ? {paddingBottom: keyboardHeight + 85 + 90 }: {paddingBottom: 90 + 85} : '']}>
+                {isLoading ? 
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                        <ActivityIndicator size="large" color="black" />
+                    </View>
+                : 
+                    isMessage ? (
+                        <View>
+                            <FlatList
+                                ref={flatListRef}
+                                data={messages}
+                                renderItem={renderItem}
+                                keyExtractor={(item, index) => index.toString()}
+                                onContentSizeChange={() => scrollToBottomWithOffset(80)}
+                                onLayout={() => scrollToBottomWithOffset(80)}
+                                style={{height: '100%'}}
+                            ></FlatList>
+                            
+                        </View>
+                    ) : (
+                        <View style={{flex: 1, justifyContent: 'flex-end', alignItems: 'center', marginBottom: 100}}>
+                            <View style={{backgroundColor: '#FFFFFF', height: '25%', width: '80%', borderRadius: 20, justifyContent: 'center'}}>
+                                <View style={{alignItems: 'center'}}>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        {items.avatar.includes('rgb')? 
+                                            <View style={{height: 40, width: 40, backgroundColor: items.avatar, borderRadius: 20}}></View> 
+                                            : 
+                                            <Image source={{}} resizeMode='contain' />
+                                        }
+                                        <Text style={{marginLeft: 20}}>{items.userName}</Text>
+                                    </View>
+                                    <Text style={{marginTop: 20}}>Chưa có tin nhắn, hãy trò chuyện ngay nào!</Text>
+                                </View>
+                            </View>
+                        </View>
+                    )
+                }
+            </View>
+
+            <View style={[styles.footer, device.device.includes('ios') ? isKeyboardOpen ? {height: keyboardHeight + 85 }: {height: 85} : '']}>
+                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 64, backgroundColor: '#FFFFFF', width: '100%'}}>
+                    <Pressable style={{ marginLeft: 10 }}>
+                        <FontAwesomeIcon size={22} color="#5E5E5E" icon={faLaughWink} />
                     </Pressable>
+
+                    <TextInput onContentSizeChange={handleContentSizeChange} value={textMessage} multiline={true} onChangeText={(text) => { setTextMessage(text) }} style={[styles.messageTxt, {height: textInputHeight}]} placeholder="Tin nhắn" placeholderTextColor={'#5E5E5E'}/>
+                    
+                    {isText ? (
+                        <View>
+                            <Pressable style={{ paddingLeft: 10, height: 40, width: 45, justifyContent: 'center' }} onPress={() => sendMessage()}>
+                                <FontAwesomeIcon size={22} color="#0085FF" icon={faPaperPlane} />
+                            </Pressable>
+                        </View>
+                    ) : (
+                        <View style={{ flexDirection: 'row', width: '30%', justifyContent: 'space-between' }}>
+                            <Pressable style={[styles.btnOpts, {}]}>
+                                <FontAwesomeIcon size={22} color="#5E5E5E" icon={faEllipsis} />
+                            </Pressable>
+
+                            <Pressable style={styles.btnOpts}>
+                                <FontAwesomeIcon size={22} color="#5E5E5E" icon={faMicrophoneLines} />
+                            </Pressable>
+
+                            <Pressable style={styles.btnOpts} onPress={() => {openImagePickerAsync()}}>
+                                <FontAwesomeIcon size={22} color="#5E5E5E" icon={faImage} />
+                            </Pressable>
+                        </View>
+                    )}
                 </View>
             </View>
-
-            <View style={styles.body}>
-                <FlatList
-                    ref={flatListRef}
-                    data={messages}
-                    renderItem={renderItem}
-                    keyExtractor={(item, index) => index.toString()}
-                ></FlatList>
-            </View>
-
-            <View style={styles.footerWrapper}>
-                <Pressable style={{ marginLeft: 10 }}>
-                    <FontAwesomeIcon size={25} color="black" icon={faLaughWink} />
-                </Pressable>
-
-                <Pressable style={{ flex: 1, marginLeft: 10 }} onPress={() => { }}>
-                    <TextInput value={textMessage} onChangeText={(text) => { setTextMessage(text) }} style={styles.messageTxt} placeholder="Tin nhắn" />
-                </Pressable>
-
-                {isText ? (
-                    <View>
-                        <Pressable style={{ paddingLeft: 10, height: 40, width: 45, justifyContent: 'center' }} onPress={() => sendMessage()}>
-                            <FontAwesomeIcon size={25} color="#0085FF" icon={faPaperPlane} />
-                        </Pressable>
-                    </View>
-                ) : (
-                    <View style={{ flexDirection: 'row', width: '30%', justifyContent: 'space-between', marginRight: 10 }}>
-                        <Pressable>
-                            <FontAwesomeIcon size={25} color="black" icon={faEllipsis} />
-                        </Pressable>
-
-                        <Pressable >
-                            <FontAwesomeIcon size={25} color="black" icon={faMicrophone} />
-                        </Pressable>
-
-                        <Pressable onPress={() => {
-                            openImagePickerAsync();
-                        }}>
-                            <FontAwesomeIcon size={25} color="black" icon={faImage} />
-                        </Pressable>
-                    </View>
-                )}
-            </View>
-
+            
             {/* Overlay và Modal */}
             {modalVisible && (
                 <View style={styles.overlay}>
@@ -725,7 +817,7 @@ export const ChatMessage = ({ navigation, route }) => {
                     </Modal>
                 </View>
             )}
-        </SafeAreaView>
+        </View>
     );
 }
 

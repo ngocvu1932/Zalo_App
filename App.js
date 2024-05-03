@@ -8,7 +8,7 @@ import { Me } from './src/components/me/Me';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAddressBook, faClock, faCommentDots, faSnowflake, faUser } from '@fortawesome/free-regular-svg-icons';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Login } from './src/components/login/Login';
+import { Login } from './src/components/login/Login'; 
 import { Setting } from './src/components/settings/Setting';
 import { AccountAndSecurity } from './src/components/accountAndSecurity/AccountAndSecurity';
 import { Privacy } from './src/components/privacy/Privacy';
@@ -36,9 +36,6 @@ import  AsyncStorage  from '@react-native-async-storage/async-storage';
 import { useDispatch } from 'react-redux';
 import { setUser } from './src/redux/userSlice'
 import { AddFriend } from './src/components/addFriend/AddFriend';
-import { ContactFriends } from './src/components/contacts/ContactFriends';
-import { ContactGroups } from './src/components/contacts/ContactGroups';
-import { ContactOA } from './src/components/contacts/ContactOA';
 import { FriendRequest } from './src/components/friendRequest/FriendRequest';
 import { FriendRequestReceived } from './src/components/friendRequest/FriendRequestReceived';
 import { FriendRequestSent } from './src/components/friendRequest/FriendRequestSent';
@@ -48,12 +45,19 @@ import { CreateGroup } from './src/components/createGroup/CreateGroup';
 import ManagerGroupMembers from './src/components/managerGroupMembers/ManagerGroupMembers';
 import { AllMembers } from './src/components/managerGroupMembers/AllMembers';
 import { AddMember } from './src/components/createGroup/AddMember';
+import { LogBox, Platform } from 'react-native';
+import { socket } from './src/config/io';
+import { setDevice } from './src/redux/deviceSlice';
+import { ProfileInfo } from './src/components/profileOptions/ProfileInfo';
+import { EditProfile } from './src/components/profileOptions/EditProfile';
+LogBox.ignoreLogs(['onAnimatedValueUpdate']);
+LogBox.ignoreLogs(['No native ExpoFirebaseCore module found']);
 
 const Tab= createBottomTabNavigator();
 const Stack= createNativeStackNavigator();
 
-const MainScreen = () => {
-  return(
+const MainScreen = () => { 
+  return( 
     <Tab.Navigator 
         initialRouteName='Messages'
         screenOptions={({route}) => ({
@@ -85,7 +89,6 @@ const MainScreen = () => {
  
 const RootStack = () => {
   const dispatch = useDispatch();
-  const user = useSelector(state => state.user);
   const [auth, setAuth] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -96,7 +99,7 @@ const RootStack = () => {
       try {
         const dataGetStorage = await AsyncStorage.getItem('dataUser');
         const data = JSON.parse(dataGetStorage);
-        setAuth(true);
+        setAuth(true); 
         setIsLoading(false);
 
         if (data) {
@@ -108,7 +111,32 @@ const RootStack = () => {
     };
 
     fetchData();
+
+    if (Platform.OS === 'ios') {
+      dispatch(setDevice('ios'));
+    } else if (Platform.OS === 'android') {
+      dispatch(setDevice('android'));
+    } else {
+      dispatch(setDevice('other'));
+    }
   }, [dispatch])
+
+  // socket
+  // useEffect(() => {
+  //   socket.then(socket => {
+  //     socket.emit('setup', user.user?.user); 
+  //     socket.on('connected', (data) => {
+  //         console.log('Connected to server', data);
+  //         socket.emit('join-room', user.user?.user?.id);
+  //     });
+  //   });
+
+  //   return () => {
+  //     socket.then(socket => {
+  //       socket.off('connected');
+  //     });
+  //   };
+  // }, [user]);
 
   if (isLoading) {
     return false;
@@ -138,9 +166,6 @@ const RootStack = () => {
           <Stack.Screen name='RegisterAuth' component={RegisterAuth}/>
           <Stack.Screen name='ChangePassword' component={ChangePassword}/>
           <Stack.Screen name='AddFriend' component={AddFriend}/>
-          <Stack.Screen name='ContactFriends' component={ContactFriends}/>
-          <Stack.Screen name='ContactGroups' component={ContactGroups}/>
-          <Stack.Screen name='ContactOA' component={ContactOA}/>
           <Stack.Screen name='FriendRequest' component={FriendRequest}/>
           <Stack.Screen name='FriendRequestReceived' component={FriendRequestReceived}/>
           <Stack.Screen name='FriendRequestSent' component={FriendRequestSent}/>
@@ -150,6 +175,8 @@ const RootStack = () => {
           <Stack.Screen name='ManagerGroupMembers' component={ManagerGroupMembers}/>
           <Stack.Screen name='AllMembers' component={AllMembers}/>
           <Stack.Screen name='AddMember' component={AddMember}/>
+          <Stack.Screen name='ProfileInfo' component={ProfileInfo}/>
+          <Stack.Screen name='EditProfile' component={EditProfile}/>
         </>
       ) : (
         <>
@@ -173,9 +200,6 @@ const RootStack = () => {
           <Stack.Screen name='RegisterAuth' component={RegisterAuth}/>
           <Stack.Screen name='ChangePassword' component={ChangePassword}/>
           <Stack.Screen name='AddFriend' component={AddFriend}/>
-          <Stack.Screen name='ContactFriends' component={ContactFriends}/>
-          <Stack.Screen name='ContactGroups' component={ContactGroups}/>
-          <Stack.Screen name='ContactOA' component={ContactOA}/>
           <Stack.Screen name='FriendRequest' component={FriendRequest}/>
           <Stack.Screen name='FriendRequestReceived' component={FriendRequestReceived}/>
           <Stack.Screen name='FriendRequestSent' component={FriendRequestSent}/>
@@ -185,6 +209,8 @@ const RootStack = () => {
           <Stack.Screen name='ManagerGroupMembers' component={ManagerGroupMembers}/>
           <Stack.Screen name='AllMembers' component={AllMembers}/>
           <Stack.Screen name='AddMember' component={AddMember}/>
+          <Stack.Screen name='ProfileInfo' component={ProfileInfo}/>
+          <Stack.Screen name='EditProfile' component={EditProfile}/>
         </>
       ) }
     </Stack.Navigator>

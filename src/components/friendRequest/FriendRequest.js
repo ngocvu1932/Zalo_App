@@ -7,6 +7,7 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { styles } from './style'
 import { FriendRequestReceived } from './FriendRequestReceived'
 import { FriendRequestSent } from './FriendRequestSent'
+import { LinearGradient } from 'expo-linear-gradient';
 
 const Tab = createMaterialTopTabNavigator();
 export const FriendRequest = ({ navigation }) => {
@@ -17,20 +18,19 @@ export const FriendRequest = ({ navigation }) => {
   }, [navigation]);
   
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={{flexDirection:"row", height: 55, alignItems:"center", justifyContent: 'center'}} onPress={() => { navigation.goBack()}}>
-          <FontAwesomeIcon style={{ marginLeft: 15,  }} color='#F1FFFF' size={21} icon={faChevronLeft} />
-          <Text style={styles.txtInHeader}>Lời mời kết bạn</Text>
-        </Pressable>
+    <View style={styles.container}>
+      <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
+        <View style={{height: '55%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+          <Pressable style={{flexDirection: "row", height: 55, alignItems: "center", justifyContent: 'center'}} onPress={() => { navigation.goBack()}}>
+            <FontAwesomeIcon style={{ marginLeft: 10 }} color='#F1FFFF' size={20} icon={faChevronLeft} />
+            <Text style={styles.txtInHeader}>Lời mời kết bạn</Text>
+          </Pressable>
 
-        <Pressable onPress={() => {
-          navigation.navigate('AddFriend')
-        }}>
-          <FontAwesomeIcon style={{ marginRight: 15 }} color='#F1FFFF' size={23} icon={faUserPlus} />
-        </Pressable>
-
-      </View>
+          <Pressable style={{height: 40, width: 40, justifyContent: 'center', alignItems: 'center'}} onPress={() => {navigation.navigate('AddFriend')}}>
+            <FontAwesomeIcon style={{ marginRight: 10 }} color='#F1FFFF' size={21} icon={faUserPlus} />
+          </Pressable>
+        </View>
+      </LinearGradient>
 
       <Tab.Navigator screenOptions={{
           tabBarLabelStyle: { textTransform: 'none', fontWeight: '500', fontSize: 14 }
@@ -38,6 +38,6 @@ export const FriendRequest = ({ navigation }) => {
         <Tab.Screen name="Đã nhận" component={FriendRequestReceived} />
         <Tab.Screen name="Đã gửi" component={FriendRequestSent} />
       </Tab.Navigator>
-    </SafeAreaView>
+    </View>
   )
 }

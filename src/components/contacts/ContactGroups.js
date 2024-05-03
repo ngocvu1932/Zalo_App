@@ -9,6 +9,15 @@ import { socket } from '../../config/io';
 
 export const ContactGroups = ({navigation}) => {
   const [dataGroups, setDataGroups] = useState([])
+  const [loadAgain, setLoadAgain] =useState();
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setLoadAgain(new Date());
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   useEffect(() => {
     fetchListGroups()

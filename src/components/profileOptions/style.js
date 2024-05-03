@@ -3,15 +3,13 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
       flex: 1,
-      backgroundColor: '#009AFA',
+      // backgroundColor: '#009AFA',
   },
 
   header: {
-      flexDirection: 'row',
-      width: '100%',
-      height: 55,
-      alignItems: 'center',
-      backgroundColor: '#009AFA',
+    width: '100%',
+    height: 90,
+    justifyContent: 'flex-end'
   },
 
   body: {
@@ -23,7 +21,6 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     color: '#F1FFFF',
     width: '60%',
-    height: 30,
     marginLeft: 15,
   },
 
@@ -89,52 +86,76 @@ export const styles = StyleSheet.create({
     backgroundColor: 'blue',
   },
 
+  btnModal: {
+    width: '50%', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    borderTopWidth: 1, 
+    borderColor: '#DEDFE3'
+  },
 
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
-    OptionsAbove:{
-        paddingTop: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height:150,
-    },
-    pressFindMessage:{
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingLeft: 15,
-        paddingRight: 15,
-    },
-    
-    
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
-      },
-      modalView: {
-        backgroundColor: 'white',
-        borderRadius: 10,
-        padding: 20,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-      },
-      modalText: {
-        marginBottom: 20,
-        textAlign: 'center',
-      },
-      modalButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: '100%',
-      },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  
+  modalView: {
+    backgroundColor: 'white', 
+    height: '13%', 
+    width: '70%',
+    borderRadius: 15,
+  },
+
+  modalText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 15
+  },
+
+  btnEdit: {
+    height: 35, 
+    width: '90%', 
+    flexDirection: 'row', 
+    backgroundColor: 'violet', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    borderRadius: 20
+  },
+
+  OptionsAbove:{
+      paddingTop: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      height:150,
+  },
+
+  pressFindMessage:{
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingLeft: 15,
+      paddingRight: 15,
+  },
+
+  
+
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
 
 });

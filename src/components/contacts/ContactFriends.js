@@ -1,169 +1,63 @@
 import React, { useEffect, useState } from "react";
-import { faCakeCandles, faCalculator, faList, faMessage, faUserPlus, faVideo } from "@fortawesome/free-solid-svg-icons";
+import { faCakeCandles, faCalculator, faList, faMessage, faPhone, faUserPlus, faVideo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { View, Text, Pressable, ScrollView, StyleSheet} from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet, FlatList, ActivityIndicator} from "react-native";
 import axios from "../../config/axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setListFriend } from "../../redux/friendSlice";
 import {socket} from '../../config/io';
 import { styles } from "./style";
 
-
 export const ContactFriends = ({ navigation }) => {
-  // const user = useSelector(state => state.user);
-  // const currentId = user.user.user.id;
-  // // const [friendList, setFriendList] = useState([])
-  // const dispatch = useDispatch();
-  // const listFriend = useSelector(state => state.listFriend);
-  // const [friendList, setFriendList] = useState(listFriend.listFriend);
-  // var acceptFriend = useSelector(state => state.isAddFriend.isAddFriend);
-
-  // useEffect(() => {
-  //   fetchFriendList()
-  // },[acceptFriend])
-  
-  // useEffect(() => {
-  //   socket.then(socket => {
-  //       socket.emit('setup');
-  //       socket.on('connected', () => {
-  //           console.log('Connected to server');
-  //       });
-  //       socket.on('new-group-chat', (data)=> {
-  //         if(data!=null){
-  //           fetchFriendList()
-  //         }
-  //       });
-  //   });
-  //   return () => {
-  //       socket.then(socket => {
-  //           socket.off('connected');
-  //           socket.off('new-group-chat');
-  //       });
-  //   };
-  // }, []); 
-
-  // useEffect(() => {
-  //   // fetchFriendList();
-  // }, [navigation, friendList])
-  
-  // useEffect(() => {
-  //   fetchFriendList()
-  // },[])
-
-
-  // async function fetchFriendList() {
-  //   try {
-  //     const res = await axios.get(`/users/friends?page=${1}&limit=${100}`);
-  //     if(res.errCode === 0){
-  //       const currentUserFriends = res.data.map(item => {
-  //         if (item.user1Id === currentId) {
-  //             return item.user2
-  //         } else if (item.user2Id === currentId) {
-  //             return item.user1
-  //         }
-  //       });
-  //       setFriendList(currentUserFriends)
-  //       dispatch(setListFriend(currentUserFriends))
-  //     }
-  //   } catch (error) {
-  //     console.log("error", error);
-  //   }
-  // }
-
-  // const joinChatWithFriend = async (friendId) => {
-  //   try {
-  //     const response = await axios.get(`/chat/private?userId=${friendId}`);
-  //     if(response.errCode === 0){
-  //       if(response.data.participants[0].id === currentId){
-  //         const newItem = {
-  //           _id : response.data._id,
-  //           avatar: response.data.participants[1].avatar,
-  //           phoneNumber: response.data.participants[1].phoneNumber,
-  //           updatedAt: response.data.updatedAt,
-  //           userId: response.data.participants[1].id,
-  //           userName: response.data.participants[1].userName,
-  //           type:"PRIVATE_CHAT"
-  //         }
-  //         navigation.navigate('ChatMessage', {items: newItem}) 
-  //       } else {
-  //         const newItem = {
-  //           _id : response.data._id,
-  //           avatar: response.data.participants[0].avatar,
-  //           phoneNumber: response.data.participants[0].phoneNumber,
-  //           updatedAt: response.data.updatedAt,
-  //           userId: response.data.participants[0].id,
-  //           userName: response.data.participants[0].userName,
-  //           type:"PRIVATE_CHAT"
-  //         }
-  //         navigation.navigate('ChatMessage', {items: newItem}) 
-  //       }
-  //     }
-  //     else if(response.errCode === -1){
-  //       const payload = {
-  //         type: "PRIVATE_CHAT",
-  //         participants: [currentId, friendId],
-  //         status: true
-  //       }
-  //       try {
-  //         const response2 = await axios.post('/chat/access', payload);
-  //         if(response2.errCode === 0){
-  //           if(response.data.participants[0].id === currentId){
-  //             const newItem = {
-  //               _id : response.data._id,
-  //               avatar: response.data.participants[1].avatar,
-  //               phoneNumber: response.data.participants[1].phoneNumber,
-  //               updatedAt: response.data.updatedAt,
-  //               userId: response.data.participants[1].id,
-  //               userName: response.data.participants[1].userName,
-  //               type:"PRIVATE_CHAT"
-  //             }
-  //             navigation.navigate('ChatMessage', {items: newItem}) 
-  //           } else {
-  //             const newItem = {
-  //               _id : response.data._id,
-  //               avatar: response.data.participants[0].avatar,
-  //               phoneNumber: response.data.participants[0].phoneNumber,
-  //               updatedAt: response.data.updatedAt,
-  //               userId: response.data.participants[0].id,
-  //               userName: response.data.participants[0].userName,
-  //               type:"PRIVATE_CHAT"
-  //             }
-  //             navigation.navigate('ChatMessage', {items: newItem}) 
-  //           }
-  //         }
-  //       } catch (error) {
-  //       }
-  //     }
-  //   } catch (error) {
-  //   }
-  // }
-
   const user = useSelector(state => state.user);
-  const currentId = user.user.user.id;
+  const currentId = user.user?.user?.id;
   const [friendList, setFriendList] = useState([])
   const dispatch = useDispatch();
+  const [loadAgainSocket, setLoadAgainSocket] =useState();
+  const [loadAgain, setLoadAgain] =useState();
 
   useEffect(() => {
-    fetchFriendList();
-  }, [navigation])
-  
-  const fetchFriendList = async () => {
-    try {
-      const res = await axios.get(`/users/friends?page=${1}&limit=${10}`);
-      if(res.errCode === 0){
-        const currentUserFriends = res.data.map(item => {
-          if (item.user1Id === currentId) {
-              return item.user2
-          } else if (item.user2Id === currentId) {
-              return item.user1
-          }
-        });
-        setFriendList(currentUserFriends)
-        dispatch(setListFriend(currentUserFriends))
+    const unsubscribe = navigation.addListener('focus', () => {
+      setLoadAgainSocket(new Date());
+      setLoadAgain(new Date());
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  // socket
+  useEffect(() => {
+    socket.then(socket => {
+      // socket.emit('setup', currentId);
+      socket.on('need-accept-addFriend', (data) => {
+        setLoadAgain(data.createdAt);
+        console.log('Is received ContactFriends: ', data.createdAt);
+        console.log('currentId: ', currentId);
+      });
+    });
+
+    return () => {
+      socket.then(socket => {
+        socket.off('need-accept-addFriend');
+      });
+    };
+  }, [loadAgainSocket]);
+ 
+
+  // lấy danh sách bạn bè
+  useEffect(() => {
+    const fetchFriendList = async () => {
+      try {
+        const response = await axios.get(`/users/friends?limit=10`);
+        if (response.errCode === 0) {
+          setFriendList(response.data);
+        }
+      } catch (error) {
+        console.log('Error 1', error);
       }
-    } catch (error) {
     }
-  }
+    fetchFriendList();
+  }, [loadAgain]);
 
   const joinChatWithFriend = async (friendId) => {
     try {
@@ -177,10 +71,11 @@ export const ContactFriends = ({ navigation }) => {
             updatedAt: response.data.updatedAt,
             userId: response.data.participants[1].id,
             userName: response.data.participants[1].userName,
-            type:"PRIVATE_CHAT"
+            type: response.data.type,
+            lastedOnline: response.data.participants[1].lastedOnline,
           }
           navigation.navigate('ChatMessage', {items: newItem}) 
-        } else {
+        } else if(response.data.participants[1].id === currentId) {
           const newItem = {
             _id : response.data._id,
             avatar: response.data.participants[0].avatar,
@@ -188,53 +83,95 @@ export const ContactFriends = ({ navigation }) => {
             updatedAt: response.data.updatedAt,
             userId: response.data.participants[0].id,
             userName: response.data.participants[0].userName,
-            type:"PRIVATE_CHAT"
+            type: response.data.type,
+            lastedOnline: response.data.participants[0].lastedOnline,
           }
           navigation.navigate('ChatMessage', {items: newItem}) 
         }
       }
       else if(response.errCode === -1){
-        const payload = {
-          type: "PRIVATE_CHAT",
-          participants: [currentId, friendId],
-          status: true
-        }
         try {
-          const response2 = await axios.post('/chat/access', payload);
-          if(response2.errCode === 0){
-            if(response.data.participants[0].id === currentId){
-              const newItem = {
-                _id : response.data._id,
+          const response = await axios.post('/chat/access', {
+            "type": "PRIVATE_CHAT",
+            "participants": [currentId, friendId],
+            "status": true
+          })
+          if (response.errCode === 0) {
+            if (response.data.participants[0].id === currentId) {
+              const data = {
+                _id: response.data._id,
                 avatar: response.data.participants[1].avatar,
                 phoneNumber: response.data.participants[1].phoneNumber,
+                type: response.data.type,
                 updatedAt: response.data.updatedAt,
                 userId: response.data.participants[1].id,
                 userName: response.data.participants[1].userName,
-                type:"PRIVATE_CHAT"
-              }
-              navigation.navigate('ChatMessage', {items: newItem}) 
-            } else {
-              const newItem = {
-                _id : response.data._id,
+                lastedOnline: response.data.participants[1].lastedOnline,
+              };
+              navigation.navigate('ChatMessage', {items: data});
+            } else if (response.data.participants[1].id === currentId) {
+              const data = {
+                _id: response.data._id,
                 avatar: response.data.participants[0].avatar,
                 phoneNumber: response.data.participants[0].phoneNumber,
+                type: response.data.type,
                 updatedAt: response.data.updatedAt,
                 userId: response.data.participants[0].id,
                 userName: response.data.participants[0].userName,
-                type:"PRIVATE_CHAT"
-              }
-              navigation.navigate('ChatMessage', {items: newItem}) 
+                lastedOnline: response.data.participants[0].lastedOnline,
+              };
+              navigation.navigate('ChatMessage', {items: data});
             }
           }
         } catch (error) {
+          console.log('Error 5: ', error);
         }
       }
     } catch (error) {
+      console.log('Error 2', error);
     }
   }
 
+  const renderLine = (height) => (
+    <View style={[styles.line, {height: height}]}>
+    </View>
+  )
+
+  const renderItem = ({item}) => {
+    let data;
+    if (item?.sender?.id === currentId) {
+      data = item?.receiver;
+    } else if (item?.receiver?.id === currentId ) {
+      data = item?.sender;
+    }
+    return(
+      <Pressable style={styles.btnItem} onPress={()=> joinChatWithFriend(data.id)}>
+        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+          {data.avatar.includes('rgb') ? 
+            <View>
+              <View style={{height: 45, width: 45, backgroundColor: data.avatar, borderRadius: 25, marginLeft: 15, position: 'fixed', top: 0, left: 0 }}></View> 
+              {!data.lastedOnline? 
+                <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
+              : ''}
+            </View>
+            : '' 
+          }
+          <Text style={{marginLeft: 15, fontSize: 16, flex: 1}}>{data.userName}</Text>
+          <View style={{flexDirection: 'row', marginRight: 25}}>
+            <Pressable style={[styles.btnIcon, {marginRight: 5}]}>
+              <FontAwesomeIcon color="#616161" size={19} icon={faPhone} />
+            </Pressable>
+            <Pressable style={[styles.btnIcon, {}]}>
+              <FontAwesomeIcon color="#616161" size={20} icon={faVideo} />
+            </Pressable>
+          </View>
+        </View>
+      </Pressable>
+    )
+  }
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "white"}}>
+    <ScrollView style={{ flex: 1, backgroundColor: '#FFFFFF'}}>
       <View style={{padding:10}}>
         <Pressable style={styles.btnWrapper} onPress={()=>{ navigation.navigate('FriendRequest') }}>
           <View style={styles.viewIcon}>
@@ -257,35 +194,30 @@ export const ContactFriends = ({ navigation }) => {
           <Text style={styles.btnTxt}>Lịch sinh nhật</Text>
         </Pressable>
       </View>
+
+      {renderLine(10)}
       
-      <View style={{flexDirection: 'row'}}>
+      <View style={{flexDirection: 'row', marginTop: 10, marginBottom: 10}}>
         <Pressable style={styles.btnSelect}> 
           <Text style={{fontWeight:"bold", fontSize:14}}>Tất cả</Text>
           <Text style={{fontSize:16, marginLeft: 10}}>{friendList.length}</Text>
         </Pressable>
         
-        <Pressable style={styles.btnSelect}> 
-          <Text style={{fontWeight:"bold", fontSize:14}}>Tất cả</Text>
+        <Pressable style={[styles.btnSelect, {width: 130}]}> 
+          <Text style={{fontWeight:"bold", fontSize:14}}>Mới truy cập</Text>
           <Text style={{fontSize:16, marginLeft: 10}}>{friendList.length}</Text>
         </Pressable>
       </View>
-      
-      {friendList.map((friend, index)=>(
-        <Pressable key={index} style={{ width:"100%", flexDirection:"row", alignItems:"center", justifyContent:"space-between", padding:8, paddingLeft:20, paddingRight:20}} onPress={()=>{
-          joinChatWithFriend(friend.id)
-        }}>
-          <View style={{height: 45, width: 45, borderRadius: 50, backgroundColor: friend.avatar}}></View>
-          <Text style={{fontWeight:"bold", paddingRight:25, width:"56%"}}>{ friend.userName}</Text>
-          <View style={{flexDirection:'row', alignItems:'center'}}>
-            <Pressable>
-              <FontAwesomeIcon size={22} color={"#0091FF"} icon={faMessage} style={{padding:10}}/>
-            </Pressable>
-            <Pressable style={{marginLeft:20}}>
-              <FontAwesomeIcon size={30} color={"#0091FF"} icon={faVideo} style={{padding:10}}/>
-            </Pressable>
-          </View>
-        </Pressable>
-      ))}
+
+      {renderLine(1)}
+
+      <FlatList
+        data={friendList}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        scrollEnabled={false}
+      ></FlatList>
+      <View style={{height: 300, width: '100%'}}></View>
     </ScrollView>
   );
 };

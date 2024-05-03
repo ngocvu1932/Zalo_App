@@ -1,226 +1,162 @@
-
+import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { LogBox, Pressable, ScrollView, Text, View } from "react-native";
+import { FlatList, LogBox, Pressable, ScrollView, Text, View } from "react-native";
 import axios, { setAuthorizationAxios } from "../../config/axios";
 import { socket } from '../../config/io';
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { styles } from './style'
+import { useSelector } from "react-redux";
 
 export const FriendRequestReceived = ({ navigation }) => {
-  const [friendRequestReceived, setFriendRequestReceived] = useState([]);
-  const [loadAgain, setLoadAgain] = useState(1);
+  const user = useSelector(state => state.user);
+  const [listFriendRequestReceived, setListFriendRequestReceived] = useState([]);
+  const [loadAgainSocket, setLoadAgainSocket] =useState();
+  const [loadAgain, setLoadAgain] =useState();
+  const currentId = user.user?.user?.id;
+   
 
   useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setLoadAgainSocket(new Date());
+      setLoadAgain(new Date());
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  // socket
+  useEffect(() => {
     socket.then(socket => {
-        socket.emit('setup'); 
-        socket.on('connected', () => {
-            console.log('Connected to server 1');
-        });
-
-        socket.on('need-accept-addFriend', (data) => {
-            // console.log('data',data); 
-            console.log('need-accept-addFriend', data);
-            setLoadAgain(loadAgain + 1);
-        });
-
+      // socket.emit('setup', currentId);
+      socket.on('need-accept-addFriend', (data) => {
+        setLoadAgain(data.createdAt);
+        console.log('Is received FriendRequestReceived: ', data.createdAt);
+      });
     });
 
     return () => {
-        socket.then(socket => {
-            socket.off('connected');
-            socket.off('need-accept-addFriend');
-           
-        });
+      socket.then(socket => {
+        socket.off('need-accept-addFriend');
+      });
     };
-}, []);
-
-console.log('1'); 
+  }, [loadAgainSocket]);
 
   useEffect(()=>{
     const getFriendRequestReceived = async () => {
       try {
+        let listFriendRequest = null;
         const response = await axios.get(`/users/notifications/friendShip`);
-        console.log('response 1', response); 
         if(response.errCode ===0 ){
-          setFriendRequestReceived(response.data.map(item=>item.sender))
+          listFriendRequest = response.data.map((item) => {
+            return {
+              id: item.id,
+              content: item.content,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+              sender: item.friendShip.sender,
+            }
+          });
         }
+        setListFriendRequestReceived(listFriendRequest);
       } catch (error) { 
-        
+        console.log('error 1', error);
       }
     }
 
     getFriendRequestReceived();
-    // console.log(1);
   }, [loadAgain])
 
-  
   const acceptFriendRequest = async (senderId) => {
-    const payload = {
-      userId: senderId
-    }
-
+    console.log('senderId', senderId);
     try {
-      const res = await axios.put(`/users/friendShip`, payload);
+      const response = await axios.put(`/users/friendShip`, {
+        userId: senderId,
+      });
+      
+      if (response.errCode === 0) {
+        setLoadAgain(new Date());
+        socket.then(socket => {
+          socket.emit('send-add-friend', {createdAt: new Date()});
+          console.log('send-add-friend', {createdAt: new Date()});
+        });
+      } else {
+        console.log('Error', response);
+      }
+
     } catch (error) {
+      console.log('error 2', error);
     }
   }
 
-  return (
-    <ScrollView style={{height:"100%", backgroundColor:'white'}}>
-      {friendRequestReceived.map((request, index)=> (
-        <Pressable style={{backgroundColor:"white"}}>
-          <View style={{flexDirection:'row', width:"100%", alignItems:"center", paddingLeft:20, paddingRight:20}}>
-            <View style={{height: 45, width: 45, borderRadius: 30, backgroundColor: request.avatar }}></View>
-            <View style={{flex:1, flexDirection :"column", marginLeft:15, padding:10}}>
-              <Text style={{fontWeight:"bold"}}>{request.userName}</Text>
-              <Text>Đã gửi cho bạn lời mời kết bạn</Text>
+  const rejectFriendRequest = async (senderId) => {
+    try {
+      const response = await axios.put(`/users/friendShip/reject`, {
+        userId: senderId,
+      });
+      if (response.errCode === 0) {
+        setLoadAgain(new Date());
+        socket.then(socket => {
+          socket.emit('send-add-friend', {createdAt: new Date()});
+          console.log('send-add-friend', {createdAt: new Date()});
+        });
+      } else {
+        console.log('Error', response);
+      }
+    } catch (error) {
+      console.log('Error 3', error);
+    }
+  }
+
+  const renderItem = ({item}) => {
+    // console.log(`item`, item);
+    const now = moment();
+    const createdAt = moment(item.createdAt);
+    const duration = moment.duration(now.diff(createdAt));
+    // console.log('createdAt', createdAt.utcOffset('+07:00').format('HH:mm'));
+    // console.log('days', duration.days(), 'hours', duration.hours(), 'minutes', duration.minutes(), 'seconds', duration.seconds());
+
+    return (
+      <View style={{height: 180, width: '100%', marginBottom: 10}}>
+        <View style={{flexDirection: 'row', marginLeft: 15, marginTop: 10}}>
+          {item.sender.avatar.includes('rgb') ? 
+            <View style={{height: 50, width: 50, borderRadius: 25, backgroundColor: item.sender.avatar}}></View> 
+          : ''   
+          }
+          <View style={{marginLeft: 10, width: '100%'}}>
+            <Text style={{fontSize: 17}}>{item.sender.userName}</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 3}}>
+            <Text style={{fontSize: 14}}>{duration.days() > 0 ? `${duration.days()} ngày trước  ` : duration.hours() > 0 ? `${duration.hours()} giờ trước  ` : duration.minutes() > 0 ? `${duration.minutes()} phút trước  ` : duration.seconds() > 0 ? `${duration.seconds()} giây trước  ` : 'Ngay bây giờ  ' }</Text>
+              <FontAwesomeIcon icon={faCircle} size={5} />
+              <Text style={{fontSize: 14}}>  Từ cửa sổ trò chuyện</Text> 
             </View>
-            <Pressable style={{backgroundColor:'#009EF8', justifyContent:'center', padding:10, borderRadius:10}} onPress={()=>acceptFriendRequest(request.id)}>
-              <Text style={{color:'white', fontWeight:"bold"}}>Chấp nhận</Text>
-            </Pressable>
+
+            <View style={{width: '80%', height: 70, borderRadius: 8, borderWidth: 1, borderColor: '#E4E4E4', marginTop: 5}}>
+              <Text style={{padding: 5, fontSize: 15}}>{item.content}</Text>
+            </View>
+
+            <View style={{flexDirection: 'row', width: '80%', justifyContent: 'space-between', alignItems: 'center'}}>
+              <Pressable style={[styles.btn, {backgroundColor: '#F3F4F8'}]} onPress={()=> rejectFriendRequest(item.sender.id)}>
+                <Text style={{fontSize: 16, color: '#232428'}}>Từ chối</Text>
+              </Pressable>
+
+              <Pressable style={[styles.btn, {backgroundColor: '#E9F6FF'}]} onPress={()=> acceptFriendRequest(item.sender.id)}>
+                <Text style={{fontSize: 16, color: '#1680D9'}}>Đồng ý</Text>
+              </Pressable>
+            </View>
           </View>
-        </Pressable>
-      ))}
-      
-    </ScrollView>
+        </View>
+      </View>
+    )
+  }
+
+  return (
+    <View style={{height:"100%", backgroundColor:'white'}}>
+      <FlatList
+        data={listFriendRequestReceived}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+      ></FlatList>
+    </View>
   );
 };
-
-// import React, { useEffect, useState } from "react";
-// import { Pressable, ScrollView, Text, View } from "react-native";
-// import axios, { setAuthorizationAxios } from "../../config/axios";
-// import {socket} from "../../config/io";
-// import { useDispatch, useSelector } from "react-redux";
-// import { setIsAddFriend } from "../../redux/stateAddfriendSlice";
-// import { setListFriend } from "../../redux/friendSlice";
-
-// export const FriendRequestReceived = ({ navigation }) => {
-//   const [friendRequestReceived, setFriendRequestReceived] = useState([]);
-//   const [renderedRequests, setRenderedRequests] = useState([]); 
-//   const dispatch = useDispatch();
-//   const user = useSelector(state => state.user);
-//   // const currentId = user.user.user.id;
-
-//   // useEffect(()=>{
-//   //   socket.then(socket => {
-//   //     socket.on('need-accept-addFriend', (data) => {
-//   //       // fetchNotificationFriendShip();
-//   //       fetchFriendList()
-//   //     })
-//   //   })
-//   // }, [])
-
-//   useEffect(() => {
-//     socket.then(socket => {
-//         socket.emit('setup');
-//         socket.on('connected', () => {
-//             console.log('Connected to server');
-//         });
-//         socket.then(socket => {
-//           socket.on('need-accept-addFriend', (data) => {
-//             fetchNotificationFriendShip();
-//             fetchFriendList()
-//           })
-//         })
-//     });
-//     return () => {
-//         socket.then(socket => {
-//             socket.off('connected');
-//             socket.off('new-group-chat');
-//         });
-//     };
-//   }, []); 
-
-//   useEffect(() => {
-//     fetchNotificationFriendShip()
-//     // fetchFriendList()
-//   },[friendRequestReceived])
-  
-//   async function fetchFriendList() {
-//     try {
-//       const res = await axios.get(`/users/friends?page=${1}&limit=${100}`);
-//       if(res.errCode === 0){
-//         const currentUserFriends = res.data.map(item => {
-//           if (item.user1Id === currentId) {
-//               return item.user2
-//           } else if (item.user2Id === currentId) {
-//               return item.user1
-//           }
-//         });
-//         dispatch(setListFriend(currentUserFriends))
-//       }
-//     } catch (error) {
-//       console.log("error", error);
-//     }
-//   }
-
-//   // useEffect(() => {
-//   //   socket.then(socket => {
-//   //       socket.emit('setup');
-//   //       socket.on('connected', () => {
-//   //           console.log('Connected to server');
-//   //       });
-//   //       socket.on('send-add-friend', (data)=> {
-//   //       });
-//   //       socket.on('need-accept-addFriend', (data)=> {
-//   //         fetchFriendList()
-//   //       });
-//   //   });
-//   //   return () => {
-//   //       socket.then(socket => {
-//   //           socket.off('connected');
-//   //           socket.off('new-group-chat');
-//   //       });
-//   //   };
-//   // }, []);
-
-
-//   const fetchNotificationFriendShip = async () => {
-//     try {
-//       const res = await axios.get(`/users/notifications/friendShip`);
-//       if(res.errCode ===0 ){
-//         const data= res.data.map(item=>item.sender)
-//         // const uniqueArray = [...new Set(data)];
-//         setFriendRequestReceived(data);
-//       }
-//     } catch (error) {
-//     }
-//   }
-
-//   const acceptFriendRequest = async (senderId) => {
-//     const payload = {
-//       userId: senderId
-//     }
-//     try {
-//       const res = await axios.put(`/users/friendShip`, payload);
-//       if(res.errCode === 0){
-//         dispatch(setIsAddFriend());
-//       }
-//     } catch (error) {
-//     }
-//   }
-//   return (
-//     <ScrollView style={{height:"100%", backgroundColor:'white'}}>
-//       <>
-//       {friendRequestReceived.map((request, index)=> (
-//         <Pressable key={index} style={{backgroundColor:"white"}}>
-//           <View style={{flexDirection:'row', width:"100%", alignItems:"center", paddingLeft:20, paddingRight:20}}>
-//             <View style={{height: 45, width: 45, borderRadius: 30, backgroundColor: request.avatar }}></View>
-//             <View style={{flex:1, flexDirection :"column", marginLeft:15, padding:10}}>
-//               <Text style={{fontWeight:"bold"}}>{request.userName}</Text>
-//               <Text>Đã gửi cho bạn lời mời kết bạn</Text>
-//             </View>
-//             {/* <Pressable style={{backgroundColor:'#009EF8', justifyContent:'center', padding:10, borderRadius:10}} onPress={()=>{
-//               acceptFriendRequest(request.id)
-//             }}></Pressable> */}
-//             <Pressable style={{backgroundColor:'#009EF8', justifyContent:'center', padding:10, borderRadius:10}} onPress={()=>{
-//               acceptFriendRequest(request.id)
-//             }}>
-
-//               <Text style={{color:'white', fontWeight:"bold"}}>Chấp nhận</Text>
-//             </Pressable>
-//           </View>
-//         </Pressable>
-//       ))}
-//       </>
-//     </ScrollView>
-//   );
-// };

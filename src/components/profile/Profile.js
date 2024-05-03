@@ -1,48 +1,74 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { SafeAreaView } from  'react-native-safe-area-context'
 import { styles } from './style'
-import { Text, View, TextInput, Pressable, Image } from 'react-native'
+import { Text, View, Pressable, Image, ActivityIndicator, ScrollView, Dimensions, StatusBar } from 'react-native'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faChevronLeft, faCircleCheck, faEllipsis, faGear, faMessage, faPhone, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faEllipsis, faGear, faPhone, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import axios from '../../config/axios';
 import Toast from 'react-native-easy-toast';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { socket } from '../../config/io';
 import { faCommentDots } from '@fortawesome/free-regular-svg-icons';
+import { setUserInfo } from '../../redux/userInfoSlice';
 
 export const Profile = ({navigation, route}) => {
   const user = useSelector(state => state.user);
-  const {phoneNumber} = route.params;
+  const userInfo = useSelector(state => state.userInfo);
+  const currentId = user?.user?.user?.id;
+  const dispatch = useDispatch();
+  const {phoneNumber, isUser} = route.params;
   const [isFriend, setIsFriend] = useState(false);
-  const friendList = useSelector(state => state.listFriend);
-  const [isUser, setIsUser] = useState(false); 
   const toastRef = useRef(null);
-  const [dataUser, setDataUser] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [idUserGet, setIdUserGet] = useState();
   const [sendRequestFriend, setSendRequestFriend] = useState(false);
   const [isCheck, setIsCheck] = useState(false);
-  // console.log("dataUser: ", dataUser.id); 
+  const [checkUserSendRequest, setCheckUserSendRequest] = useState(false);
+  const [loadAgainSocket, setLoadAgainSocket] =useState();
+  const [loadAgain, setLoadAgain] =useState();
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
+  const [scrollViewContentHeight, setScrollViewContentHeight] = useState(0);
+  const [scrollViewHeight, setScrollViewHeight] = useState(0);
+  const {width, height} = Dimensions.get('screen');
+  const SCROLL_THRESHOLD = height * 0.3;
 
-  // kiểm tra user có phải là chính mình không
+  // console.log('userInfor', userInfo.userInfo.avatar);
+  // console.log('dataUser', dataUser);
+  // console.log(11111);
+
   useEffect(() => {
-    if (phoneNumber === user?.user?.user?.phoneNumber) {
-      setIsUser(true);
-    } else {
-      setIsUser(false); 
-    }
-  }, [phoneNumber, user?.user?.user?.phoneNumber]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      setLoadAgain(new Date());
+      setLoadAgainSocket(new Date());
+    });
 
-  // kiểm tra xem đã check lời mời chưa
-  useEffect(()=>{
+    return unsubscribe;
+  }, [navigation]);
 
-  }, [])
+  // socket
+  useEffect(() => {
+    socket.then(socket => {
+      // socket.emit('setup', currentId);
+      socket.on('need-accept-addFriend', (data) => {
+        setLoadAgain(data.createdAt);
+        console.log('Is received', data.createdAt);
+      });
+    });
+
+    return () => {
+      socket.then(socket => {
+        socket.off('need-accept-addFriend');
+      });
+    };
+  }, [loadAgainSocket]);
 
   // kiểm tra trạng thái bạn bè
   useEffect(() => {
     const getStatusFriend = async () => {
       try {
         const response = await axios.get(`/users/friendShip?userId=${idUserGet}`);
+        // console.log('response1 :', response);
         if (response.errCode === 0) {
           if (response.data.status === 'RESOLVE') {
             setIsFriend(true);
@@ -52,114 +78,285 @@ export const Profile = ({navigation, route}) => {
             setSendRequestFriend(true);
             setIsLoading(false);
           } else if (response.data.status === 'REJECT') {
+            setSendRequestFriend(false);
+            setIsFriend(false);
+            setIsLoading(false);
+          } else if (response.data.status === 'OLD_FRIEND') {
             setIsFriend(false);
             setIsLoading(false);
           }
+
+          if (response.data.sender.id === currentId) {
+            setCheckUserSendRequest(true);
+            setIsLoading(false);
+          } else {
+            setCheckUserSendRequest(false);
+            setIsLoading(false);
+          }
         } else if (response.errCode === 1) {
-          // chưa gửi kết bạn
           setIsFriend(false);
+          setSendRequestFriend(false);
           setIsLoading(false);
         }
       } catch (error) {
-        console.log('Error x: ', error); 
+        console.log('Error 1: ', error); 
       }
     }
-    if (!isCheck && idUserGet) {
+    
+    if (isCheck && idUserGet) {
       getStatusFriend();
     }
-  }, [idUserGet, isCheck]);
+    
+  }, [idUserGet, isCheck, loadAgain]);
 
   // lấy thông tin user
   useEffect(() => {
     const getProlife = async () => {
       try {
         const response = await axios.get(`/users/detail?phoneNumber=${phoneNumber}`);
+        // console.log('response', response);
         if (response.errCode === 0) {
-          setDataUser(response.data);
+          setIsCheck(true);
           setIdUserGet(response.data.id);
-          setIsCheck(false);
+          dispatch(setUserInfo(response.data));
         } else {
-          console.log("err: ", response);
+          console.log("Error 2: ", response);
         }
       } catch (error) {
-        console.log(error);
-      }
+        console.log("Error 3: ",error);
+      } 
     }
+      
     getProlife();
-  }, [phoneNumber]);
+  }, [phoneNumber, isUser]);
+
+  useLayoutEffect(() => {
+    const scrollableHeight = scrollViewContentHeight - scrollViewHeight;
+    if (scrollableHeight > 0) {
+      setIsScrollable(true);
+    } else {
+      setIsScrollable(false);
+    }
+  }, [scrollViewContentHeight, scrollViewHeight]);
 
   // gửi yêu cầu kết bạn
   const sendRequestAddFriend = async () => {
     try {
       const response = await axios.post(`/users/friendShip`, {
-        userId: idUserGet,
+        userId: idUserGet, 
         content: 'Xin chào, tôi muốn kết bạn với bạn'
       });
+
+      // console.log('res', JSON.stringify(response));
       if (response.errCode === 0) {
+        
         if (response.data.status === 'PENDING') {
+          setLoadAgain(new Date()); 
           setSendRequestFriend(true);
           socket.then(socket => {
             socket.emit('send-add-friend', response.data);
           });
         }
+      } else if (response.errCode === 3) {
+        setSendRequestFriend(false);
+        socket.then(socket => {
+          socket.emit('send-add-friend', response);
+        });
       } else {
         setSendRequestFriend(false);
       }
     } catch (error) {
-      console.log('Error: ', error);
+      console.log('Error 4: ', error.message);
     }
   };
 
-  if (isLoading) {
-    return false;
+  const joinChat = async () => {
+    try {
+      const response = await axios.get(`/chat/private?userId=${idUserGet}`);
+      if (response.errCode === 0) {
+        if (response.data.participants[0].id === currentId) {
+          const data = {
+            _id: response.data._id,
+            avatar: response.data.participants[1].avatar,
+            phoneNumber: response.data.participants[1].phoneNumber,
+            type: response.data.type,
+            updatedAt: response.data.updatedAt,
+            userId: response.data.participants[1].id,
+            userName: response.data.participants[1].userName,
+            lastedOnline: response.data.participants[1].lastedOnline,
+          };
+          navigation.navigate('ChatMessage', {items: data});
+        } else if (response.data.participants[1].id === currentId) {
+          const data = {
+            _id: response.data._id,
+            avatar: response.data.participants[0].avatar,
+            phoneNumber: response.data.participants[0].phoneNumber,
+            type: response.data.type,
+            updatedAt: response.data.updatedAt,
+            userId: response.data.participants[0].id,
+            userName: response.data.participants[0].userName,
+            lastedOnline: response.data.participants[0].lastedOnline,
+          };
+          navigation.navigate('ChatMessage', {items: data});
+        }
+      } else if (response.errCode === -1) {
+        try {
+          const response = await axios.post('/chat/access', {
+            "type": "PRIVATE_CHAT",
+            "participants": [currentId, idUserGet],
+            "status": true
+          })
+          if (response.errCode === 0) {
+            if (response.data.participants[0].id === currentId) {
+              const data = {
+                _id: response.data._id,
+                avatar: response.data.participants[1].avatar,
+                phoneNumber: response.data.participants[1].phoneNumber,
+                type: response.data.type,
+                updatedAt: response.data.updatedAt,
+                userId: response.data.participants[1].id,
+                userName: response.data.participants[1].userName,
+                lastedOnline: response.data.participants[1].lastedOnline,
+              };
+              navigation.navigate('ChatMessage', {items: data});
+            } else if (response.data.participants[1].id === currentId) {
+              const data = {
+                _id: response.data._id,
+                avatar: response.data.participants[0].avatar,
+                phoneNumber: response.data.participants[0].phoneNumber,
+                type: response.data.type,
+                updatedAt: response.data.updatedAt,
+                userId: response.data.participants[0].id,
+                userName: response.data.participants[0].userName,
+                lastedOnline: response.data.participants[0].lastedOnline,
+              };
+              navigation.navigate('ChatMessage', {items: data});
+            }
+          }
+        } catch (error) {
+          console.log('Error 5: ', error);
+        }
+      }
+    } catch (error) {
+      console.log('Error 6: ', error);
+    }
+  }
+
+  const handleScroll = (event) => {
+    const scrollY = event.nativeEvent.contentOffset.y;
+    if (scrollY > SCROLL_THRESHOLD) {
+      setIsScrolling(true);
+    } else {
+      setIsScrolling(false);
+    }
+  };
+
+  if (isLoading) { 
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color="black" />
+      </View>
+    )
   }
   
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={styles.btnHeader} onPress={()=>{
-          navigation.goBack()
-        }}>
-          <FontAwesomeIcon style={{marginLeft: 15}} color='#FFFFFF' size={21} icon={faChevronLeft} />
-        </Pressable>
-        <View style={{flexDirection:'row', flex: 1, justifyContent: 'flex-end'}}>
-          { !isUser ? 
-            <View style={{flexDirection: 'row', marginRight: 20}}>
-              <Pressable onPress={() => {}} style={styles.btnHeader}>
-                <FontAwesomeIcon style={{marginRight: 20}} color='#FFFFFF' size={22} icon={faPhone} />
-              </Pressable>
+    <View style={styles.container}>
+      {isScrolling ? 
+        <View style={{position: 'absolute', top: 0, left: 0, right: 0, width: '100%', height: '4.5%', backgroundColor: '#FFFFFF', zIndex: 9}}>
+        </View> 
+        :
+        ''
+      }
+      <View style={[{position: 'absolute', top: '4.5%', left: 0, right: 0,  width: '100%', zIndex: 10}, isScrolling ? {backgroundColor: '#FFFFFF', borderBottomWidth: 1, borderBottomColor: '#D4D4D4'}: '']} >
+        <View style={{flexDirection: 'row'}}>
+          <Pressable style={{marginLeft: 10, flexDirection: 'row', height: 40, alignItems: 'center', justifyContent: 'flex-start', minWidth: 40}} onPress={()=>{navigation.goBack()}}>
+            <FontAwesomeIcon style={[{marginLeft: 5}, isScrolling ? {color: 'black'} : {color: '#FFFFFF'}]} size={21} icon={faChevronLeft} />
+            {isScrolling ? 
+              <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 10}}>
+                {isUser ? (
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    { typeof userInfo.userInfo?.avatar === 'string'? 
+                      <View style={{height: 30, width: 30, backgroundColor: userInfo.userInfo?.avatar , borderRadius: 15}}></View>: 
+                      
+                      ''
+                      // Image ở đây
+                    }
 
-              <Pressable onPress={() => {}} style={styles.btnHeader}>
-                <FontAwesomeIcon style={{marginRight: 0}} color='#FFFFFF' size={22} icon={faGear} />
-              </Pressable>
-            </View>
-          :
-            '' 
-          }
-          <Pressable style={styles.btnHeader} onPress={() => {navigation.navigate('ProfileOptions', {items: dataUser, isUser: isUser, isFriend: isFriend})}}>
-            <FontAwesomeIcon style={{marginRight:15}} color='#FFFFFF' size={22} icon={faEllipsis} />
+                    <Text style={{fontWeight:'bold', fontSize: 18, marginLeft: 10}}>{userInfo.userInfo?.userName}</Text>
+                  </View>
+                ) : (
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    {typeof userInfo?.avatar === 'string' ?
+                      <View style={{height: 30, width: 30, backgroundColor: userInfo.avatar , borderRadius: 15}}></View> : 
+                      '' 
+                      // image ở đây 
+                    }
+                    <Text style={{fontWeight:'bold', fontSize: 18, marginLeft: 10}}> {userInfo?.userName} </Text>
+                  </View>
+                  
+                )}
+              </View> 
+            : ''}
           </Pressable>
+
+          <View style={{flexDirection:'row', flex: 1, justifyContent: 'flex-end', alignItems: 'center'}}>
+            { !isUser ? 
+              <View style={{flexDirection: 'row', marginRight: 5, alignItems: 'center'}}>
+                <Pressable onPress={() => {}} style={[styles.btnHeader, {marginRight: 5}]}>
+                  <FontAwesomeIcon style={isScrolling ? {color: 'black'} : {color: '#FFFFFF'}} size={21} icon={faPhone} />
+                </Pressable>
+
+                <Pressable onPress={() => {}} style={[styles.btnHeader, {}]}>
+                  <FontAwesomeIcon style={isScrolling ? {color: 'black'} : {color: '#FFFFFF'}} size={21} icon={faGear} />
+                </Pressable>
+              </View>
+            :
+              '' 
+            }
+            <Pressable style={[styles.btnHeader, {marginRight: 5}]} onPress={() => {navigation.navigate('ProfileOptions', {isUser: isUser, isFriend: isFriend})}}>
+              <FontAwesomeIcon style={isScrolling ? {color: 'black'} : {color: '#FFFFFF'}}  size={21} icon={faEllipsis} />
+            </Pressable>
+          </View>
         </View>
+
+        {!isScrolling ? 
+        (<View>
+          <Text>Ở đây là nhạc</Text>
+        </View>): ''}
       </View>
 
-      <View style={{height:"30%", width: '100%', position: 'absolute', top: 0, left: 0, right: 0}}>
-        <Image source={{uri: 'https://res.cloudinary.com/ngocvu1932/image/upload/v1713151081/s8kdgofytlvf9ylpybju.jpg'}} style={{height:"100%", width:"100%"}}></Image>
-      </View> 
+      <ScrollView onScroll={handleScroll} scrollEventThrottle={70} showsVerticalScrollIndicator={false} >
+        <View style={[styles.header, {width: '100%', height: height * 0.3}]}>
+          <View style={{width: '100%', height: '100%', zIndex: 0}}>
+            <Image source={{uri: 'https://res.cloudinary.com/ngocvu1932/image/upload/v1714486268/bgVsCode/kbdwbuprkwqyz54zovxu.jpg'}} style={{height:"100%", width:"100%"}}></Image>
+          </View> 
+        </View>
 
-      {/* body */}
-      <View style={{position: 'absolute', top: '23%', alignSelf: 'center', width: '100%', height: '100%', alignItems: 'center'}}>
-        <View style={{alignItems: 'center'}} > 
-          { dataUser?.avatar.includes('rgb') ?
-            <View style={{height: 120, width: 120, borderRadius: 70, backgroundColor: dataUser?.avatar, borderWidth: 3, borderColor: '#FFFFFF'}}></View>      
-            : 
-            '' 
+        <View style={{alignItems: 'center', marginTop: '-15%'}} >  
+          {/* khúc này là ảnh đại diện và bio */}
+          <View style={{alignItems: 'center'}}>
+            {typeof userInfo.userInfo?.avatar === 'string' ?
+              <View style={{height: 120, width: 120, borderRadius: 70, backgroundColor: userInfo.userInfo?.avatar, borderWidth: 3, borderColor: '#FFFFFF'}}></View> : 
+              '' 
+              // image ở đây 
+            }
+            <Text style={{fontWeight:'bold', fontSize: 18, marginBottom: 20}}> {userInfo.userInfo?.userName} </Text>
+          </View>
+        
+          {
+            userInfo?.userInfo?.description ? 
+              <Text>{userInfo.userInfo.description}</Text> : 
+              isUser ? 
+              <View>
+                <Text>Cập nhật giới thiệu bản thân</Text>
+              </View> 
+              : '' 
           }
-          
-          <Text style={{fontWeight:'bold', fontSize: 18, marginBottom: 20}}> {dataUser?.userName} </Text>
         </View>
 
         { !isUser ? 
           isFriend ? (
+            // Không phải chính mình và là bạn bè
             <View style={{width: '100%', alignItems: 'center', height: '100%'}}>
               <View style={{flexDirection: 'row'}}>
                 <Pressable>
@@ -171,8 +368,8 @@ export const Profile = ({navigation, route}) => {
                 </Pressable>
               </View>
 
-              <View style={{position: 'absolute', bottom: 600, right: '10%'}}>
-                <Pressable style={[styles.btnChat]}>
+              <View style={{}}>
+                <Pressable style={[styles.btnChat]} onPress={()=> alert('re')}>
                   <FontAwesomeIcon icon={faCommentDots} color='#0763EA' size={18} />
                   <Text style={{color: '#0763EA', fontSize: 16, fontWeight: '500', marginLeft: 10}}>Nhắn tin</Text> 
                 </Pressable>
@@ -180,38 +377,106 @@ export const Profile = ({navigation, route}) => {
 
             </View>
           ) : (
-            <View style={{width: '100%', alignItems: 'center'}} >
+            // Không phải chính mình và không là bạn bè
+            <View style={{width: '100%', alignItems: 'center', backgroundColor: 'red'}} >
               <View style={{width: '80%', alignItems: 'center'}}>
                 {sendRequestFriend ? 
-                  <Text style={{marginBottom: 10, textAlign: 'center'}}>Lời mời kết bạn đã được gửi đi. Hãy để lại tin nhắn cho {dataUser?.userName} trong lúc đợi chờ nhé!</Text>
+                  checkUserSendRequest ? <Text style={{marginBottom: 10, textAlign: 'center'}}>Lời mời kết bạn đã được gửi đi. Hãy để lại tin nhắn cho {userInfo?.userName} trong lúc đợi chờ nhé!</Text> 
+                  :
+                  <Text style={{marginBottom: 10, textAlign: 'center'}}> {userInfo?.userName} đã gửi cho bạn lời mời kết bạn!</Text>
                 : 
                 ''
                 }
               </View>
 
-              <View style={{width: '85%', flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Pressable style={[styles.btnChat, sendRequestFriend ? {width: '48%'} : {width: '78%'}]}>
+              <View style={{width: '85%', flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'violet' }}>
+                <Pressable style={[styles.btnChat, sendRequestFriend ? {width: '48%'} : {width: '78%'}]} onPress={()=> joinChat()}>
                   <FontAwesomeIcon icon={faCommentDots} color='#0763EA' size={18} />
                   <Text style={{color: '#0763EA', fontSize: 16, fontWeight: '500', marginLeft: 10}}>Nhắn tin</Text> 
                 </Pressable>
 
-                <Pressable style={[styles.btnAddFriend, sendRequestFriend ? {width: '48%'} : {width: '18%'}]} onPress={()=> sendRequestAddFriend()}>
+                <Pressable style={[styles.btnAddFriend, sendRequestFriend ? {width: '48%'} : {width: '18%'}]} onPress={()=> {sendRequestAddFriend()}}>
                   { sendRequestFriend ? 
-                    <Text style={{fontSize: 16, fontWeight: '500'}}>Hủy lời mời</Text> 
-                  :
+                    checkUserSendRequest ? 
+                      <Pressable style={[styles.btnAddFriend, {width: '100%'}]} onPress={()=> sendRequestAddFriend()}>
+                        <Text style={{fontSize: 16, fontWeight: '500'}}>Hủy lời mời</Text> 
+                      </Pressable>
+                      : 
+                      <Pressable style={[styles.btnAddFriend, {width: '100%'}]} onPress={()=> alert('Chấp nhận')}>
+                        <Text style={{fontSize: 16, fontWeight: '500'}}>Chấp nhận</Text>
+                      </Pressable>
+                    :
                     <FontAwesomeIcon icon={faUserPlus} size={21} />
                   }
                 </Pressable>
               </View>
+              <View style={{marginBottom: 800}} ></View>
             </View>
           ) 
         : 
           (
-            <View><Text>Cập nhật giới thiệu bản thân</Text></View>
+            // Chính mình
+            <View style={{ alignItems: 'center'}}>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Text>Vũ đây nè</Text>
+            </View>
           )
         }
-      </View>
+
+       
+      </ScrollView>
       <Toast style={{backgroundColor: 'green'}} ref={toastRef} position='center' />
-    </SafeAreaView>
+    </View>
   )
 }

@@ -3,25 +3,22 @@ import { StyleSheet } from 'react-native'
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#009AFA',
+        // backgroundColor: '#E2E9F1',
     },
 
     header: {
-        flexDirection: 'row', 
         width: '100%',
-        height: 55,
-        alignItems: 'center',
-        backgroundColor: '#009AFA',
-        justifyContent: 'space-between'
-       
+        height: 90,
+        justifyContent: 'flex-end',
     },
+
     txtInHeader: {
         flex: 1,
-        fontSize: 18,
+        fontSize: 17,
         color: '#F1FFFF',
         width: '60%',
         height: 30,
-        marginLeft: 15,
+        marginLeft: 10,
     },
 
     btnWrapper: {
@@ -56,5 +53,25 @@ export const styles = StyleSheet.create({
         marginLeft: 15, 
         marginBottom: 2,
         alignItems: 'center',
+    },
+    
+    line: {
+        flexDirection: 'row',
+        backgroundColor: '#E1E1E1'
+    },
+
+    btnItem: {
+        marginTop: 10, 
+        height: 60, 
+        width: '100%', 
+        justifyContent: 'center'
+    },
+
+    btnIcon: {
+        height: 40, 
+        width: 40,
+        justifyContent: 'center',
+        alignItems: 'center'
     }
+    
 })

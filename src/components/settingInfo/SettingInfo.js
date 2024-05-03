@@ -3,8 +3,9 @@ import React, { useState } from 'react'
 import { styles } from './style'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { faChevronLeft, faChevronRight, faCircleCheck, faPenToSquare} from '@fortawesome/free-solid-svg-icons'
+import { faChevronLeft, faCircleCheck, faPenToSquare} from '@fortawesome/free-solid-svg-icons'
 import { faCommentDots } from '@fortawesome/free-regular-svg-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 
 export const SettingInfo = ({navigation}) => {
   const [isToggled, setToggled] = useState(false);
@@ -12,15 +13,28 @@ export const SettingInfo = ({navigation}) => {
   const handleToggle = () => {
     setToggled(!isToggled);
   }; 
+
+  const renderLine = () => (
+    <View style={styles.line}>
+      <View style={styles.line1} >
+        <Text> </Text>
+      </View>
+      <View style={styles.line2}>
+        <Text> </Text>
+      </View>
+    </View>
+  )
  
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
-          <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
-          <Text style={styles.txtInHeader}>Thông tin về Zalo</Text> 
-        </Pressable>
-      </View>
+    <View style={styles.container}>
+      <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
+        <View style={{height: '55%', justifyContent: 'center'}}>
+          <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
+            <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
+            <Text style={styles.txtInHeader}>Thông tin về Zalo</Text> 
+          </Pressable>
+        </View>
+      </LinearGradient>
 
       <ScrollView style={styles.body}>   
         <View style={[styles.pressBirthDay, {height: 70}]}>
@@ -40,15 +54,7 @@ export const SettingInfo = ({navigation}) => {
           </View>
         </Pressable>
 
-        {/* Làm màu kẻ vạch ngang */}
-        <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+        {renderLine()}
 
         <Pressable style={[styles.pressBirthDay]} onPress={()=> alert('Hiện liên hệ trong danh bạ')}>
           <Text style={styles.textBirthDay}>Liên hệ hỗ trợ</Text>
@@ -57,15 +63,7 @@ export const SettingInfo = ({navigation}) => {
           </View>
         </Pressable>
 
-        {/* Làm màu kẻ vạch ngang */}
-        <View style={styles.line}>
-          <View style={styles.line1} >
-            <Text> </Text>
-          </View>
-          <View style={styles.line2}>
-            <Text> </Text>
-          </View>
-        </View>
+        {renderLine()}
 
         <Pressable style={[styles.pressBirthDay]} onPress={()=> alert('Gửi Qos')}>
           <Text style={styles.textBirthDay}>Gửi Qos</Text>
@@ -76,7 +74,7 @@ export const SettingInfo = ({navigation}) => {
         </Pressable>
         
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }
 

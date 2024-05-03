@@ -8,9 +8,8 @@ export const styles = StyleSheet.create({
 
     header: {
         width: '100%',
-        height: 55,
-        backgroundColor: '#009AFA',
-        justifyContent: 'center'
+        height: 90,
+        justifyContent: 'flex-end'
     },
 
     pressBack: {
@@ -21,10 +20,9 @@ export const styles = StyleSheet.create({
     },
 
     txtInHeader: {
-        fontSize: 21,
+        fontSize: 20,
         color: '#F1FFFF',
         marginLeft: 10,
-        marginBottom: 2
     }, 
     
     body: {

@@ -10,14 +10,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-easy-toast';
 import { CommonActions } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../../redux/userSlice'
+import { setUser } from '../../redux/userSlice';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export const LoginPage = ({navigation}) => {
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(true);
   const [isFillText, setIsFillText] = useState(true);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState(''); 
-  const toastRef = useRef(null);
+  const toastRef = useRef(null); 
   const dispatch = useDispatch();
 
   const loginFunc =  async (phoneNumber, password) => {
@@ -56,7 +57,6 @@ export const LoginPage = ({navigation}) => {
 
           if (verifyResponse.errCode === 0) {
             const data = verifyResponse.data;
-            
             try {
               // console.log("data", typeof data);
               await AsyncStorage.setItem('dataUser', JSON.stringify(data));
@@ -109,30 +109,31 @@ export const LoginPage = ({navigation}) => {
   
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
-          <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
-          <Text style={styles.txtInHeader}>Đăng nhập</Text> 
-          {/* <Text>{todo}</Text> */}
-        </Pressable>
-      </View>
+      <LinearGradient colors={['#008BFA', '#00ACF4']} style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+        <View style={{height: '60%', justifyContent: 'center'}}>
+          <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
+            <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
+            <Text style={styles.txtInHeader}>Đăng nhập</Text> 
+          </Pressable>
+        </View>
+      </LinearGradient>
       
       <View style={styles.body}>
         <View style={{height: 40, backgroundColor: '#F9FAFE', justifyContent: 'center', alignItems: 'center'}}>
-          <Text style={{fontSize: 15}}>Vui lòng nhập số điện thoại và mật khẩu để đăng nhập</Text>
+          <Text style={{fontSize: 14}}>Vui lòng nhập số điện thoại và mật khẩu để đăng nhập</Text>
         </View>
 
         <View style={{marginTop: 40, alignItems: 'center'}}>
-          <TextInput style={styles.inputt} placeholder='Số điện thoại' onChangeText={(text)=> {setPhone(text)}}></TextInput>
+          <TextInput style={styles.inputt} placeholder='Số điện thoại' placeholderTextColor={'#818A91'} onChangeText={(text)=> {setPhone(text)}}></TextInput>
           <View style={{width: '100%', justifyContent: 'center', flexDirection: 'row'}}>
-            <TextInput style={[styles.inputt, {marginTop:10}]} placeholder='Mật khẩu' secureTextEntry={isPasswordVisible} onChangeText={(text)=> {setPassword(text)}}></TextInput>
+            <TextInput style={[styles.inputt, {marginTop:10}]} placeholder='Mật khẩu' placeholderTextColor={'#818A91'} secureTextEntry={isPasswordVisible} onChangeText={(text)=> {setPassword(text)}}></TextInput>
             <Pressable onPress={()=> handleToggle()} style={{height: 50, width: 50,justifyContent: 'center', alignItems: 'center', marginLeft: -50}}>
-              <Text style={{fontSize: 16}}>{isPasswordVisible ? "Hiện" : "Ẩn"}</Text>
+              <Text style={{fontSize: 14, fontWeight: 500, color: '#7B848B'}}>{isPasswordVisible ? "Hiện" : "Ẩn"}</Text>
             </Pressable>
           </View>
 
-          <Pressable onPress={()=> alert('Lấy lại mật khẩu')} style={{marginTop: 20, alignSelf: 'flex-start', marginLeft: 20, height: 30, width:130}}>
-            <Text style={{fontSize: 17, color: '#33A1FF'}}>Lấy lại mật khẩu</Text>
+          <Pressable onPress={()=> alert('Lấy lại mật khẩu')} style={{marginTop: 20, alignSelf: 'flex-start', marginLeft: 20, height: 30}}>
+            <Text style={{fontSize: 16, color: '#33A1FF'}}>Lấy lại mật khẩu</Text>
           </Pressable>
 
           <Pressable disabled={isFillText} onPress={loginHandleSuccess} style={[styles.btnLogin, isFillText ? styles.gray : styles.blue]}>

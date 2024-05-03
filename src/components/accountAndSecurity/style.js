@@ -3,32 +3,26 @@ import { StyleSheet } from 'react-native'
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // justifyContent: 'center',
-        // alignItems: 'center'
         backgroundColor: '#009AFA',
     },
 
     header: {
         width: '100%',
-        height: 55,
+        height: 90,
         backgroundColor: '#009AFA',
-        justifyContent: 'center'
+        justifyContent: 'flex-end'
     },
 
     pressBack: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: 250,
         height: 40,
-        // backgroundColor: 'red',
-        // justifyContent: 'center'
     },
 
     txtInHeader: {
         fontSize: 20,
         color: '#F1FFFF',
         marginLeft: 10,
-        marginBottom: 2
     }, 
     
     body: {
@@ -92,7 +86,7 @@ export const styles = StyleSheet.create({
 
     viewChild: {
         flex: 1, 
-        marginLeft: 20
+        marginLeft: 15
     },
 
     txtChild: {
@@ -129,7 +123,6 @@ export const styles = StyleSheet.create({
         height: 100, 
         width: '100%',
         backgroundColor: '#FFFFFF',
-        // backgroundColor: 'red',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -142,7 +135,7 @@ export const styles = StyleSheet.create({
         borderRadius: 15,
         height: 25,
         width: 45,
-        marginRight: 20,
+        marginRight: 15,
         justifyContent: 'center'
       },
 
@@ -199,14 +192,14 @@ export const styles = StyleSheet.create({
     },
 
     line1: {
-        height: 2,
+        height: 1,
         backgroundColor: '#FFFFFF',
         width: '15%'
         
     },
 
     line2: {
-        height: 2,
+        height: 1,
         backgroundColor: '#F1F2F4',
         width: '85%'
     },

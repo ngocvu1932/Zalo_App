@@ -3,40 +3,36 @@ import { SafeAreaView } from  'react-native-safe-area-context'
 import { styles } from './style'
 import { Text, View, Pressable, Switch, Modal, Button } from 'react-native'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faChevronLeft, faClock, faEllipsis, faGear, faLock, faMagnifyingGlass, faMessage, faPencil, faPhone, faRing, faStar, faTrash, faUser, faUserLock, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import axios from '../../config/axios';
 import Toast from 'react-native-easy-toast';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSelector } from 'react-redux';
 
 export const ProfileOptions = ({navigation, route}) => {
-  const {items, isUser, isFriend } = route.params;
-  const [isEnabled, setIsEnabled] = useState(false);
+  const {isUser, isFriend } = route.params;
   const [modalVisible, setModalVisible] = useState(false);
   const toastRef = useRef(null);
   const [isToggled, setToggled] = useState(false);
+  const userInfo = useSelector(state => state.userInfo); 
 
   const handleToggle = () => {
     setToggled(!isToggled);
   }; 
 
-  const handleUnfriend = async (userId) => {
-    console.log(userId,"hihi");
-    setModalVisible(false);
-    console.log(userId,"hihiê");
-
-    const payload = {
-        userId: userId
-    }
+  const handleUnfriend = async () => {
     try {
-        const response = await axios.put(`users/friendShip/unfriend`, payload)
-        console.log(response);
+        const response = await axios.put(`users/friendShip/unfriend`, {userId: userInfo.userInfo?.id})
+        // console.log(response);
         if(response.errCode === 0){
-            toastRef.current.show('Xóa bạn bè thành công!', 2000);
+            setModalVisible(false);
+            toastRef.current.show('Xóa bạn bè thành công!', 1000);
             setTimeout(() => {
-                navigation.navigate('Messages')
-            }, 2000)
+                navigation.goBack();
+            }, 1000)
         }
     } catch (error) {
-
+      console.log('error', error);
     }
   }
 
@@ -52,18 +48,22 @@ export const ProfileOptions = ({navigation, route}) => {
   )
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={styles.btnHeader} onPress={()=>{navigation.goBack()}}>
-          <FontAwesomeIcon style={{ marginLeft: 15 }} color='#F1FFFF' size={21} icon={faChevronLeft} />
-        </Pressable>
-        <Text style={{fontSize:18, fontWeight:'500', color:'white', marginLeft: 10}}>{items.userName}</Text>
-      </View>
+    <View style={styles.container}>
+      <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
+        <View style={{flexDirection: 'row', height: '55%', alignItems: 'center'}}>
+          <Pressable style={styles.btnHeader} onPress={()=>{navigation.goBack()}}>
+            <FontAwesomeIcon style={{ marginLeft: 15 }} color='#F1FFFF' size={21} icon={faChevronLeft} />
+          </Pressable>
+          <Text style={{fontSize:18, fontWeight:'500', color:'white', marginLeft: 10}}>
+            {userInfo.userInfo?.userName}
+          </Text>
+        </View>
+      </LinearGradient>
 
-      <View style={styles.body}>
+      <View style={styles.body}> 
         {isUser ? ( 
             <View style={{width: '100%'}}>
-              <Pressable style={[styles.btnOption]} onPress={()=> alert('Thoong tin')}>
+              <Pressable style={[styles.btnOption]} onPress={()=> navigation.navigate('ProfileInfo', {isUser: isUser})}>
                 <Text style={styles.txt}>Thông tin</Text>
               </Pressable>
 
@@ -109,7 +109,7 @@ export const ProfileOptions = ({navigation, route}) => {
             </View>
           ) : isFriend ? (
             <View style={{width: '100%'}}>
-              <Pressable style={[styles.btnOption]} onPress={()=> alert('Thoong tin')}>
+              <Pressable style={[styles.btnOption]} onPress={()=> navigation.navigate('ProfileInfo', {isUser: isUser})}>
                 <Text style={styles.txt}>Thông tin</Text>
               </Pressable>
 
@@ -117,7 +117,7 @@ export const ProfileOptions = ({navigation, route}) => {
               
               <Pressable style={[styles.btnOption]} onPress={()=> alert('Đổi tên gợi nhớ')}>
                 <Text style={styles.txt}>Đổi tên gợi nhớ</Text>
-              </Pressable>
+              </Pressable> 
 
               {renderLine()}
 
@@ -142,7 +142,7 @@ export const ProfileOptions = ({navigation, route}) => {
                             
               {renderLine()}
 
-              <Pressable style={[styles.btnOption]} onPress={()=> alert('Giới thiệu cho bạn')}>
+              <Pressable style={[styles.btnOption]} onPress={()=> setModalVisible(true)}>
                 <Text style={[styles.txt, {color: 'red'}]}>Xóa bạn</Text>
               </Pressable>
             </View>
@@ -154,7 +154,7 @@ export const ProfileOptions = ({navigation, route}) => {
 
               {renderLine()}
 
-              <Pressable style={[styles.btnOption]} onPress={()=> alert('Thoong tin')}>
+              <Pressable style={[styles.btnOption]} onPress={()=> navigation.navigate('ProfileInfo', {isUser: isUser})}>
                 <Text style={styles.txt}>Thông tin</Text>
               </Pressable>
 
@@ -182,29 +182,36 @@ export const ProfileOptions = ({navigation, route}) => {
         }
       </View>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Bạn có chắc muốn xóa khỏi danh sách bạn bè?</Text>
-            <View style={styles.modalButtons}>
-              <Button
-                title="Hủy bỏ"
-                onPress={() => setModalVisible(false)}
-              />
-              <Button
-                title="Xác nhận"
-                // onPress={() => handleUnfriend(items.userId)}
-              />
+      { modalVisible ? 
+        <View style={styles.overlay}>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={{flex: 3}}>
+                  <Text style={styles.modalText}>Xóa bạn với {userInfo.userInfo.userName}?</Text>
+                </View>
+                <View style={{flex: 2, flexDirection: 'row', borderRadius: 15}}>
+                  <Pressable style={[styles.btnModal]} onPress={()=> setModalVisible(false)}>
+                    <Text style={{color: '#147FDF', fontSize: 16}}>Hủy</Text>
+                  </Pressable>
+
+                  <Pressable style={[styles.btnModal, {borderLeftWidth: 1}]} onPress={()=> handleUnfriend()}>
+                    <Text style={{fontSize: 16, color: 'red'}}>Xóa</Text>
+                  </Pressable>
+                </View>
+                
+              </View>
             </View>
-          </View>
+          </Modal>
         </View>
-      </Modal>
+        : ''}
+      
       <Toast style={{backgroundColor: 'green'}} ref={toastRef} position='center' />
-    </SafeAreaView>
+    </View>
   )
 }
