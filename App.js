@@ -52,6 +52,7 @@ import { ProfileInfo } from './src/components/profileOptions/ProfileInfo';
 import { EditProfile } from './src/components/profileOptions/EditProfile';
 LogBox.ignoreLogs(['onAnimatedValueUpdate']);
 LogBox.ignoreLogs(['No native ExpoFirebaseCore module found']);
+LogBox.ignoreLogs(['Possible unhandled promise rejection']);
 
 const Tab= createBottomTabNavigator();
 const Stack= createNativeStackNavigator();

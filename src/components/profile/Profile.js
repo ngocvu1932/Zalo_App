@@ -1,7 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { SafeAreaView } from  'react-native-safe-area-context'
 import { styles } from './style'
-import { Text, View, Pressable, Image, ActivityIndicator, ScrollView, Dimensions, StatusBar } from 'react-native'
+import { Text, View, Pressable, Image, ActivityIndicator, ScrollView, Dimensions } from 'react-native'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faChevronLeft, faEllipsis, faGear, faPhone, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import axios from '../../config/axios';
@@ -10,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { socket } from '../../config/io';
 import { faCommentDots } from '@fortawesome/free-regular-svg-icons';
 import { setUserInfo } from '../../redux/userInfoSlice';
+import { Video, Audio } from 'expo-av';
 
 export const Profile = ({navigation, route}) => {
   const user = useSelector(state => state.user);
@@ -32,10 +32,6 @@ export const Profile = ({navigation, route}) => {
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
   const {width, height} = Dimensions.get('screen');
   const SCROLL_THRESHOLD = height * 0.3;
-
-  // console.log('userInfor', userInfo.userInfo.avatar);
-  // console.log('dataUser', dataUser);
-  // console.log(11111);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -114,7 +110,6 @@ export const Profile = ({navigation, route}) => {
     const getProlife = async () => {
       try {
         const response = await axios.get(`/users/detail?phoneNumber=${phoneNumber}`);
-        // console.log('response', response);
         if (response.errCode === 0) {
           setIsCheck(true);
           setIdUserGet(response.data.id);
@@ -273,7 +268,6 @@ export const Profile = ({navigation, route}) => {
             <FontAwesomeIcon style={[{marginLeft: 5}, isScrolling ? {color: 'black'} : {color: '#FFFFFF'}]} size={21} icon={faChevronLeft} />
             {isScrolling ? 
               <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 10}}>
-                {isUser ? (
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     { typeof userInfo.userInfo?.avatar === 'string'? 
                       <View style={{height: 30, width: 30, backgroundColor: userInfo.userInfo?.avatar , borderRadius: 15}}></View>: 
@@ -284,17 +278,6 @@ export const Profile = ({navigation, route}) => {
 
                     <Text style={{fontWeight:'bold', fontSize: 18, marginLeft: 10}}>{userInfo.userInfo?.userName}</Text>
                   </View>
-                ) : (
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    {typeof userInfo?.avatar === 'string' ?
-                      <View style={{height: 30, width: 30, backgroundColor: userInfo.avatar , borderRadius: 15}}></View> : 
-                      '' 
-                      // image ở đây 
-                    }
-                    <Text style={{fontWeight:'bold', fontSize: 18, marginLeft: 10}}> {userInfo?.userName} </Text>
-                  </View>
-                  
-                )}
               </View> 
             : ''}
           </Pressable>
@@ -459,16 +442,12 @@ export const Profile = ({navigation, route}) => {
               <Text>Cập nhật giới thiệu bản thân</Text>
               <Text>Cập nhật giới thiệu bản thân</Text>
               <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
+              <Video
+                source={{uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4'}} // Đường dẫn đến video
+                style={{width: 300, height: 200}}
+                useNativeControls // Sử dụng controls mặc định của hệ thống
+                resizeMode="contain" // Đặt chế độ hiển thị của video
+              />
               <Text>Vũ đây nè</Text>
             </View>
           )

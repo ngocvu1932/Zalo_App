@@ -33,7 +33,7 @@ export const EditProfile = ({navigation}) => {
     const [isUpdate, setIsUpdate] = useState(false);
     const toastRef = useRef(null);
  
-    // kiểm tra thông tin mới
+    // kiểm tra thông tin mới 
     useEffect(() => {
         var userUpdateBirth = moment.utc(new Date(userUpdate.birthdate)).utcOffset('+07:00').format('DD/MM/YYYY');
         var userInfoBirth = moment.utc(new Date(userInfo.userInfo?.userInfo.birthdate)).utcOffset('+07:00').format('DD/MM/YYYY');

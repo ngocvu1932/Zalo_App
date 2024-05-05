@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF', 
   },
-  // header
+
   header: {
     width: '100%',
     height: 90,
@@ -15,6 +15,7 @@ export const styles = StyleSheet.create({
 
   body: {
     backgroundColor: '#FFFFFF',
+    // backgroundColor: 'blue',
     flex: 1,
   },
 
@@ -56,7 +57,6 @@ export const styles = StyleSheet.create({
     color: 'grey',
     marginTop: "10px",
     right: "10px",
-    // fontWeight:500,
     color: "black"
   },
 
@@ -68,13 +68,13 @@ export const styles = StyleSheet.create({
   line1: {
     height: 1,
     backgroundColor: '#FFFFFF',
-    width: '15%'
+    width: '20%'
   },
 
   line2: {
     height: 1,
     backgroundColor: '#F1F2F4',
-    width: '85%'
+    width: '80%'
   },
 
   line: {

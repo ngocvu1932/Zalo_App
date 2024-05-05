@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from  'react-native-safe-area-context'
 import { styles } from './style'
-import { Text, View, TextInput, Pressable, Image } from 'react-native'
+import { Text, View, TextInput, Pressable, Image, StatusBar, Keyboard } from 'react-native'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faArrowRight, faChevronLeft, faQrcode, faUsersViewfinder } from '@fortawesome/free-solid-svg-icons';
 import { faAddressBook } from '@fortawesome/free-regular-svg-icons';
 import axios from '../../config/axios';
 import Toast from 'react-native-easy-toast';
+import { useSelector } from 'react-redux';
 
 export const AddFriend = ({navigation}) => {
+  const device = useSelector(state => state.device)
   const [phoneNumber, setPhoneNumber] = useState('')
   const toastRef = useRef(null);
   const [isInput, setIsInput] = useState(false)
@@ -21,7 +23,7 @@ export const AddFriend = ({navigation}) => {
       setIsInput(false)
     }
     
-  }, [phoneNumber]);
+  }, [phoneNumber]); 
 
   const findUserByPhone = async ()=>{
     try {
@@ -29,6 +31,7 @@ export const AddFriend = ({navigation}) => {
       if(res.errCode === 0){
         navigation.navigate('Profile', {phoneNumber: res.data.phoneNumber})
       } else if(res.errCode === 1){
+        toastRef.current.props.style.backgroundColor = 'orange';
         toastRef.current.show('Không tìm thấy người dùng này!', 2000);
       }
     } catch (error) {
@@ -39,21 +42,21 @@ export const AddFriend = ({navigation}) => {
   const renderLine = () => (
     <View style={styles.line}>
       <View style={styles.line1} >
-        <Text> </Text>
       </View>
       <View style={styles.line2}>
-        <Text> </Text>
       </View>
     </View>
   )
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
-        <Pressable style={styles.btnHeader}  onPress={()=>{navigation.goBack()}}>
-          <FontAwesomeIcon style={{ }} color='black' size={22} icon={faChevronLeft} />
-          <Text style={styles.txtInHeader}>Thêm bạn</Text>
-        </Pressable>
+        <View style={{ height: '55%'}}>
+          <Pressable style={styles.btnHeader}  onPress={()=>{navigation.goBack()}}>
+            <FontAwesomeIcon style={{ }} color='black' size={22} icon={faChevronLeft} />
+            <Text style={styles.txtInHeader}>Thêm bạn</Text>
+          </Pressable>
+        </View>
       </View> 
 
       <View style={styles.body}>
@@ -64,7 +67,7 @@ export const AddFriend = ({navigation}) => {
         </View>
 
         <View style={{flexDirection: 'row', width: '100%', justifyContent: 'space-around', height: 70, backgroundColor: '#FFFFFF', alignItems: 'center'}}>
-          <TextInput keyboardType='numeric' style={[styles.textInput, isInput1 ? {borderColor: '#2561B7'} : {}]} onFocus={()=> setIsInput1(true)} onBlur={()=> setIsInput1(false)} onChangeText={(text)=>setPhoneNumber(text)} placeholder='Nhập số điện thoại'></TextInput>
+          <TextInput keyboardType='numeric' style={[styles.textInput, isInput1 ? {borderColor: '#2561B7'} : {}]} onFocus={()=> setIsInput1(true)} onBlur={()=> setIsInput1(false)} onChangeText={(text)=>setPhoneNumber(text)} placeholder='Nhập số điện thoại' placeholderTextColor={'#AEB2B3'}></TextInput>
           <Pressable disabled={!isInput} style={[styles.btnSearch, isInput ? {backgroundColor: '#0068FF'} : {}]} onPress={()=> findUserByPhone()}>
             <FontAwesomeIcon icon={faArrowRight} size={20} color={isInput ? '#FFFFFF' : '#ACAFB6'} /> 
           </Pressable>
@@ -92,6 +95,7 @@ export const AddFriend = ({navigation}) => {
         <Text style={{fontSize: 15, marginTop: 20}}>Xem lời mời kết bạn đã gửi tại trang Danh bạ Zalo</Text>
       </View>
       <Toast style={{backgroundColor: 'green'}} ref={toastRef} position='center' />
-    </SafeAreaView>
+      {device.device === 'ios' ? <StatusBar style="auto" /> : ''}
+    </View>
   )
 }

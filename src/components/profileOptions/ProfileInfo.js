@@ -66,12 +66,16 @@ export const ProfileInfo = ({navigation, route}) => {
                 {renderLine()}
 
                 <View style={{flexDirection: 'row', height: 45, alignItems: 'center'}}>
-                    <Text style={{flex: 1,fontSize: 15, opacity: 0.7, marginLeft: 15, marginBottom: 5}}>Điện thoại</Text>
-                    <Text style={{marginBottom: 5, flex: 2}}>{userInfo.userInfo?.phoneNumber}</Text>
+                    <Text style={{flex: 1,fontSize: 15, opacity: 0.7, marginLeft: 15}}>Điện thoại</Text>
+                    <Text style={{flex: 2, fontSize: 15}}>{isUser ? userInfo.userInfo?.phoneNumber : '**********'}</Text>
+                </View>
+
+                <View style={{width: '100%', alignItems: 'flex-end', marginBottom: 10}}>
+                    <Text style={{width: '65%', fontSize: 13, opacity: 0.7}}>Số điện thoại chỉ hiển thị khi bạn có lưu số người này trong danh bạ</Text>
                 </View>
 
                 {isUser ? 
-                    <View style={{alignItems: 'center', marginTop: 10, marginBottom: 20}}>
+                    <View style={{alignItems: 'center', marginBottom: 20}}>
                         <Pressable style={styles.btnEdit} onPress={()=> navigation.navigate('EditProfile', {isUser: isUser})}>
                             <FontAwesomeIcon icon={faPencil} size={20} color='#000000'/>
                             <Text>   Chỉnh sửa</Text>

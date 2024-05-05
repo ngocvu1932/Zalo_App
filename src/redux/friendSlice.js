@@ -6,14 +6,14 @@ const initialState = {
 
 const friendSlice = createSlice({
     name: 'listFriend',
-    initialState,
+    initialState, 
     reducers: {
       setListFriend(state, action) {
         state.listFriend = action.payload;
       },
 
-      clearUser(state) {
-        state.listFriend = null;
+      clearListFriend(state) {
+        state.listFriend = null; 
       },
     }
 });

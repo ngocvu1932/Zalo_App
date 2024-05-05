@@ -67,13 +67,13 @@ export const ContactGroups = ({navigation}) => {
   }
   return (
     <ScrollView style={{backgroundColor:"white", height:"100%"}}>
-      <View>
+      <View style={{backgroundColor: 'red'}}>
         <Pressable style={{flexDirection:"row", alignItems:'center', marginLeft:20, paddingTop:20, paddingBottom:10}} onPress={()=>{
           navigation.navigate('CreateGroup')
         }}>
-          <Pressable style={{width:40, height:40, borderRadius:50, backgroundColor:"#0091FF", alignItems:'center', justifyContent:'center'}}>
+          <View style={{width:40, height:40, borderRadius:50, backgroundColor:"#0091FF", alignItems:'center', justifyContent:'center'}}>
             <FontAwesomeIcon size={20} color={"#FFFFFF"} icon={faUserGroup} />
-          </Pressable>
+          </View>
           <Text style={{color:"black", fontSize:16, marginLeft:15, fontWeight:'500'}}>Tạo nhóm mới</Text>
         </Pressable>
       </View>

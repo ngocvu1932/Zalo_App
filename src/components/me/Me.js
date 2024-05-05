@@ -57,12 +57,12 @@ export const Me = ({navigation}) => {
           </View>
         </View>
         
-        <Pressable style={styles.pressViewQR}  onPress={()=>{alert('Nhạc chờ Zalo X')}}>
+        <Pressable style={styles.pressViewQR}  onPress={()=>{alert('Nhạc chờ Zalo')}}>
           <FontAwesomeIcon style={{marginLeft: 15}} size={22} color='#1A66D4' icon={faMusic} />
           <View style={{flex: 1, marginLeft: 20}}>
             <View style={styles.viewMusicTxt}>
-              <Text style={styles.txtViewQR}>Nhạc chờ Zalo X </Text>
-              <FontAwesomeIcon style={{borderWidth: 5, borderColor: 'red'}} icon={faCrown} size={20} color='#E5850A' />    
+              <Text style={styles.txtViewQR}>Nhạc chờ Zalo</Text>
+              {/* <FontAwesomeIcon style={{borderWidth: 5, borderColor: 'red'}} icon={faCrown} size={20} color='#E5850A' />     */}
             </View>
             <Text style={styles.txtViewQR1}>Đăng kí nhạc chờ, thể hiện cá tính</Text>
           </View>

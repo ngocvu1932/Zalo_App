@@ -50,7 +50,8 @@ export const ContactFriends = ({ navigation }) => {
       try {
         const response = await axios.get(`/users/friends?limit=10`);
         if (response.errCode === 0) {
-          setFriendList(response.data);
+          setFriendList(response.data); 
+          dispatch(setListFriend(response.data));
         }
       } catch (error) {
         console.log('Error 1', error);
@@ -144,19 +145,20 @@ export const ContactFriends = ({ navigation }) => {
     } else if (item?.receiver?.id === currentId ) {
       data = item?.sender;
     }
+    
     return(
       <Pressable style={styles.btnItem} onPress={()=> joinChatWithFriend(data.id)}>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-          {data.avatar.includes('rgb') ? 
+          {data?.avatar.includes('rgb') ? 
             <View>
-              <View style={{height: 45, width: 45, backgroundColor: data.avatar, borderRadius: 25, marginLeft: 15, position: 'fixed', top: 0, left: 0 }}></View> 
+              <View style={{height: 45, width: 45, backgroundColor: data?.avatar, borderRadius: 25, marginLeft: 15, position: 'fixed', top: 0, left: 0 }}></View> 
               {!data.lastedOnline? 
                 <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
               : ''}
             </View>
             : '' 
           }
-          <Text style={{marginLeft: 15, fontSize: 16, flex: 1}}>{data.userName}</Text>
+          <Text style={{marginLeft: 15, fontSize: 16, flex: 1}}>{data?.userName}</Text>
           <View style={{flexDirection: 'row', marginRight: 25}}>
             <Pressable style={[styles.btnIcon, {marginRight: 5}]}>
               <FontAwesomeIcon color="#616161" size={19} icon={faPhone} />
