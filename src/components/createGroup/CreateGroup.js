@@ -22,7 +22,7 @@ export const CreateGroup = ({ navigation }) => {
     const [isKeyboardNumber, setIsKeyboardNumber] = useState(false);
     const [listId, setListId] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
-    const [linkImageGroup, setLinkImageGroup] = useState('');
+    const [linkImageGroup, setLinkImageGroup] = useState(null);
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [isLoadingImage, setIsLoadingImage] = useState(false);
@@ -139,7 +139,7 @@ export const CreateGroup = ({ navigation }) => {
                     name: groupName ? groupName : `${user.user.user.userName}, ` + listId.map(item => item.name).join(', '),
                     type: "GROUP_CHAT",
                     participants: listId.map(item => item.id),
-                    groupPhoto: linkImageGroup
+                    groupPhoto: linkImageGroup ? linkImageGroup : null,
                 });
                 
                 console.log('Response create group:', response.data);
@@ -189,11 +189,9 @@ export const CreateGroup = ({ navigation }) => {
                         <FontAwesomeIcon color='#FFFFFF' icon={faCheck} size={18} />
                     </View>                    
                     {data?.avatar?.includes('rgb') ? 
-                        <View style={{height: 50, width: 50, backgroundColor: data?.avatar, borderRadius: 25, marginLeft: 15}}>
-                        </View> 
-                        : 
-                        // <Image style={{height: 45, width: 45, borderRadius: 25, marginLeft: 15}} source={{uri: data?.avatar}}></Image>
-                        ''
+                        <View style={{height: 50, width: 50, backgroundColor: data?.avatar, borderRadius: 25, marginLeft: 15}} />
+                    : 
+                        <Image style={{height: 50, width: 50, borderRadius: 25, marginLeft: 15}} source={{uri: data?.avatar}} />
                     }
                     <Text style={{fontSize: 16, marginLeft: 15}} >{data?.userName}</Text>
                 </View>
@@ -211,8 +209,14 @@ export const CreateGroup = ({ navigation }) => {
                             <FontAwesomeIcon size={13} color='#6B849A' icon={faXmark} /> 
                         </View>
                     </View>     
-                    : 
-                ''}
+                : 
+                    <View style={{}}>
+                        <Image source={{uri: item.avatar}} style={{height: 55, width: 55, borderRadius: 30}} />
+                        <View style={{position: 'absolute',top: 0, right: 0, height: 18, width: 18, borderRadius: 10, backgroundColor: '#E5E4E0', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFFFFF'}} >
+                            <FontAwesomeIcon size={13} color='#6B849A' icon={faXmark} /> 
+                        </View>
+                    </View>     
+                }
             </Pressable>
         )
     }

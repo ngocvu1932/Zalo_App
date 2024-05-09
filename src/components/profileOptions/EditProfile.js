@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, Text, TextInput, View, Keyboard } from 'react-native';
+import { Pressable, Text, TextInput, View, Keyboard, Modal, Image } from 'react-native';
 import { styles } from './style';
 import { LinearGradient } from 'expo-linear-gradient';
-import { faCircle, faPencil, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCamera, faCircle, faImages, faPencil, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from 'moment';
@@ -13,32 +13,39 @@ import { setUser } from '../../redux/userSlice';
 import Toast from 'react-native-easy-toast';
 import { useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 export const EditProfile = ({navigation}) => {
     const userInfo = useSelector(state => state.userInfo);
     const user = useSelector(state => state.user);
     const dispatch = useDispatch();
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState();
     const [genderMale, setGenderMale] = useState(true);
     const [genderFemale, setGenderFemale] = useState(false);
     const [newUserInfo, setNewUserInfo] = useState();
+    const [newAvatar, setNewAvatar] = useState();
     const [userUpdate, setUserUpdate] = useState({
         id: userInfo.userInfo?.id,
         userName: userInfo.userInfo?.userName,
         birthdate: userInfo.userInfo?.userInfo.birthdate,
         gender: userInfo.userInfo?.userInfo.gender,
+        avatar: userInfo.userInfo?.avatar,
     });
     const [isCheck, setIsCheck] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
     const toastRef = useRef(null);
+    const [modalVisible, setModalVisible] = useState(false);
+
+    // console.log('userUpdate', userUpdate.avatar);
  
     // kiểm tra thông tin mới 
     useEffect(() => {
         var userUpdateBirth = moment.utc(new Date(userUpdate.birthdate)).utcOffset('+07:00').format('DD/MM/YYYY');
         var userInfoBirth = moment.utc(new Date(userInfo.userInfo?.userInfo.birthdate)).utcOffset('+07:00').format('DD/MM/YYYY');
 
-        if (userUpdate.userName !== userInfo.userInfo?.userName || userUpdateBirth !== userInfoBirth || userUpdate.gender !== userInfo.userInfo?.userInfo.gender) {
+        if (userUpdate.userName !== userInfo.userInfo?.userName || userUpdateBirth !== userInfoBirth || userUpdate.gender !== userInfo.userInfo?.userInfo.gender || userUpdate.avatar !== userInfo.userInfo?.avatar) {
             setIsUpdate(true);
         } else {
             setIsUpdate(false);
@@ -56,13 +63,13 @@ export const EditProfile = ({navigation}) => {
         }
     }, [userInfo]);
 
-    // dispatch thoon tin moiw
+    // dispatch cập nhật thông tin
     useEffect(() => {
         const setData = async () => {
             if (isCheck) {
                 const userInfoCus = {
                     ...userInfo.userInfo,
-                    avatar: userInfo.userInfo.avatar,
+                    avatar: newAvatar,
                     userInfo: {
                         ...userInfo.userInfo.userInfo,
                         birthdate: newUserInfo.info.birthdate,
@@ -76,6 +83,7 @@ export const EditProfile = ({navigation}) => {
                     user: {
                         ...user.user.user,
                         userName: newUserInfo.userName,
+                        avatar: newAvatar,
                     }
                 };
                 
@@ -91,7 +99,7 @@ export const EditProfile = ({navigation}) => {
         }
 
         setData();
-    }, [newUserInfo, isCheck]);
+    }, [newUserInfo, isCheck, newAvatar]);
 
     const handleGenderMale = () => {
         if (genderMale === false) {
@@ -125,20 +133,113 @@ export const EditProfile = ({navigation}) => {
 
     const updateInfo = async () => {
         try {
-            const response = await axios.put('/users/updateInfor', userUpdate)
-            if (response.errCode === 0) {
-                setNewUserInfo(response.data);
-                setIsCheck(true);
-                setIsUpdate(false);
-                toastRef.current.show('Cập nhật thông tin thành công!', 1000);
-                Keyboard.dismiss();
+            const responseAvatar = await axios.put('/users/avatar', {avatar: userUpdate.avatar});
+            if (responseAvatar.errCode === 0) {
+                setNewAvatar(responseAvatar.data.avatar);
+                const response = await axios.put('/users/updateInfor', userUpdate)
+                if (response.errCode === 0) {
+                    setNewUserInfo(response.data);
+                    setIsCheck(true);
+                    setIsUpdate(false);
+                    toastRef.current.show('Cập nhật thông tin thành công!', 1000);
+                    Keyboard.dismiss();
+                } else {
+                    console.log('error ', response); 
+                }
             } else {
-                console.log('error ', response); 
-            }
+                console.log('error ', responseAvatar);
+            } 
         } catch (error) {
             console.log('error', error); 
         }
     }
+
+    const openImagePicker = async (type) => {
+        if (type === 'C') {
+            const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+            if (!permissionResult.granted) {
+                console.log("Permission to access camera roll is required!");
+                return;
+            }
+        
+            const pickerResult = await ImagePicker.launchCameraAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+            });
+        
+            if (!pickerResult.canceled) {
+                const uri = pickerResult.assets[0].uri;
+                const manipResult = await ImageManipulator.manipulateAsync(uri, 
+                    [{ resize: { width: 140, height: 140 } }], 
+                    { compress: 0.2}
+                );
+
+                setModalVisible(false);
+
+                convertImageToBase64(manipResult.uri).then((result) => {
+                    console.log(result);
+                    setUserUpdate(pre => ({...pre, avatar: result}));
+                });
+        }
+          
+        } else if (type === 'L') {
+            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (!permissionResult.granted) {
+                console.log("Permission to access camera roll is required!");
+                return;
+            }
+      
+            const pickerResult = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+                allowsMultipleSelection: false,
+                selectionLimit: 1,
+            });
+      
+            if (!pickerResult.canceled) {
+                const uri = pickerResult.assets[0].uri;
+                const manipResult = await ImageManipulator.manipulateAsync(uri, 
+                    [{ resize: { width: 140, height: 140 } }], 
+                    { compress: 0.2}
+                );
+
+                setModalVisible(false);
+
+                convertImageToBase64(manipResult.uri).then((result) => {
+                    console.log(result);
+                    setUserUpdate(pre => ({...pre, avatar: result}));
+                });
+            }
+        }
+    }
+
+    const convertImageToBase64 = async (imageUri) => {
+        return new Promise((resolve, reject) => {
+            try {
+                fetch(imageUri)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            resolve(reader.result);
+                        };
+                        reader.onerror = error => {
+                            reject(error);
+                        };
+                        reader.readAsDataURL(blob);
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            } catch (error) {
+                reject(error);
+            }
+        });
+    };
 
     const checkBox = (state, text) => {
         return (
@@ -150,6 +251,13 @@ export const EditProfile = ({navigation}) => {
             </View>
         )
     }
+
+    const renderLine = () => (
+        <View style={styles.line}> 
+          <View style={[styles.line1, {width: '15%'}]} />
+          <View style={[styles.line2, {width: '85%'}]} />
+        </View>
+    )
 
     return (
         <View style={styles.container}>
@@ -164,10 +272,24 @@ export const EditProfile = ({navigation}) => {
 
             <View style={styles.body}>
                 <View style={{width: '100%', flexDirection: 'row', backgroundColor: '#FFFFFF'}}>
-                    {typeof userInfo.userInfo.avatar === 'string' ? 
-                    <View style={{flex: 1, alignItems: 'center', marginTop: 20}}>
-                        <View style={{height: 55, width: 55, borderRadius: 30, backgroundColor: userInfo.userInfo?.avatar}}></View>
-                    </View> : ''}
+                    {userUpdate.avatar?.includes('rgb') ? 
+                        <Pressable style={{flex: 1, alignItems: 'center', marginTop: 20}} onPress={() => setModalVisible(true)}>
+                            <View style={{height: 60, width: 60, borderRadius: 30, backgroundColor: userInfo.userInfo?.avatar}}>
+                                <View style={{position: 'absolute', bottom: 1, right: 2, height: 20, width: 20, borderRadius: 10, backgroundColor: '#FFFFFF', borderColor: '#DADAD8', borderWidth: 2, justifyContent: 'center', alignItems: 'center'}}>
+                                    <FontAwesomeIcon color='#94A1AA' size={11} icon={faCamera} />
+                                </View>
+                            </View>
+                        </Pressable> 
+                    : 
+                        <Pressable style={{flex: 1, alignItems: 'center', marginTop: 20}} onPress={() => setModalVisible(true)}>
+                            <View style={{height: 60, width: 60, borderRadius: 30}}>
+                                <Image source={{uri: userUpdate.avatar}} style={{height: 60, width: 60, borderRadius: 30}} />
+                                <View style={{position: 'absolute', bottom: 1, right: 2, height: 20, width: 20, borderRadius: 10, backgroundColor: '#FFFFFF', borderColor: '#DADAD8', borderWidth: 2, justifyContent: 'center', alignItems: 'center'}}>
+                                    <FontAwesomeIcon color='#94A1AA' size={11} icon={faCamera} />
+                                </View>
+                            </View>
+                        </Pressable> 
+                    } 
 
                     <View style={{flex: 3}}>
                         <View style={{flexDirection: 'row', width: '100%', alignItems: 'center', height: 55}}>
@@ -180,9 +302,9 @@ export const EditProfile = ({navigation}) => {
                                 {!userUpdate.birthdate ? 
                                     selectedDate ? 
                                         <Text style={{ fontSize: 17}}>{moment.utc(selectedDate).utcOffset('+07:00').format('DD/MM/YYYY')}</Text> : 
-                                        <Text style={{ fontSize: 17, opacity: 0.7}}>Chưa thiết lập</Text>
+                                        <Text style={{ fontSize: 17, opacity: 0.7}}>Chưa cập nhật</Text>
                                 :
-                                <Text style={{ fontSize: 17}}>{moment.utc(userUpdate.birthdate).utcOffset('+07:00').format('DD/MM/YYYY')}</Text>}
+                                    <Text style={{ fontSize: 17}}>{moment.utc(userUpdate.birthdate).utcOffset('+07:00').format('DD/MM/YYYY')}</Text>}
                             </Pressable>
 
                             <DateTimePickerModal
@@ -204,6 +326,8 @@ export const EditProfile = ({navigation}) => {
                             </Pressable>
                         </View>
                     </View>
+
+                    
                 </View>
 
                 <View style={{width: '100%', height: 80, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center'}}>
@@ -213,6 +337,37 @@ export const EditProfile = ({navigation}) => {
                 </View>
             </View>
             <Toast style={{backgroundColor: 'green'}} ref={toastRef} position='center' />
+
+            {modalVisible ? 
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    // onRequestClose={() => {
+                    //     setModalVisible(!modalVisible);
+                    // }}
+                >
+                    <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.3)'}}>
+                        <Pressable style={{flex: 1}} onPress={()=> setModalVisible(false)} />
+                        <View style={styles.modalContent}>
+                            <View style={{height: 6, width: 55, backgroundColor: '#DFE3E6', marginBottom: 10, marginTop: 5, borderRadius: 10}} />
+                            <Pressable style={styles.btnOptsAvatar} onPress={()=> openImagePicker('C')}>
+                                <FontAwesomeIcon style={{marginLeft: 20}} icon={faCamera} color='#707070' size={22} />
+                                <Text style={{fontSize: 17, marginLeft: 15}}>Chụp ảnh mới</Text>
+                            </Pressable>
+
+                            {renderLine()}
+
+                            <Pressable style={styles.btnOptsAvatar} onPress={()=> openImagePicker('L')}>
+                                <FontAwesomeIcon style={{marginLeft: 20}} icon={faImages} color='#707070' size={22} />
+                                <Text style={{fontSize: 17, marginLeft: 15}} >Chọn ảnh trên máy</Text>
+                            </Pressable>
+
+                            {renderLine()}
+                        </View>
+                    </View>
+                </Modal> 
+            : ''}
         </View>
     )
 };

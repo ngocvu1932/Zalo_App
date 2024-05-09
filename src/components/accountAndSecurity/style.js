@@ -66,11 +66,11 @@ export const styles = StyleSheet.create({
     },
 
     txtAllOne: {
-        fontSize: 17,
+        fontSize: 16,
     },
 
     txtName: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '500',
     },
 
@@ -139,27 +139,27 @@ export const styles = StyleSheet.create({
         justifyContent: 'center'
       },
 
-      circleButton: {
+    circleButton: {
         height: 20, width: 20, 
         backgroundColor: '#FFFFFF',
         borderRadius: 20,
         marginLeft: 2
-      },
+    },
 
-      circleButton1: {
+    circleButton1: {
         height: 20, width: 20, 
         backgroundColor: '#FFFFFF',
         borderRadius: 20,
         marginLeft: 23
-      },
+    },
 
-      toggledButton: {
+    toggledButton: {
         backgroundColor: 'blue',
-      },
+    },
 
-      buttonText: {
+    buttonText: {
         color: 'white',
-      },
+    },
 
       pressDeleteAccount: {
 

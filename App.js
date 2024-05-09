@@ -42,7 +42,7 @@ import { FriendRequestSent } from './src/components/friendRequest/FriendRequestS
 import { Profile } from './src/components/profile/Profile';
 import { ProfileOptions } from './src/components/profileOptions/ProfileOptions';
 import { CreateGroup } from './src/components/createGroup/CreateGroup';
-import ManagerGroupMembers from './src/components/managerGroupMembers/ManagerGroupMembers';
+import {ManagerGroupMembers} from './src/components/managerGroupMembers/ManagerGroupMembers';
 import { AllMembers } from './src/components/managerGroupMembers/AllMembers';
 import { AddMember } from './src/components/createGroup/AddMember';
 import { LogBox, Platform } from 'react-native';
@@ -50,6 +50,7 @@ import { socket } from './src/config/io';
 import { setDevice } from './src/redux/deviceSlice';
 import { ProfileInfo } from './src/components/profileOptions/ProfileInfo';
 import { EditProfile } from './src/components/profileOptions/EditProfile';
+import { ChangeAdminGroup } from './src/components/managerGroupMembers/ChangeAdminGroup';
 LogBox.ignoreLogs(['onAnimatedValueUpdate']);
 LogBox.ignoreLogs(['No native ExpoFirebaseCore module found']);
 LogBox.ignoreLogs(['Possible unhandled promise rejection']);
@@ -57,34 +58,34 @@ LogBox.ignoreLogs(['Possible unhandled promise rejection']);
 const Tab= createBottomTabNavigator();
 const Stack= createNativeStackNavigator();
 
-const MainScreen = () => { 
+const MainScreen = ({ route }) => { 
   return( 
     <Tab.Navigator 
-        initialRouteName='Messages'
-        screenOptions={({route}) => ({
-          tabBarIcon: ({ color}) => {
-            if (route.name === 'Messages') {
-              return <FontAwesomeIcon icon={faCommentDots} size={22} color={color} />;
-            } else if (route.name === 'Contacts') {
-              return <FontAwesomeIcon icon={faAddressBook} size={22} color={color} />;
-            } else if (route.name === 'Discovery') {
-              return <FontAwesomeIcon icon={faSnowflake} size={22} color={color} />;
-            } else if (route.name === 'Timeline') {
-              return <FontAwesomeIcon icon={faClock} size={22} color={color} />;
-            } else if (route.name === 'Me') {
-              return <FontAwesomeIcon icon={faUser} size={22} color={color} />;
-            } 
-          },
-          headerShown: false,
-          tabBarStyle:{paddingBottom: 25, height: '10%'}
-        })} 
-        >
-        <Tab.Screen name="Messages" component={Messages} options={{tabBarLabel: 'Tin nhắn', tabBarLabelStyle:{fontSize: 12}, tabBarBadge: '3'}}/>
-        <Tab.Screen name="Contacts" component={Contacts} options={{tabBarLabel: 'Danh bạ', tabBarLabelStyle:{fontSize: 12}}}/>
-        <Tab.Screen name="Discovery" component={Discovery} options={{tabBarLabel: 'Khám phá', tabBarLabelStyle:{fontSize: 12}}}/>
-        <Tab.Screen name="Timeline" component={Timeline} options={{tabBarLabel: 'Nhật ký', tabBarLabelStyle:{fontSize: 12}}}/>
-        <Tab.Screen name="Me" component={Me} options={{tabBarLabel: 'Cá nhân', tabBarLabelStyle:{fontSize: 12}}}/>
-      </Tab.Navigator>
+      initialRouteName={route.params?.screen}
+      screenOptions={({route}) => ({
+        tabBarIcon: ({ color}) => {
+          if (route.name === 'Messages') {
+            return <FontAwesomeIcon icon={faCommentDots} size={22} color={color} />;
+          } else if (route.name === 'Contacts') {
+            return <FontAwesomeIcon icon={faAddressBook} size={22} color={color} />;
+          } else if (route.name === 'Discovery') {
+            return <FontAwesomeIcon icon={faSnowflake} size={22} color={color} />;
+          } else if (route.name === 'Timeline') {
+            return <FontAwesomeIcon icon={faClock} size={22} color={color} />;
+          } else if (route.name === 'Me') {
+            return <FontAwesomeIcon icon={faUser} size={22} color={color} />;
+          } 
+        },
+        headerShown: false,
+        tabBarStyle:{paddingBottom: 25, height: '10%', elevation: 0, shadowOpacity: 0, borderTopWidth: 1, borderTopColor: '#D1D1D1'}
+      })} 
+    >
+      <Tab.Screen name="Messages" component={Messages} options={{tabBarLabel: 'Tin nhắn', tabBarLabelStyle:{fontSize: 12}, tabBarBadge: '3'}}/>
+      <Tab.Screen name="Contacts" component={Contacts} options={{tabBarLabel: 'Danh bạ', tabBarLabelStyle:{fontSize: 12}}}/>
+      <Tab.Screen name="Discovery" component={Discovery} options={{tabBarLabel: 'Khám phá', tabBarLabelStyle:{fontSize: 12}}}/>
+      <Tab.Screen name="Timeline" component={Timeline} options={{tabBarLabel: 'Nhật ký', tabBarLabelStyle:{fontSize: 12}}}/>
+      <Tab.Screen name="Me" component={Me} options={{tabBarLabel: 'Cá nhân', tabBarLabelStyle:{fontSize: 12}}}/>
+    </Tab.Navigator>
   )
 }
  
@@ -178,6 +179,7 @@ const RootStack = () => {
           <Stack.Screen name='AddMember' component={AddMember}/>
           <Stack.Screen name='ProfileInfo' component={ProfileInfo}/>
           <Stack.Screen name='EditProfile' component={EditProfile}/>
+          <Stack.Screen name='ChangeAdminGroup' component={ChangeAdminGroup}/>
         </>
       ) : (
         <>
@@ -212,6 +214,7 @@ const RootStack = () => {
           <Stack.Screen name='AddMember' component={AddMember}/>
           <Stack.Screen name='ProfileInfo' component={ProfileInfo}/>
           <Stack.Screen name='EditProfile' component={EditProfile}/>
+          <Stack.Screen name='ChangeAdminGroup' component={ChangeAdminGroup}/>
         </>
       ) }
     </Stack.Navigator>

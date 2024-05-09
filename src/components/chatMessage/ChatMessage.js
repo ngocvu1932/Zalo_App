@@ -14,9 +14,12 @@ import { setIsCreateGroup, setisCreateGroup } from '../../redux/stateCreateGroup
 import {CLOUD_NAME, UPLOAD_PRESET} from '@env'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Video, Audio } from 'expo-av';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import { setGroupChatInfo } from '../../redux/groupChatInfoSlice';
 
 export const ChatMessage = ({ navigation, route }) => {
-    const dispatch = useDispatch();
+    const groupChatInfo = useSelector(state => state.groupChatInfo.groupChatInfo);
+    const dispatch = useDispatch(); 
     const [isText, setIsText] = useState(false);
     const [textMessage, setTextMessage] = useState('');
     const [messages, setMessages] = useState([]);
@@ -30,9 +33,12 @@ export const ChatMessage = ({ navigation, route }) => {
     const [isUserChoose, setIsUserChoose] = useState(false);
     const [messageIsChooseId, setMessageIsChooseId] = useState('');
     const [loadAgain, setLoadAgain] = useState(false);
+    const [loadAgainFocus, setLoadAgainFocus] = useState();
+    const [loadAgain1, setLoadAgain1] = useState(false);
     const [isSend, setIsSend] = useState(false);
     const [isMessage, setIsMessage] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingGroupChat, setIsLoadingGroupChat] = useState(true);
     const [textInputHeight, setTextInputHeight] = useState(30);
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -40,9 +46,13 @@ export const ChatMessage = ({ navigation, route }) => {
     const [isControl, setIsControl] = useState(false);
     const delayTime = 300;
 
-    console.log('Flag: ', items);
-//   console.log("videoRefs: ", videoRefs);
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            setLoadAgainFocus(new Date());
+        });
 
+        return unsubscribe;
+    }, [navigation]);
 
     //get permissions
     useEffect(() => {
@@ -99,11 +109,38 @@ export const ChatMessage = ({ navigation, route }) => {
         }, 500);
     }, []);
 
+    // Lấy thông tin group chat
+    useEffect(() => { 
+        const getGroupChat = async () => {
+            try {
+                const response = await axios.get(`/chat/access?chatId=${items._id}`);
+                console.log('check load group chat!');
+                if (response.errCode === 0) {
+                    dispatch(setGroupChatInfo(response.data));
+                    setIsLoadingGroupChat(false);
+                } else {
+                    console.log("Error: ", response);
+                }
+            } catch (error) {
+                console.log("Error: ", error);
+            }
+        };
+
+        if (items.type?.includes('GROUP_CHAT')) {
+            getGroupChat();
+            setLoadAgain(false)
+            setLoadAgain1(true)
+        } else {
+            setLoadAgain1(true)
+        }
+    }, [items, loadAgain, loadAgainFocus]);
+
     // Lấy tin nhắn từ server
     useEffect(() => {
         const fetchMessages = async () => {
             try {
                 const response = await axios.get(`/chat/message/pagination?chatId=${items._id}&limit=50`);
+                console.log('check load message!');
                 if (response.errCode === 0) {
                     const filteredMessages = response.data.map(item => ({
                         _id: `${item._id}`,
@@ -119,7 +156,7 @@ export const ChatMessage = ({ navigation, route }) => {
                     }));
                     setMessages(filteredMessages);
                     setIsLoadingMessages(false);
-                    setLoadAgain(false);
+                    setLoadAgain1(false);
                     setIsMessage(true);
                     setIsLoading(false);
                 } else if (response.errCode === 1) {
@@ -132,8 +169,10 @@ export const ChatMessage = ({ navigation, route }) => {
             }
         };
 
-        fetchMessages();
-    }, [items._id, loadAgain]);
+        if (loadAgain1) {
+            fetchMessages();
+        }
+    }, [items._id, loadAgain1]);
 
     // socket
     useEffect(() => {
@@ -181,10 +220,6 @@ export const ChatMessage = ({ navigation, route }) => {
             });
         };
     }, []);
-
-    useEffect(() => {
-
-    }, [isSend]);
 
     // phát video
     const handleVideoPress = (index) => {
@@ -648,34 +683,33 @@ export const ChatMessage = ({ navigation, route }) => {
                             if (item.sender?.id === user.user?.user?.id) {
                                 return (
                                     <View style={styles.viewEnd}>
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} style={styles.messsagePressEnd}>
-                                            {/* <Text style={[styles.textMessagePress]}>{item.content}</Text>
-                                            {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>} */}
-                                            {/* <Image source={{uri: `${item.urls}`}} style={{width: 200, height: 200, borderRadius: 10}} resizeMode="contain"  /> */}
-                                            {/* <Video></Video> */}
-                                            {/* <Video source={{uri: `${item.urls}`}} controls={true} /> */}
-                                            {/* <Text> {item.urls}</Text>  */}
-                                            {/* <Video source={{uri: `${item.urls}`}} style={{width: 200, height: 200, borderRadius: 10}} resizeMode="contain" /> */}
-
-                                            {/* <Video source={{uri: `${item.urls}`}}></Video> */}
-                                            {/* <Video
-                                                source={{uri: 'https://www.w3schools.com/html/mov_bbb.mp4'}}
-                                                rate={1.0}
-                                                volume={9.0}
-                                                isMuted={false}
-                                                resizeMode="contain"
-                                                shouldPlay
-                                                // isLooping
-                                                style={{ width: 300, height: 300 }}
-                                                controls="true"
-                                                />   */}
-
-                                        </Pressable>
+                                        <View style={styles.viewEnd}>
+                                            <Pressable style={styles.messsagePressEnd} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} onPress={()=> {
+                                                if (!isControl) {
+                                                    handleVideoPress(item._id);
+                                                    setIsControl(true);
+                                                }
+                                                }} >
+                                                <Video
+                                                    ref={(videoRef) => (videoRefs.current[item._id] = videoRef)}
+                                                    style={{height: 300, width: 200, borderRadius: 10, zIndex: 5}}
+                                                    source={{uri: `${item.urls}`}}
+                                                    useNativeControls={true}
+                                                    resizeMode="contain"
+                                                    isLooping
+                                                />
+                                            </Pressable>
+                                            {isLastItem && 
+                                                <View style={{marginRight: 15, height: 20, width: 50, backgroundColor: '#B0B0B0', alignItems: 'center', borderRadius: 25, justifyContent: 'center' }}>
+                                                    <Text style={{fontSize: 12, color: '#ffffff'}}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>
+                                                </View>
+                                            }
+                                            </View>
                                     </View>
                                 )
                             } else {
                                 return (
-                                    <View style={[styles.viewStart, firstItemBySender ? { flexDirection: '' } : {}]}>
+                                    <View style={[styles.viewStart]}>
                                         {firstItemBySender &&
                                             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
                                                 <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}></View>
@@ -684,12 +718,27 @@ export const ChatMessage = ({ navigation, route }) => {
                                                 </View>
                                             </View>
                                         }
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart]}>
-                                            {/* <Text style={[styles.textMessagePress]}>{item.content}</Text>
-                                        {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>} */}
-                                            {/* <Image source={{uri: `${item.urls}`}} style={{width: 200, height: 200, borderRadius: 10}} resizeMode='contain' /> */}
 
+                                        <Pressable style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, {marginLeft: 30}]} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} onPress={()=> {
+                                                if (!isControl) {
+                                                    handleVideoPress(item._id);
+                                                    setIsControl(true);
+                                                }
+                                            }} >
+                                            <Video
+                                                ref={(videoRef) => (videoRefs.current[item._id] = videoRef)}
+                                                style={{height: 300, width: 200, borderRadius: 10}}
+                                                source={{uri: `${item.urls}`}}
+                                                useNativeControls={true}
+                                                resizeMode="contain"
+                                                isLooping
+                                            />
                                         </Pressable>
+                                        {isLastItem && 
+                                            <View style={{marginLeft: 30, height: 20, width: 50, backgroundColor: '#B0B0B0', alignItems: 'center', borderRadius: 25, justifyContent: 'center' }}>
+                                                <Text style={{fontSize: 12, color: '#ffffff'}}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>
+                                            </View>
+                                        }
                                     </View>
                                 )
                             }
@@ -753,23 +802,23 @@ export const ChatMessage = ({ navigation, route }) => {
             <LinearGradient colors={['#008BFA', '#00ACF4']} style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
                 <View style={{flexDirection: 'row', height: '55%', alignItems: 'center'}}>
                     <Pressable style={{ height: 40, justifyContent: 'center', width: 40}} onPress={() => {
-                        if (flag === 'Messages') {
+                        if (flag) {
+                            navigation.navigate('MainScreen', { screen: 'Messages' })
+                        } else {
                             navigation.goBack();
-                        } else if (flag === 'CreateGroup') {
-                            resetToScreen(navigation, 'MainScreen');
                         }
                     }}>
                         <FontAwesomeIcon icon={faChevronLeft} style={{ marginLeft: 10 }} color='#F5F8FF' size={20} />
                     </Pressable>
 
-                    <Pressable style={{ flex: 1, marginLeft: 5 }} onPress={() => navigation.navigate('ChatMessageOptions', { items: items })}>
-                        <Text style={styles.nameTxt}>{items.userName}</Text>
-                        <Text style={[styles.stateTxt]}>{items.type.includes('GROUP_CHAT') ? 'Bấm để xem thông tin' : !items.lastedOnline ? 'Vừa mới truy cập' : onlineTime(items.lastedOnline)}</Text>
-                    </Pressable>
+                    <Pressable style={{ flex: 1, marginLeft: 5, marginRight: 5}} onPress={() => navigation.navigate('ChatMessageOptions', { items: items })}>
+                        <Text numberOfLines={1} style={styles.nameTxt}>{items.type?.includes('GROUP_CHAT') ? !isLoadingGroupChat ? groupChatInfo.name: '' : items.userName}</Text>
+                        <Text style={[styles.stateTxt]}>{items.type?.includes('GROUP_CHAT') ? 'Bấm để xem thông tin' : !items.lastedOnline ? 'Vừa mới truy cập' : onlineTime(items.lastedOnline)}</Text>
+                    </Pressable>  
 
                     <View style={{ flexDirection: 'row', width: '25%', justifyContent: 'space-between', marginRight: 10 }}>
-                        <Pressable style={styles.btnOptsIcon} >
-                            <FontAwesomeIcon size={20} style={styles.icon} icon={faPhone} />
+                        <Pressable style={[styles.btnOptsIcon, {}]} >
+                            <FontAwesomeIcon size={20} style={[styles.icon]} icon={faPhone} /> 
                         </Pressable>
 
                         <Pressable style={styles.btnOptsIcon} >
@@ -807,14 +856,86 @@ export const ChatMessage = ({ navigation, route }) => {
                             <View style={{backgroundColor: '#FFFFFF', height: '25%', width: '80%', borderRadius: 20, justifyContent: 'center'}}>
                                 <View style={{alignItems: 'center'}}>
                                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                        {items.avatar.includes('rgb')? 
-                                            <View style={{height: 40, width: 40, backgroundColor: items.avatar, borderRadius: 20}}></View> 
+                                        {items.type?.includes('PRIVATE_CHAT') ? 
+                                            items.avatar?.includes('rgb')? 
+                                                <View style={{height: 40, width: 40, backgroundColor: items.avatar, borderRadius: 20, marginLeft: 20}}></View> 
                                             : 
-                                            <Image style={{height: 60, width: 60, borderRadius: 30}} source={{uri: items.avatar}}></Image> 
+                                                <Image style={{height: 60, width: 60, borderRadius: 30, marginLeft: 20}} source={{uri: items.avatar}}></Image> 
+                                        : 
+                                            // group chat
+                                            !isLoadingGroupChat ?
+                                                <View style={{height: 60, width: 60, marginLeft: 20}}>
+                                                    {groupChatInfo.avatar ? 
+                                                        <Image source={{uri: groupChatInfo.avatar}} style={{height: 60, width: 60, borderRadius: 30}} /> 
+                                                    : groupChatInfo.participants?.map((participant, index) => (
+                                                        index < 4 ? 
+                                                            groupChatInfo.participants?.length <= 3 ? // nhoms cos 3 nguowif
+                                                                <View key={index} style={[
+                                                                    {height: 30, width: 30}, 
+                                                                    index === 0 ? styles.position0 :
+                                                                        index === 1 ? styles.position1 :
+                                                                        styles.position2
+                                                                    ]}
+                                                                >
+                                                                {participant.avatar.includes('rgb') ? 
+                                                                    <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
+                                                                : 
+                                                                    <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
+                                                                }
+                                                                </View>
+                                                            : groupChatInfo.participants?.length === 4 ? //nhoms cos 4 nguoi
+                                                                <View key={index} style={[
+                                                                    {height: 30, width: 30}, 
+                                                                    index === 0 ? styles.position0_1 :
+                                                                        index === 1 ? styles.position1_1 : 
+                                                                        index === 2 ? styles.position2_1 :
+                                                                        styles.position3_1
+                                                                    ]}
+                                                                >
+                                                                    {participant.avatar.includes('rgb') ? 
+                                                                        <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
+                                                                    : 
+                                                                        <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
+                                                                    }
+                                                                </View>
+                                                            : groupChatInfo.participants?.length > 4 ? // nhoms 5 nguoi tro len
+                                                                <View key={index} style={[
+                                                                {height: 30, width: 30}, 
+                                                                    index === 0 ? styles.position0_1 :
+                                                                        index === 1 ? styles.position1_1 : 
+                                                                        index === 2 ? styles.position2_1 :
+                                                                        [styles.position3_1, {backgroundColor: '#E9ECF3', justifyContent: 'center', alignItems: 'center', borderRadius: 15, height: 28, width: 28}]
+                                                                    ]}
+                                                                >
+                                                                    {participant.avatar.includes('rgb') ? 
+                                                                        <View style={{}}>
+                                                                            {index === 3 ? 
+                                                                                <Text>{groupChatInfo.participants.length - index}</Text> 
+                                                                            : 
+                                                                                <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
+                                                                            }
+                                                                        </View>
+                                                                    : 
+                                                                        <View style={{}}>
+                                                                            {index === 3 ? 
+                                                                                <Text>{groupChatInfo.participants.length - index}</Text> 
+                                                                            : 
+                                                                                <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
+                                                                            }
+                                                                        </View>
+                                                                    }
+                                                                </View>
+                                                            : ''
+                                                        : ''
+                                                    ))
+                                                    }
+                                                </View>
+                                            :
+                                            ''
                                         }
-                                        <Text style={{marginLeft: 20}}>{items.userName}</Text>
+                                        <Text numberOfLines={1} style={{marginLeft: 20, width: '70%', fontSize: 17, fontWeight: '500'}}>{items.type?.includes('GROUP_CHAT') ? !isLoadingGroupChat ? groupChatInfo.name: '' : items.userName}</Text>
                                     </View>
-                                    <Text style={{marginTop: 20}}>Chưa có tin nhắn, hãy trò chuyện ngay nào!</Text>
+                                    <Text style={{marginTop: '5%'}}>Chưa có tin nhắn, hãy trò chuyện ngay nào!</Text>
                                 </View>
                             </View>
                         </View>
@@ -915,7 +1036,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                         <Text style={{ color: 'red', fontSize: 17, fontWeight: 500 }}>Xóa</Text>
                                     </Pressable>
                                 </View>
-                            </View>
+                            </View> 
                         </View>
                     </Modal>
                 </View>

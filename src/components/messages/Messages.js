@@ -17,10 +17,11 @@ export const Messages = ({ navigation }) => {
   const [access_token, setAccess_Token] = useState('');
   const [chatInfo, setChatInfo] = useState([]);
   const [loadAgain, setLoadAgain] =useState();
+  const [loadAgainFocus, setLoadAgainFocus] =useState();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      setLoadAgain(new Date());
+      setLoadAgainFocus(new Date());
     });
 
     return unsubscribe;
@@ -89,11 +90,11 @@ export const Messages = ({ navigation }) => {
     };
 
     fetchChat(); 
-  }, [access_token, loadAgain]); 
+  }, [access_token, loadAgain, loadAgainFocus]); 
 
   useEffect(() => {
     const dataChat = chatData.map((item) => {
-      if (item.type.includes('PRIVATE_CHAT')) {
+      if (item.type?.includes('PRIVATE_CHAT')) {
         if (item.participants[0]?.id === user.user?.user?.id) {
           return {
             _id: item._id,
@@ -128,7 +129,8 @@ export const Messages = ({ navigation }) => {
           userId: item.participants[0]?.id,
           type: "GROUP_CHAT",
           lastedMessage: item.lastedMessage,
-          administrator: item.administrator
+          administrator: item.administrator,
+          participants: item.participants.map(participant => ({...participant}))
         };
       }
       return null;
@@ -148,16 +150,84 @@ export const Messages = ({ navigation }) => {
     const { lastedMessage, ...rest } = item;
     return (
       <View style={{width: '100%'}}>
-        <Pressable style={styles.btnSelectChat} onPress={() => {navigation.navigate('ChatMessage', { items: {...rest}, flag: 'Messages' })}}>
+        <Pressable style={styles.btnSelectChat} onPress={() => {navigation.navigate('ChatMessage', { items: {...rest}, flag: false})}}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '95%' }}>
-            {item?.avatar?.includes('rgb') ?
-              <View style={{ height: 60, width: 60, borderRadius: 30, backgroundColor: item.avatar, justifyContent: 'center', alignItems: 'center' }}>
-              </View>
-              :
-              <Image source={{uri: item.avatar}} style={{height: 60, width: 60, borderRadius: 30}}></Image>
-            }
+          {item.type?.includes('PRIVATE_CHAT') ? 
+            item.avatar?.includes('rgb')? 
+              <View style={{height: 60, width: 60, backgroundColor: item.avatar, borderRadius: 30}} />
+            : 
+              <Image style={{height: 60, width: 60, borderRadius: 30}} source={{uri: item.avatar}} />
+          : 
+          // group chat
+            <View style={{height: 60, width: 60}}>
+              {item.avatar ? 
+                <Image source={{uri: item.avatar}} style={{height: 60, width: 60, borderRadius: 30}} /> 
+              : item.participants?.map((participant, index) => (
+                  index < 4 ? 
+                    item.participants?.length <= 3 ? // nhoms cos 3 nguowif
+                      <View key={index} style={[
+                        {height: 30, width: 30}, 
+                        index === 0 ? styles.position0 :
+                          index === 1 ? styles.position1 :
+                            styles.position2
+                        ]}
+                      >
+                        {participant.avatar.includes('rgb') ? 
+                          <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
+                        : 
+                          <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
+                        }
+                      </View>
+                    : item.participants?.length === 4 ? //nhoms cos 4 nguoi
+                      <View key={index} style={[
+                        {height: 30, width: 30}, 
+                        index === 0 ? styles.position0_1 :
+                          index === 1 ? styles.position1_1 : 
+                            index === 2 ? styles.position2_1 :
+                            styles.position3_1
+                        ]}
+                      >
+                        {participant.avatar.includes('rgb') ? 
+                          <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
+                        : 
+                          <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
+                        }
+                      </View>
+                    : item.participants?.length > 4 ? // nhoms 5 nguoi tro len
+                      <View key={index} style={[
+                        {height: 30, width: 30}, 
+                        index === 0 ? styles.position0_1 :
+                          index === 1 ? styles.position1_1 : 
+                            index === 2 ? styles.position2_1 :
+                            [styles.position3_1, {backgroundColor: '#E9ECF3', justifyContent: 'center', alignItems: 'center', borderRadius: 15, height: 28, width: 28}]
+                        ]}
+                      >
+                        {participant.avatar.includes('rgb') ? 
+                          <View style={{}}>
+                            {index === 3 ? 
+                              <Text>{item.participants.length - index}</Text> 
+                            : 
+                              <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
+                            }
+                          </View>
+                        : 
+                          <View style={{}}>
+                            {index === 3 ? 
+                              <Text>{item.participants.length - index}</Text> 
+                            : 
+                              <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
+                            }
+                          </View>
+                        }
+                      </View>
+                    : ''
+                  : ''
+              ))
+              }
+            </View>
+          }
 
-            <View style={{ flex: 1, marginLeft: 15 }}>
+            <View style={{ flex: 1, marginLeft: 15 }}> 
               <Text style={{ fontSize: 20, marginBottom: 3 }}>{item?.userName}</Text>
               <Text style={{ marginTop: 3 }}>
                 {
@@ -173,15 +243,13 @@ export const Messages = ({ navigation }) => {
         {renderLine()}
       </View>
     )
-  };
+  }; 
 
   const renderLine = () => (
     <View style={styles.line}>
       <View style={styles.line1} >
-        <Text> </Text>
       </View>
       <View style={styles.line2}>
-        <Text> </Text>
       </View>
     </View>
   )

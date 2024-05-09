@@ -5,6 +5,7 @@ import stateCreateGroupSlice from './stateCreateGroupSlice';
 import stateAddfriendSlice from './stateAddfriendSlice';
 import deviceSlice from './deviceSlice';
 import userInfoSlice from './userInfoSlice';
+import groupChatInfoSlice from './groupChatInfoSlice';
 
 export default configureStore({
     reducer: {
@@ -14,5 +15,6 @@ export default configureStore({
       isAddFriend: stateAddfriendSlice.reducer,
       device: deviceSlice.reducer,
       userInfo: userInfoSlice.reducer,
+      groupChatInfo: groupChatInfoSlice.reducer
     }
 });

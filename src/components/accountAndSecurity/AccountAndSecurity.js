@@ -18,10 +18,8 @@ export const AccountAndSecurity = ({navigation}) => {
   const renderLine = () => (
     <View style={styles.line}>
       <View style={styles.line1} >
-        <Text> </Text>
       </View>
       <View style={styles.line2}>
-        <Text> </Text>
       </View>
     </View>
   )
@@ -42,14 +40,14 @@ export const AccountAndSecurity = ({navigation}) => {
           <Text style={styles.txtTitle}>Tài khoản</Text>
           <View style={{alignItems: 'center'}} >
             <Pressable style={styles.pressAccount} onPress={()=> {alert('Thông tin cá nhân')}}>
-              { user.user?.user?.avatar.includes('rgb') ?  
-                <View style={[styles.avatar, {backgroundColor: `${user.user?.user?.avatar}`}]} ></View> 
+              { user.user?.user?.avatar?.includes('rgb') ? 
+                <View style={[styles.avatar, {backgroundColor: user.user?.user?.avatar}]} /> 
               :  
-                <Image source={require('../../../assets/img/avt.jpg')} style={styles.avatar}></Image>
-              }    
+                <Image source={{uri: user.user?.user?.avatar}} style={styles.avatar}></Image>
+              }     
               <View style={{flex: 1, marginLeft: 10}}>
                 <Text style={styles.txtAllOne}>Thông tin cá nhân</Text>
-                <Text style={styles.txtName}>{user.user?.user.userName}</Text>
+                <Text numberOfLines={1} style={styles.txtName}>{user.user?.user.userName}</Text>
               </View>
               <FontAwesomeIcon style={{marginRight: 15}} size={15} color='#6E6E6E' icon={faChevronRight}/>
             </Pressable>

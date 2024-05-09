@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { View, Pressable, Text } from 'react-native'
+import { View, Pressable, Text, Dimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faChevronLeft, faUserPlus } from '@fortawesome/free-solid-svg-icons'
@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const Tab = createMaterialTopTabNavigator();
 export const FriendRequest = ({ navigation }) => {
+  const { width } = Dimensions.get('screen');
 
   useEffect(() => {
     navigation.setOptions({
@@ -33,7 +34,8 @@ export const FriendRequest = ({ navigation }) => {
       </LinearGradient>
 
       <Tab.Navigator screenOptions={{
-          tabBarLabelStyle: { textTransform: 'none', fontWeight: '500', fontSize: 14 }
+          tabBarLabelStyle: { textTransform: 'none', fontWeight: '500', fontSize: 14 },
+          tabBarIndicatorStyle: {backgroundColor: '#1E70E3', height: 2, width: width * 0.5 - 30, marginLeft: 15}
         }} >
         <Tab.Screen name="Đã nhận" component={FriendRequestReceived} />
         <Tab.Screen name="Đã gửi" component={FriendRequestSent} />

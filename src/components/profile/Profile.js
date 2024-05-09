@@ -318,10 +318,10 @@ export const Profile = ({navigation, route}) => {
         <View style={{alignItems: 'center', marginTop: '-15%'}} >  
           {/* khúc này là ảnh đại diện và bio */}
           <View style={{alignItems: 'center'}}>
-            {typeof userInfo.userInfo?.avatar === 'string' ?
-              <View style={{height: 120, width: 120, borderRadius: 70, backgroundColor: userInfo.userInfo?.avatar, borderWidth: 3, borderColor: '#FFFFFF'}}></View> : 
-              '' 
-              // image ở đây 
+            {userInfo.userInfo?.avatar.includes('rgb') ?
+              <View style={{height: 140, width: 140, borderRadius: 100, backgroundColor: userInfo.userInfo?.avatar, borderWidth: 3, borderColor: '#FFFFFF'}} /> 
+            : 
+              <Image source={{uri: userInfo.userInfo?.avatar }} style={{height: 140, width: 140, borderRadius: 100, borderWidth: 3, borderColor: '#FFFFFF'}} />
             }
             <Text style={{fontWeight:'bold', fontSize: 18, marginBottom: 20}}> {userInfo.userInfo?.userName} </Text>
           </View>

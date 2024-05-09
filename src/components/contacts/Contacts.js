@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, TextInput, Pressable, Text } from 'react-native'
+import { View, TextInput, Pressable, Text, Dimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faMagnifyingGlass, faUserPlus } from '@fortawesome/free-solid-svg-icons'
@@ -12,7 +12,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { NavigationContainer } from '@react-navigation/native'
 const Tab = createMaterialTopTabNavigator(); 
 
+
 export const Contacts = ({ navigation }) => {
+  const { width } = Dimensions.get('screen');
+  // console.log("width", width);
 
   // const [loadAgain, setLoadAgain] =useState();
   // useEffect(() => {
@@ -35,7 +38,11 @@ export const Contacts = ({ navigation }) => {
         </View>
       </LinearGradient>
 
-      <Tab.Navigator screenOptions={{tabBarLabelStyle: { textTransform: 'none', fontWeight: '500', fontSize: 14}}}>
+      <Tab.Navigator screenOptions={{
+        tabBarLabelStyle: { textTransform: 'none', fontWeight: '500', fontSize: 14}, 
+        tabBarStyle: {elevation: 1, shadowOpacity: 0, borderBottomWidth: 1, borderBottomColor: '#D1D1D1'},
+        tabBarIndicatorStyle: {backgroundColor: '#1E70E3', height: 2, width: width * 0.333333 - 30, marginLeft: 15}
+      }}>
         <Tab.Screen name="Bạn bè" component={ContactFriends} />
         <Tab.Screen name="Nhóm" component={ContactGroups} />
         <Tab.Screen name="OA" component={ContactOA} />

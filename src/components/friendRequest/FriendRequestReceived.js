@@ -1,6 +1,6 @@
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { FlatList, LogBox, Pressable, ScrollView, Text, View } from "react-native";
+import { FlatList, Image, LogBox, Pressable, ScrollView, Text, View } from "react-native";
 import axios, { setAuthorizationAxios } from "../../config/axios";
 import { socket } from '../../config/io';
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
@@ -109,19 +109,17 @@ export const FriendRequestReceived = ({ navigation }) => {
   }
 
   const renderItem = ({item}) => {
-    // console.log(`item`, item);
     const now = moment();
     const createdAt = moment(item.createdAt);
     const duration = moment.duration(now.diff(createdAt));
-    // console.log('createdAt', createdAt.utcOffset('+07:00').format('HH:mm'));
-    // console.log('days', duration.days(), 'hours', duration.hours(), 'minutes', duration.minutes(), 'seconds', duration.seconds());
 
     return (
       <View style={{height: 180, width: '100%', marginBottom: 10}}>
         <View style={{flexDirection: 'row', marginLeft: 15, marginTop: 10}}>
-          {item.sender.avatar.includes('rgb') ? 
+          {item.sender?.avatar?.includes('rgb') ? 
             <View style={{height: 50, width: 50, borderRadius: 25, backgroundColor: item.sender.avatar}}></View> 
-          : ''   
+          : 
+            <Image source={{uri: item.sender?.avatar}} style={{height: 50, width: 50, borderRadius: 25 }} />  
           }
           <View style={{marginLeft: 10, width: '100%'}}>
             <Text style={{fontSize: 17}}>{item.sender.userName}</Text>

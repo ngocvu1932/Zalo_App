@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { FlatList, Image, Pressable, Text, View } from "react-native";
 import axios from "../../config/axios";
 import moment from "moment";
 import { styles } from "./style";
@@ -80,9 +80,10 @@ export const FriendRequestSent = ({ navigation }) => {
     const duration = moment.duration(now.diff(createdAt));
     return (
       <Pressable style={styles.btnMain} onPress={()=> {navigation.navigate('Profile', {phoneNumber: item.friendShip.receiver.phoneNumber})}}>
-        {item.friendShip.receiver.avatar.includes('rgb') ? 
-            <View style={[styles.viewAvt, {backgroundColor: item.friendShip.receiver.avatar}]}></View> 
-          : ''   
+        {item.friendShip?.receiver?.avatar.includes('rgb') ? 
+            <View style={[styles.viewAvt, {backgroundColor: item.friendShip.receiver.avatar}]} />
+          : 
+            <Image source={{uri: item.friendShip?.receiver?.avatar}} style={[styles.viewAvt]} />
         }
         <View style={{flex: 1, marginLeft: 10}}>
           <Text style={{fontSize: 16, fontWeight: 400}}>{item.friendShip.receiver.userName}</Text>

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from  'react-native-safe-area-context'
 import { styles } from './style'
-import { Text, View, TextInput, Pressable, Image, ScrollView } from 'react-native'
+import { Text, View, TextInput, Pressable, Image, ScrollView, Keyboard, FlatList, StatusBar } from 'react-native'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowLeft, faArrowRight, faCamera, faCheck, faChevronLeft, faMagnifyingGlass, faPersonCirclePlus, faPhone, faQrcode, faSearch, faUserGroup, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faArrowRight, faCamera, faCheck, faChevronLeft, faChevronRight, faLink, faMagnifyingGlass, faPersonCirclePlus, faPhone, faQrcode, faSearch, faUserGroup, faUserPlus, faXmark } from '@fortawesome/free-solid-svg-icons';
 import axios from '../../config/axios';
 import Toast from 'react-native-easy-toast';
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,98 +11,223 @@ import { CheckBox } from 'react-native-elements';
 import { setIsCreateGroup, setisCreateGroup } from '../../redux/stateCreateGroupSlice';
 import { set } from 'zod';
 import {socket} from '../../config/io';
+import { setListFriend } from '../../redux/friendSlice';
+import { setGroupChatInfo } from '../../redux/groupChatInfoSlice';
 
 export const AddMember = ({navigation, route}) => {
     const {items} = route.params;
-    const friendList = useSelector(state => state.listFriend.listFriend);
-    const [searchText, setSearchText] = useState('');
-    const [groupName, setGroupName] = useState('');
-    const [selectedFriends, setSelectedFriends] = useState([]);
+    const device = useSelector(state => state.device);
+    const currentId = useSelector(state => state.user.user.user.id);
+    const groupChatInfo = useSelector(state => state.groupChatInfo.groupChatInfo);
     const dispatch = useDispatch();
-    const maxLength = 16;
+    const [loadAgain, setLoadAgain] = useState(false);
+    const [friendList, setFriendList] = useState([]);
+    const [isKeyboardNumber, setIsKeyboardNumber] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const toastRef = useRef(null);
+    const [listId, setListId] = useState([]);
 
-    const handleFriendSelection = (friend) => {
-        if (selectedFriends.includes(friend)) {
-          setSelectedFriends(prevState => prevState.filter(item => item.id !== friend.id));
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
+            setIsKeyboardOpen(true);
+            setKeyboardHeight(event.endCoordinates.height)
+        });
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+            setIsKeyboardOpen(false);
+            setKeyboardHeight(0);
+        });
+    
+        return () => {
+            keyboardDidShowListener.remove();
+            keyboardDidHideListener.remove();
+        };
+    }, []);
+
+    // lấy danh sách bạn bè
+    useEffect(() => {
+        const fetchFriendList = async () => {
+            console.log('Lấy danh sach bạn bè');
+            try {
+                const response = await axios.get(`/users/friends?limit=10`);
+                if (response.errCode === 0) {
+                    setFriendList(response.data); 
+                    dispatch(setListFriend(response.data));
+                    setLoadAgain(false);
+                }
+            } catch (error) {
+                console.log('Error 1', error);
+            }
+        }
+        fetchFriendList();
+    }, []);
+
+    // kiểm tra xem có chọn thành viên nào không
+    useEffect(() => {
+        if (listId.length > 0) {
+            setModalVisible(true);
         } else {
-          setSelectedFriends(prevState => [...prevState, friend]);
+            setModalVisible(false);
         }
-      };
-    const isFriendSelected = (friend) => {
-    return selectedFriends.includes(friend);
-    };
-    const handleDeleteFriendSelected = (friend) => {
-        setSelectedFriends(selectedFriends.filter(item => item.id !== friend.id));
+    }, [listId]);
+
+    const chooseMember = (id, avatar, name) => {
+        const existingIndex = listId.findIndex(item => item.id === id);
+
+        if (existingIndex !== -1) {
+            setListId(listId.filter(item => item.id !== id));
+        } else {
+            setListId([...listId, { id, avatar, name }]);
+        }
     }
 
-    const handlDeleteMember = async () => {
+    const getGroupChat = async () => {
         try {
-          const response = await axios.put(`/chat/message/addMember`, {
-            chatId: items._id,
-            memberId: selectedFriends[0].id
-          });
-          if (response.errCode === 0) {
-            console.log('Thêm thành công thành viên')
-
-            socket.then(socket => {
-                socket.emit('new-group-chat', response.data);
-            })
-            navigation.navigate('ChatMessage', {items: items})
-          }
+            const response = await axios.get(`/chat/access?chatId=${items._id}`);
+            if (response.errCode === 0) {
+                dispatch(setGroupChatInfo(response.data));
+            } else {
+                console.log("Error: ", response);
+            }
         } catch (error) {
-          console.log('Error deleting member:', error)
+            console.log("Error: ", error);
+        }
+    };
+
+    const handleAddMember = async() => {
+        try {
+            const response = await axios.put(`/chat/addMembers`, {
+                members: listId.map(item => item.id),
+                chatId: items._id
+            });
+            if (response.errCode === 0) {
+                getGroupChat();
+                setListId([]);
+                setModalVisible(false);
+                toastRef.current.show('Thêm thành viên thành công', 2000);
+            }
+        } catch (error) {
+            console.log('Error adding member:', error);
         }
     }
-  return (
-    <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-            <Pressable onPress={()=>{
-                navigation.goBack()
-            }}>
-                <FontAwesomeIcon style={{marginLeft: 15}} color='#F1FFFF' size={21} icon={faChevronLeft} />
-            </Pressable>
-            <Text style={styles.txtInHeader}>Thêm thành viên</Text>
-        </View>
 
-        <View style={styles.body}>
-            <Pressable style={{flexDirection:'row', padding:16}}>  
-                <FontAwesomeIcon style={{marginLeft: 15}} color='#37333A' size={30} icon={faSearch} />
-                <TextInput style={{marginLeft:15, fontSize:16}} placeholder='Tìm tên hoặc số điện thoại'></TextInput>
-            </Pressable>
-        
-            <ScrollView>
-                {friendList.map((friend, index)=>(
-                    <Pressable key={index} style={{ width:"100%", flexDirection:"row", alignItems:"center", justifyContent:"space-between", padding:8, paddingLeft:20, paddingRight:20}}>
-                        <View style={{height: 45, width: 45, borderRadius: 50, backgroundColor:friend.avatar}}></View>
-                        <View style={{width:"70%"}}>
-                            <Text style={{fontWeight:"500", marginLeft:0}}>{friend.userName}</Text>   
-                        </View>
-                        <Pressable style={styles.tick} onPress={()=>{
-                            handleFriendSelection(friend)
-                        }}>
-                            <View style={{width:24, height:24, backgroundColor:'#F3F5F6', borderRadius:50, alignItems:'center', justifyContent:'center', borderWidth: 1, borderColor: '#37333A'}}>
-                                {isFriendSelected(friend)? (
-                                    <Pressable style={{width:24, height:24, backgroundColor:'#0091FF', borderRadius:50, alignItems:'center', justifyContent:'center'}} onPress={
-                                        () => handleDeleteFriendSelected(friend)
-                                    }>
-                                        <FontAwesomeIcon color='white' size={18} icon={faCheck} />
-                                    </Pressable>      
-                                ):(
-                                    <View></View>
-                                )}
+    const renderItem = ({ item }) => {
+        let data;
+        if (item?.sender?.id === currentId) {
+            data = item?.receiver;
+        } else if (item?.receiver?.id === currentId ) {
+            data = item?.sender;
+        }
+
+        return (
+            <View>
+                {groupChatInfo.participants?.map(item => item.id).includes(data?.id) ? '' : 
+                    <Pressable style={[styles.btnChooseMember, {marginTop: 10, marginBottom: 0}]} onPress={()=> chooseMember(data?.id, data?.avatar, data?.userName)}>
+                        <View style={{width: '90%', flexDirection: 'row', alignItems: 'center'}}>
+                            <View style={[styles.viewCheck, listId.map(item => item.id).includes(data?.id) ? {backgroundColor: '#1194FE', borderColor: '#1194FE'} : {}]}>
+                                <FontAwesomeIcon color='#FFFFFF' icon={faCheck} size={18} />
                             </View>
-                        </Pressable>
+                            {data?.avatar?.includes('rgb') ? 
+                                <View style={{height: 50, width: 50, backgroundColor: data?.avatar, borderRadius: 25, marginLeft: 15}} />
+                            : 
+                                <Image style={{height: 50, width: 50, borderRadius: 25, marginLeft: 15}} source={{uri: data?.avatar}} />
+                            }
+                            <Text style={{fontSize: 16, marginLeft: 15}} >{data?.userName}</Text>
+                        </View>
                     </Pressable>
-                ))}
-                <View style={{height:100}}></View>
-            </ScrollView>
-        </View>
-        
-        <View style={styles.footerWrapper}>
-            <Pressable style={{backgroundColor:'#0091FF', width:'100%', height:55, alignItems:'center', justifyContent:'center'}} onPress={handlDeleteMember}>
-                <Text style={{color:'white', fontSize:18, fontWeight:'500'}}>Thêm thành viên</Text>
+                }
+            </View>
+        )
+    }
+
+    const renderItemChooseMember = ({ item }) => {
+        return(
+            <Pressable key={item.id} style={{justifyContent: 'center', marginLeft: 10}} onPress={()=> chooseMember(item.id, item.avatar)}>
+                {item.avatar.includes('rgb') ? 
+                    <View style={{}}>
+                        <View style={{height: 55, width: 55, borderRadius: 30, backgroundColor: item.avatar}}></View>
+                        <View style={{position: 'absolute',top: 0, right: 0, height: 18, width: 18, borderRadius: 10, backgroundColor: '#E5E4E0', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFFFFF'}} >
+                            <FontAwesomeIcon size={13} color='#6B849A' icon={faXmark} /> 
+                        </View>
+                    </View>     
+                : 
+                    <View style={{}}>
+                        <Image source={{uri : item.avatar}} style={{height: 55, width: 55, borderRadius: 30}} />
+                        <View style={{position: 'absolute',top: 0, right: 0, height: 18, width: 18, borderRadius: 10, backgroundColor: '#E5E4E0', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFFFFF'}} >
+                            <FontAwesomeIcon size={13} color='#6B849A' icon={faXmark} /> 
+                        </View>
+                    </View>    
+                }
             </Pressable>
+        )
+    }
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <View style={{flexDirection: 'row', alignItems: 'center', height: '55%'}}>
+                    <Pressable onPress={() => {navigation.goBack()}}>
+                        <FontAwesomeIcon style={{ marginLeft: 15 }} color='#363636' size={20} icon={faXmark} />
+                    </Pressable>
+                    <View style={{marginLeft: 15}}>
+                        <Text style={{fontSize: 18, fontWeight: '500'}}>Thêm vào nhóm</Text>
+                        <Text style={{fontSize: 14, opacity: 0.8}}>Đã chọn: {listId.length}</Text>
+                    </View>
+                </View>
+            </View>
+
+            <View style={[styles.body, modalVisible ? {paddingBottom: 90} : '', device.device === 'ios' ? isKeyboardOpen ? {paddingBottom: keyboardHeight + 90} : '' : '']}>
+                <View style={{justifyContent: 'center', flexDirection: 'row', alignItems: 'center', marginBottom: 15, marginTop: 20}}>
+                    <FontAwesomeIcon style={{marginRight: -25, zIndex: 2}} color='#878789' size={17} icon={faSearch} />
+                    <TextInput keyboardType={isKeyboardNumber ? 'numeric' : 'default'} style={styles.textInputSearch} placeholder='Tìm tên hoặc số điện thoại' placeholderTextColor={'#878789'}/>
+                    <Pressable style={styles.btnChangeStyleKeyboard} onPress={()=> setIsKeyboardNumber(!isKeyboardNumber)}>
+                        <Text style={{fontSize: 12, color: '#878789'}}>{isKeyboardNumber ? 'ABC' : '123'}</Text>
+                    </Pressable>
+                </View>
+
+                <ScrollView>
+                    <Pressable style={{height: 60,flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#DFDFDF'}}>
+                        <View style={{height: 45, width: 45, backgroundColor: '#E9ECF3', alignItems: 'center', justifyContent: 'center', marginLeft: 10, borderRadius: 25}}>
+                            <FontAwesomeIcon color='#5D9CD1' size={16} icon={faLink} />
+                        </View>
+                        <Text style={{flex: 1, marginLeft: 10, fontSize: 15}}>Mời vào nhóm bằng link</Text>
+                        <FontAwesomeIcon size={15} color='#BDBDBF' style={{marginRight: 10}} icon={faChevronRight} /> 
+                    </Pressable>
+
+                    <FlatList 
+                        data={friendList}
+                        renderItem={renderItem}
+                        keyExtractor={item => item.id}
+                        scrollEnabled={false}
+                    />
+                </ScrollView>
+            </View>
+
+            {modalVisible ? 
+                <View style={[styles.viewModal, device.device === 'ios' ? isKeyboardOpen ? {height: keyboardHeight + 90} : '' : '']}>
+                    <View style={{height: '80%',}}> 
+                        <View style={{ flexDirection: 'row', height: 80}}>
+                            <View style={{width: '80%'}}>
+                                <FlatList 
+                                    data={listId}
+                                    renderItem={renderItemChooseMember}
+                                    keyExtractor={item => item.id}
+                                    horizontal={true} 
+                                />
+                            </View>
+                            <View style={{width: '20%', justifyContent: 'center', alignItems: 'center'}}>
+                                <Pressable style={[styles.btnCreateGroup, ]} onPress={()=> {handleAddMember()}}>
+                                    <FontAwesomeIcon color='#FFFFFF' size={23} icon={faArrowRight} />
+                                </Pressable>
+                            </View>
+                        </View>
+                    </View>
+                </View> : 
+            ''
+            }
+            <Toast style={{ backgroundColor: 'green' }} ref={toastRef} position='center' />
+            {device.device === 'ios' ? <StatusBar style="auto" /> : ''}
         </View>
-    </SafeAreaView>
-  )
+    )
 }

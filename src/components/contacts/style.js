@@ -72,6 +72,70 @@ export const styles = StyleSheet.create({
         width: 40,
         justifyContent: 'center',
         alignItems: 'center'
+    },
+
+    avtGroup: {
+        height: 30, 
+        width: 30, 
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: '#FFFFFF'
+    },
+
+    position0: {
+        position: 'absolute',
+        top: 0,
+        left: 15,
+        zIndex: 6
+    },
+
+    position1: {
+        position: 'absolute',
+        bottom: 7,
+        left: 3,
+        zIndex: 5
+    },
+
+    position2: {
+        position: 'absolute',
+        bottom: 7,
+        right: 3,
+        zIndex: 4
+    },
+
+    position0_1: {
+        position: 'absolute',
+        top: 3,
+        left: 3,
+        zIndex: 6
+    },
+
+    position1_1: {
+        position: 'absolute',
+        top: 3,
+        right: 3,
+        zIndex: 5
+    },
+
+    position2_1: {
+        position: 'absolute',
+        bottom: 3,
+        left: 3,
+        zIndex: 3
+    },
+
+    position3_1: {
+        position: 'absolute',
+        bottom: 3,
+        right: 3,
+        zIndex: 4
+    },
+
+    btnJoinGroupChat: {
+        height: 80, 
+        marginTop: 5, 
+        justifyContent: 'center', 
+        flexDirection: 'row', 
+        alignItems: 'center'
     }
-    
 })

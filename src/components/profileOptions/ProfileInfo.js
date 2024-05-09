@@ -31,9 +31,11 @@ export const ProfileInfo = ({navigation, route}) => {
             {/* avtt */}
             <View style={{position: 'absolute', top: '23%', left: 0, right: 0, zIndex: 10, width: '100%'}}>
                 <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 10}}>
-                    {typeof userInfo.userInfo?.avatar === 'string' ? (
+                    {userInfo.userInfo?.avatar.includes('rgb') ? (
                         <View style={{height: 55, width: 55, backgroundColor: userInfo.userInfo.avatar, borderRadius: 30, borderWidth: 2, borderColor: '#FFFFFF'}}></View>
-                    ): ''}
+                    ): 
+                        <Image source={{uri : userInfo.userInfo.avatar }} style={{height: 55, width: 55, borderRadius: 30, borderWidth: 2, borderColor: '#FFFFFF'}} />
+                    }
                     <Text style={{fontSize: 20, color: '#FFFFFF', fontWeight: '500', marginLeft: 10}}>{ userInfo.userInfo?.userName}</Text>
                 </View>
             </View>
@@ -75,7 +77,7 @@ export const ProfileInfo = ({navigation, route}) => {
                 </View>
 
                 {isUser ? 
-                    <View style={{alignItems: 'center', marginBottom: 20}}>
+                    <View style={{alignItems: 'center', marginBottom: 20, marginTop: 10}}>
                         <Pressable style={styles.btnEdit} onPress={()=> navigation.navigate('EditProfile', {isUser: isUser})}>
                             <FontAwesomeIcon icon={faPencil} size={20} color='#000000'/>
                             <Text>   Chỉnh sửa</Text>

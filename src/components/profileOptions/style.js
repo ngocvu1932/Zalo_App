@@ -128,7 +128,7 @@ export const styles = StyleSheet.create({
     height: 35, 
     width: '90%', 
     flexDirection: 'row', 
-    backgroundColor: 'violet', 
+    backgroundColor: '#E9EDF0', 
     justifyContent: 'center', 
     alignItems: 'center', 
     borderRadius: 20
@@ -150,12 +150,26 @@ export const styles = StyleSheet.create({
       paddingRight: 15,
   },
 
-  
-
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
   },
+
+  modalContent: {
+    width: '100%',
+    height: '20%',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    borderTopLeftRadius: 15, 
+    borderTopRightRadius: 15,
+  },
+
+  btnOptsAvatar: {
+    height: '32%', 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    width: '100%'
+  }
 
 });

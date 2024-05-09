@@ -10,10 +10,6 @@ export const styles = StyleSheet.create({
     header: {
         width: '100%',
         height: 90,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
         justifyContent: 'flex-end'
     },
 
@@ -27,10 +23,6 @@ export const styles = StyleSheet.create({
     
     body: {
         backgroundColor: '#F5F6F8',
-        position: 'absolute',
-        top: 90,
-        left: 0,
-        right: 0,
         height: '100%',
     },
 
@@ -41,24 +33,6 @@ export const styles = StyleSheet.create({
         width: 40,
         backgroundColor: '#E6E6E6',
         borderRadius: 20
-    },
-    avtWrapper:{
-        flexDirection: 'column',
-        alignItems: 'center',
-        height: 70,
-        width: '100%',
-        justifyContent: 'space-between',
-        paddingLeft: 15,
-        marginTop: 15,
-        marginBottom: 15,
-        padding:10
-    },
-    img_avt:{
-        height: 80,
-        width: 80,
-        borderRadius: 50,
-        alignItems:'center',
-        // borderBlockColor:'#0091FF',
     },
 
     pressbtnOP :{
@@ -86,7 +60,8 @@ export const styles = StyleSheet.create({
 
     txt:{
         fontSize: 17,
-        marginLeft: 15
+        marginLeft: 15,
+        flex: 1,
     },
 
     imageContainer:{
@@ -118,4 +93,33 @@ export const styles = StyleSheet.create({
     line: {
         flexDirection: 'row'
     },
+
+    button: {
+        alignSelf: 'center',
+        backgroundColor: '#A8ADB1',
+        borderRadius: 15,
+        height: 25,
+        width: 45,
+        marginRight: 15,
+        justifyContent: 'center'
+      },
+
+    circleButton: {
+        height: 20, width: 20, 
+        backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        marginLeft: 2
+    },
+
+    circleButton1: {
+        height: 20, width: 20, 
+        backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        marginLeft: 23
+    },
+
+    toggledButton: {
+        backgroundColor: 'blue',
+    },
+
 })
