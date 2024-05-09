@@ -42,7 +42,11 @@ export const ProfileInfo = ({navigation, route}) => {
 
             <View style={{width: '100%', height: height * 0.3}}>
                 <View style={{width: '100%', height: '100%', zIndex: 0}}>
-                    <Image source={{uri: 'https://res.cloudinary.com/ngocvu1932/image/upload/v1714486268/bgVsCode/kbdwbuprkwqyz54zovxu.jpg'}} style={{height:"100%", width:"100%"}}></Image>
+                {userInfo.userInfo?.userInfo?.coverImage.includes('localhost') ?
+                    <Image source={{uri: 'https://res.cloudinary.com/ngocvu1932/image/upload/v1714486268/bgVsCode/kbdwbuprkwqyz54zovxu.jpg'}} style={{height:"100%", width:"100%"}} />
+                : 
+                    <Image source={{uri: userInfo.userInfo?.userInfo?.coverImage}} style={{height:"100%", width:"100%"}} />
+                }
                 </View> 
             </View>
 

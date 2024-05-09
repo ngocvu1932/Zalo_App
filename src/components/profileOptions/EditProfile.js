@@ -37,8 +37,6 @@ export const EditProfile = ({navigation}) => {
     const [isUpdate, setIsUpdate] = useState(false);
     const toastRef = useRef(null);
     const [modalVisible, setModalVisible] = useState(false);
-
-    // console.log('userUpdate', userUpdate.avatar);
  
     // kiểm tra thông tin mới 
     useEffect(() => {
@@ -179,7 +177,6 @@ export const EditProfile = ({navigation}) => {
                 setModalVisible(false);
 
                 convertImageToBase64(manipResult.uri).then((result) => {
-                    console.log(result);
                     setUserUpdate(pre => ({...pre, avatar: result}));
                 });
         }
@@ -210,7 +207,6 @@ export const EditProfile = ({navigation}) => {
                 setModalVisible(false);
 
                 convertImageToBase64(manipResult.uri).then((result) => {
-                    console.log(result);
                     setUserUpdate(pre => ({...pre, avatar: result}));
                 });
             }
@@ -326,8 +322,6 @@ export const EditProfile = ({navigation}) => {
                             </Pressable>
                         </View>
                     </View>
-
-                    
                 </View>
 
                 <View style={{width: '100%', height: 80, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center'}}>
@@ -343,9 +337,9 @@ export const EditProfile = ({navigation}) => {
                     animationType="slide"
                     transparent={true}
                     visible={modalVisible}
-                    // onRequestClose={() => {
-                    //     setModalVisible(!modalVisible);
-                    // }}
+                    onRequestClose={() => {
+                        setModalVisible(!modalVisible);
+                    }}
                 >
                     <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.3)'}}>
                         <Pressable style={{flex: 1}} onPress={()=> setModalVisible(false)} />

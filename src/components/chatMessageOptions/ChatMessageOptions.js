@@ -1,7 +1,6 @@
-import { Image, Pressable, ScrollView, Text, View, Switch, Modal } from 'react-native'
+import { Image, Pressable, ScrollView, Text, View, Switch, Modal, TextInput } from 'react-native'
 import React, {useRef, useState} from 'react'
 import { styles } from './style'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faMagnifyingGlass, faWandMagicSparkles, faPencil, faUserPlus, faPersonCirclePlus, faArrowRightFromBracket ,faUserGroup, faThumbtack,  faPhoneFlip, faTrash, faChevronLeft, faCamera, faChevronRight, faChartSimple, faGear, faUsers, faUserCheck, faLink, faUserGear, faPhoneVolume, faTriangleExclamation} from '@fortawesome/free-solid-svg-icons' ;
 import { faStar, faClock, faImage, faUser, faBell, faEyeSlash, faCircleXmark, faTrashCan, faImages, faPenToSquare,  } from '@fortawesome/free-regular-svg-icons';
@@ -24,6 +23,8 @@ export const ChatMessageOptions = ({navigation, route}) => {
     const toastRef = useRef(null);
     const [isToggled, setToggled] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
+    const [modalVisibleChangeName, setModalVisibleChangeName] = useState(false);
+    const [groupName, setGroupName] = useState(groupChatInfo.name)
     const dispatch = useDispatch();
 
     const handleToggle = () => {
@@ -214,6 +215,32 @@ export const ChatMessageOptions = ({navigation, route}) => {
 
     }
 
+    const changeGroupName = async () => {
+        console.log('items: ', items._id, groupName);
+        try {
+            const response = await axios.put(`/chat/group`, {
+                _id: items._id,
+                name: groupName
+            })
+            if (response.errCode === 0) {
+                setModalVisibleChangeName(false);
+                const data = {
+                    ...groupChatInfo,
+                    name: groupName
+                }
+                dispatch(setGroupChatInfo(data));
+                toastRef.current.show('Thay đổi tên nhóm thành công!', 1000);
+            } else {
+                toastRef.current.pops.style.backgroundColor = 'red';
+                toastRef.current.show('Có lỗi xảy ra!', 1000);
+            }
+        } catch (error) {
+            console.log('Error: ',error);
+            toastRef.current.pops.style.backgroundColor = 'red';
+            toastRef.current.show('Có lỗi xảy ra!', 1000);
+        }
+    }
+
     const renderLine = (height) => (
         <View style={styles.line}>
             <View style={[styles.line1, {height: height}]}></View>
@@ -264,11 +291,18 @@ export const ChatMessageOptions = ({navigation, route}) => {
                                 </Pressable>
                         }
 
-                        <View style={{backgroundColor: 'blue', flexDirection: 'row', alignItems: 'center'}}>
-                            <Text numberOfLines={1} style={{fontSize: 18, fontWeight: 'bold', marginTop: 10, width: 320}}>{items.type.includes('GROUP_CHAT') ? groupChatInfo.name : items.userName}</Text>
-                            <Pressable>
-                                <FontAwesomeIcon icon={faPenToSquare} />
-                            </Pressable>
+
+                        <View style={{marginTop: 10, alignItems: 'center'}}>
+                            {items.type.includes('GROUP_CHAT') ? 
+                                <View style={{flexDirection: 'row'}} >
+                                    <Text numberOfLines={1} style={{fontSize: 18, fontWeight: 'bold', maxWidth: 320}}>{groupChatInfo.name}</Text>                 
+                                    <Pressable style={{width: 30, height: 30, backgroundColor: '#F6F6F6', alignItems: 'center', justifyContent: 'center', borderRadius: 20}} onPress={()=> setModalVisibleChangeName(true)}>
+                                        <FontAwesomeIcon size={15} color='#0E0E0E' icon={faPenToSquare} />
+                                    </Pressable>
+                                </View> 
+                            : 
+                                <Text numberOfLines={1} style={{fontSize: 18, fontWeight: 'bold'}}>{items.userName}</Text>
+                            }
                         </View>
                     </Pressable>
 
@@ -598,6 +632,39 @@ export const ChatMessageOptions = ({navigation, route}) => {
                             </Pressable>
                         </Pressable>
                     </Pressable>
+                </Modal>
+            : ''}
+
+            {modalVisibleChangeName ? 
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisibleChangeName}
+                    onRequestClose={() => {
+                        setModalVisibleChangeName(!modalVisibleChangeName);
+                    }}
+                >
+                    <Pressable style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.3)', justifyContent: 'center', alignItems: 'center'}} onPress={()=> setModalVisibleChangeName(false)} >
+                        <Pressable style={{height: 180, width: 280, backgroundColor: '#FFFFFF', borderRadius: 20, alignItems: 'center'}}>
+                            <View style={{flex: 1, justifyContent: 'flex-end'}}>
+                                <Text style={{fontSize: 16, fontWeight: '500'}} >Đặt tên nhóm</Text>
+                            </View>
+
+                            <View style={{width: '90%', flex: 4, justifyContent: 'center'}}>
+                                <TextInput style={{borderRadius: 5, borderWidth: 1, borderColor: '#E8E8E8', height: 40, paddingLeft: 5, paddingRight: 5}} value={groupName} placeholder={'Nhập tên nhóm'} onChangeText={(text)=> {setGroupName(text)}} />
+                            </View>
+
+                            <View style={{flexDirection: 'row', flex: 2, borderTopColor: '#E8E8E8', borderTopWidth: 1, width: '100%'}}>
+                                <Pressable style={{flex: 1, alignItems: 'center', justifyContent: 'center', borderRightWidth: 1, borderRightColor: '#E8E8E8'}} onPress={()=> setModalVisibleChangeName(false)} >
+                                    <Text style={{fontSize: 14}}>Hủy</Text>
+                                </Pressable>
+                                <Pressable style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} onPress={()=> changeGroupName()} >
+                                    <Text style={{fontSize: 14, fontWeight: '500', color: '#0E87FF'}}>Lưu</Text>
+                                </Pressable>
+                            </View>
+                        </Pressable>
+                    </Pressable>
+
                 </Modal>
             : ''}
         </View>

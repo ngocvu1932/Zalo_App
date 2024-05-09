@@ -228,7 +228,7 @@ export const Messages = ({ navigation }) => {
           }
 
             <View style={{ flex: 1, marginLeft: 15 }}> 
-              <Text style={{ fontSize: 20, marginBottom: 3 }}>{item?.userName}</Text>
+              <Text numberOfLines={1} style={{ fontSize: 20, marginBottom: 3 }}>{item?.userName}</Text>
               <Text style={{ marginTop: 3 }}>
                 {
                   item.lastedMessage?.type === 'TEXT' ?

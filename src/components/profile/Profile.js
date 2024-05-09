@@ -269,11 +269,10 @@ export const Profile = ({navigation, route}) => {
             {isScrolling ? 
               <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 10}}>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    { typeof userInfo.userInfo?.avatar === 'string'? 
-                      <View style={{height: 30, width: 30, backgroundColor: userInfo.userInfo?.avatar , borderRadius: 15}}></View>: 
-                      
-                      ''
-                      // Image ở đây
+                    { userInfo.userInfo?.avatar.includes('rgb') ? 
+                      <View style={{height: 30, width: 30, backgroundColor: userInfo.userInfo?.avatar , borderRadius: 15}} />
+                    : 
+                      <Image source={{uri: userInfo.userInfo?.avatar}} style={{height: 30, width: 30, borderRadius: 15}} />
                     }
 
                     <Text style={{fontWeight:'bold', fontSize: 18, marginLeft: 10}}>{userInfo.userInfo?.userName}</Text>
@@ -311,7 +310,11 @@ export const Profile = ({navigation, route}) => {
       <ScrollView onScroll={handleScroll} scrollEventThrottle={70} showsVerticalScrollIndicator={false} >
         <View style={[styles.header, {width: '100%', height: height * 0.3}]}>
           <View style={{width: '100%', height: '100%', zIndex: 0}}>
-            <Image source={{uri: 'https://res.cloudinary.com/ngocvu1932/image/upload/v1714486268/bgVsCode/kbdwbuprkwqyz54zovxu.jpg'}} style={{height:"100%", width:"100%"}}></Image>
+            {userInfo.userInfo?.userInfo?.coverImage.includes('localhost') ?
+              <Image source={{uri: 'https://res.cloudinary.com/ngocvu1932/image/upload/v1714486268/bgVsCode/kbdwbuprkwqyz54zovxu.jpg'}} style={{height:"100%", width:"100%"}} />
+            : 
+              <Image source={{uri: userInfo.userInfo?.userInfo?.coverImage}} style={{height:"100%", width:"100%"}} />
+            }
           </View> 
         </View>
 
@@ -324,6 +327,7 @@ export const Profile = ({navigation, route}) => {
               <Image source={{uri: userInfo.userInfo?.avatar }} style={{height: 140, width: 140, borderRadius: 100, borderWidth: 3, borderColor: '#FFFFFF'}} />
             }
             <Text style={{fontWeight:'bold', fontSize: 18, marginBottom: 20}}> {userInfo.userInfo?.userName} </Text>
+            <Text>{userInfo.userInfo.userInfo.description}</Text>
           </View>
         
           {

@@ -170,6 +170,30 @@ export const styles = StyleSheet.create({
     flexDirection: 'row', 
     alignItems: 'center', 
     width: '100%'
+  },
+
+  btnPressCloseModal: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    height: 40, 
+    borderTopLeftRadius: 20, 
+    borderTopRightRadius: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#DEDFE3',
+    width: '100%'
+  },
+
+  textBio: {
+    height: 200, 
+    marginTop: 30, 
+    textAlignVertical: 'top',
+    fontSize: 16,
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingTop: 10,
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: '#E9EDF0'
   }
 
 });
