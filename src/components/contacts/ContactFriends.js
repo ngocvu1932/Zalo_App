@@ -207,12 +207,12 @@ export const ContactFriends = ({ navigation }) => {
       
       <View style={{flexDirection: 'row', marginTop: 10, marginBottom: 10}}>
         <Pressable style={styles.btnSelect}> 
-          <Text style={{fontWeight:"bold", fontSize:14}}>Tất cả</Text>
+          <Text style={{fontWeight: "bold", fontSize:14}}>Tất cả</Text>
           <Text style={{fontSize:16, marginLeft: 10}}>{friendList.length}</Text>
         </Pressable>
         
         <Pressable style={[styles.btnSelect, {width: 130}]}> 
-          <Text style={{fontWeight:"bold", fontSize:14}}>Mới truy cập</Text>
+          <Text style={{fontWeight: "bold", fontSize:14}}>Mới truy cập</Text>
           <Text style={{fontSize:16, marginLeft: 10}}>{friendList.length}</Text>
         </Pressable>
       </View>

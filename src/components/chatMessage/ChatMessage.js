@@ -31,7 +31,7 @@ export const ChatMessage = ({ navigation, route }) => {
     const flatListRef = useRef();
     const [isLoadingMessages, setIsLoadingMessages] = useState(true);
     const [isUserChoose, setIsUserChoose] = useState(false);
-    const [messageIsChooseId, setMessageIsChooseId] = useState('');
+    const [messageIsChoose, setMessageIsChoose] = useState();
     const [loadAgain, setLoadAgain] = useState(false);
     const [loadAgainFocus, setLoadAgainFocus] = useState();
     const [loadAgain1, setLoadAgain1] = useState(false);
@@ -47,6 +47,7 @@ export const ChatMessage = ({ navigation, route }) => {
     const delayTime = 100;
     const [isMessageRecall, setIsMessageRecall] = useState(false);
     const adminId = groupChatInfo?.administrator;
+    // console.log(items._id)
     // console.log('adminId',adminId); 
 
     // console.log(isAdmin);
@@ -324,12 +325,12 @@ export const ChatMessage = ({ navigation, route }) => {
                     _id: ObjectId,
                     chat: items._id,
                     type: type,
-                    sender: user.user?.user,
+                    sender: user.user?.user, 
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     unViewList: [],
                     isDelete: false,
-                    urls: [data.secure_url],
+                    urls: data.secure_url,
                     reactions: []
                 }
 
@@ -407,7 +408,7 @@ export const ChatMessage = ({ navigation, route }) => {
     const deleteMessageForMe = async () => {
         try {
             const res = await axios.put('/chat/message/recall', {
-                messageId: messageIsChooseId,
+                messageId: messageIsChoose._id,
             });
 
             if (res.errCode === 0) {
@@ -425,7 +426,7 @@ export const ChatMessage = ({ navigation, route }) => {
     const deleteMessage = async () => {
         try {
             const res = await axios.put('/chat/message/deleteMessage', {
-                messageId: messageIsChooseId,
+                messageId: messageIsChoose._id,
             });
 
             if (res.errCode === 0) {
@@ -483,7 +484,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             if (item.sender?.id === user.user?.user?.id) {
                                 return (
                                     <View style={styles.viewEnd}>
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(false) }} style={styles.messsagePressEnd}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false) }} style={styles.messsagePressEnd}>
                                             <Text style={[styles.textMessagePress]}>{item.content}</Text>
                                             {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
                                         </Pressable>
@@ -498,7 +499,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                             : 
                                             <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
                                         :''}
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChoose(item) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
                                             <Text style={[styles.textMessagePress]}>{item.content}</Text>
                                             {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
                                         </Pressable>
@@ -509,7 +510,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             if (item.sender?.id === user.user?.user?.id) { 
                                 return (
                                     <View style={styles.viewEnd}>
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(false) }} style={styles.messsagePressEnd}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false) }} style={styles.messsagePressEnd}>
                                             <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode='contain' />
                                         </Pressable>
                                         {isLastItem && 
@@ -529,7 +530,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                             : 
                                             <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
                                         :''}
-                                            <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
+                                            <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChoose(item) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
                                                 <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode='contain' />
                                             </Pressable>
                                         </View>
@@ -545,7 +546,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             if (item.sender?.id === user.user?.user?.id) {
                                 return (
                                     <View style={styles.viewEnd}>
-                                        <Pressable style={styles.messsagePressEnd} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} onPress={()=> {
+                                        <Pressable style={styles.messsagePressEnd} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item) }} onPress={()=> {
                                             if (!isControl) {
                                                 handleVideoPress(item._id);
                                                 setIsControl(true);
@@ -577,7 +578,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                                 : 
                                                 <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
                                             :''}
-                                            <Pressable style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id), setIsMessageRecall(false) }} onPress={()=> {
+                                            <Pressable style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChoose(item), setIsMessageRecall(false) }} onPress={()=> {
                                                 if (!isControl) {
                                                     handleVideoPress(item._id);
                                                     setIsControl(true);
@@ -612,7 +613,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             return (
                                 <View style={styles.viewEnd}>
                                     {firstItemBySender && <Text style={styles.name}></Text>}
-                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(true) }} style={styles.messsagePressEnd}>
+                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(true) }} style={styles.messsagePressEnd}>
                                         <Text style={[styles.textMessagePress, { opacity: 0.7 }]}>Tin nhắn đã được thu hồi</Text>
                                         {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
                                     </Pressable>
@@ -627,7 +628,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                         : 
                                             <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
                                     :''}
-                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
+                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChoose(item) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
                                         <Text style={[styles.textMessagePress, { opacity: 0.7 }]}>Tin nhắn đã được thu hồi</Text>
                                         {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
                                     </Pressable>
@@ -648,7 +649,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             if (item.sender?.id === user.user?.user?.id) {
                                 return (
                                     <View style={styles.viewEnd}>
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(false)  }} style={[styles.messsagePressEnd, adminId === item.sender?.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false)  }} style={[styles.messsagePressEnd, adminId === item.sender?.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
                                             <Text style={[styles.textMessagePress]}>{item.content}</Text>
                                             {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
                                         </Pressable>
@@ -679,7 +680,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                                 }
                                             </View>
                                         :''}
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChoose(item) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]}>
                                             {firstItemBySender && <Text style={styles.name}>{item.sender.userName}</Text>}
                                             <Text style={[styles.textMessagePress, firstItemBySender ? { paddingTop: 5 } : {}]}>{item.content}</Text>
                                             {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
@@ -691,7 +692,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             if (item.sender?.id === user.user?.user?.id) {
                                 return (
                                     <View style={[styles.viewEnd, {}]}>
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(false) }} style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false) }} style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]}>
                                             <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode="contain" />
                                         </Pressable>
                                         {isLastItem && 
@@ -738,7 +739,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                                     </View>
                                                 </View>
                                         :''}
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChoose(item) }} style={[styles.messsagePressStart, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
                                             <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode='contain' />
                                         </Pressable>
                                         {isLastItem && 
@@ -754,7 +755,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={styles.viewEnd}>
                                         <View style={styles.viewEnd}>
-                                            <Pressable style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(false) }} onPress={()=> {
+                                            <Pressable style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false) }} onPress={()=> {
                                                 if (!isControl) {
                                                     handleVideoPress(item._id);
                                                     setIsControl(true);
@@ -812,7 +813,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                                     </View>
                                                 </View>
                                         :''}
-                                        <Pressable style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, {marginLeft: 30}, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} onPress={()=> {
+                                        <Pressable style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, {marginLeft: 30}, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChoose(item) }} onPress={()=> {
                                                 if (!isControl) {
                                                     handleVideoPress(item._id);
                                                     setIsControl(true);
@@ -843,7 +844,7 @@ export const ChatMessage = ({ navigation, route }) => {
                         if (item.sender?.id === user.user?.user?.id) {
                             return (
                                 <View style={styles.viewEnd}>
-                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(true)  }} style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
+                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(true)  }} style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
                                         <Text style={[styles.textMessagePress, { opacity: 0.7 }]}>Tin nhắn đã được thu hồi</Text>
                                         {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
                                     </Pressable>
@@ -874,7 +875,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                                 }
                                             </View>
                                         :''}
-                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
+                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChoose(item) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
                                         {firstItemBySender && <Text style={styles.name}>{item.sender.userName}</Text>}
                                         <Text style={[styles.textMessagePress, { opacity: 0.7 }]}>Tin nhắn đã được thu hồi</Text>
                                         {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
@@ -1105,7 +1106,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                     <Text style={{ fontSize: 13, marginTop: 5 }}>Trả lời</Text>
                                 </Pressable>
 
-                                <Pressable onPress={() => { }} style={styles.longPress}>
+                                <Pressable onPress={() => {navigation.navigate('ShareMessage', {data: messageIsChoose}) }} style={styles.longPress}>
                                     <FontAwesomeIcon size={18} color='#4879D8' icon={faShare} />
                                     <Text style={{ fontSize: 13, marginTop: 5, textAlign: 'center' }}>Chuyển tiếp</Text>
                                 </Pressable>

@@ -51,6 +51,7 @@ import { setDevice } from './src/redux/deviceSlice';
 import { ProfileInfo } from './src/components/profileOptions/ProfileInfo';
 import { EditProfile } from './src/components/profileOptions/EditProfile';
 import { ChangeAdminGroup } from './src/components/managerGroupMembers/ChangeAdminGroup';
+import { ShareMessage } from './src/components/chatMessage/ShareMessage';
 LogBox.ignoreLogs(['onAnimatedValueUpdate']);
 LogBox.ignoreLogs(['No native ExpoFirebaseCore module found']);
 LogBox.ignoreLogs(['Possible unhandled promise rejection']);
@@ -180,6 +181,7 @@ const RootStack = () => {
           <Stack.Screen name='ProfileInfo' component={ProfileInfo}/>
           <Stack.Screen name='EditProfile' component={EditProfile}/>
           <Stack.Screen name='ChangeAdminGroup' component={ChangeAdminGroup}/>
+          <Stack.Screen name='ShareMessage' component={ShareMessage}/>
         </>
       ) : (
         <>
@@ -215,6 +217,8 @@ const RootStack = () => {
           <Stack.Screen name='ProfileInfo' component={ProfileInfo}/>
           <Stack.Screen name='EditProfile' component={EditProfile}/>
           <Stack.Screen name='ChangeAdminGroup' component={ChangeAdminGroup}/>
+          <Stack.Screen name='ShareMessage' component={ShareMessage}/>
+
         </>
       ) }
     </Stack.Navigator>

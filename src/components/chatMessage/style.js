@@ -17,6 +17,15 @@ export const styles = StyleSheet.create({
         right: 0,
     },
 
+    header1: {
+        width: '100%',
+        height: 90,
+        backgroundColor: '#F7F7F7',
+        justifyContent: 'flex-end',
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E5E5',
+    },
+
     body: {
         flex: 1,
         position: 'absolute',

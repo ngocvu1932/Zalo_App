@@ -1,4 +1,4 @@
-import { FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import {Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import React from 'react'
 import { styles } from './style'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
@@ -24,67 +24,6 @@ export const Discovery = () => {
           <Text style={{marginLeft: -180 , fontSize: 18}}>Zalo Video</Text>
           <FontAwesomeIcon size={20} color='#6E6E6E' style={{marginRight: 15}} icon={faChevronRight}/>
         </Pressable>
-
-        <View>
-          
-
-        </View>
-
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        <Text> hehe </Text>
-        
-        <View style={{height: 300, width: '100%'}}></View>
       </ScrollView>
     </View>
   )
