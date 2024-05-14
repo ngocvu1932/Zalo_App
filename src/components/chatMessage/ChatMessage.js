@@ -308,7 +308,7 @@ export const ChatMessage = ({ navigation, route }) => {
             typesend = 'video';
         }
         try {
-            const response = await fetch(`https://api.cloudinary.com/v1_1/ngocvu1932/${typesend}/upload`, {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${typesend}/upload`, {
                 method: 'POST',
                 body: formData,
                 headers: {
