@@ -149,7 +149,7 @@ export const ContactFriends = ({ navigation }) => {
     return(
       <Pressable style={styles.btnItem} onPress={()=> joinChatWithFriend(data.id)}>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-          {data?.avatar.includes('rgb') ? 
+          {data?.avatar.substring(0, 3) ==='rgb' ? 
             <View>
               <View style={{height: 45, width: 45, backgroundColor: data?.avatar, borderRadius: 25, marginLeft: 15}}></View> 
               {!data.lastedOnline? 

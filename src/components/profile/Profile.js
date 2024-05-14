@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { socket } from '../../config/io';
 import { faCommentDots, faImage } from '@fortawesome/free-regular-svg-icons';
 import { setUserInfo } from '../../redux/userInfoSlice';
-import { Video, Audio } from 'expo-av';
 
 export const Profile = ({navigation, route}) => {
   const user = useSelector(state => state.user);
@@ -279,7 +278,7 @@ export const Profile = ({navigation, route}) => {
             {isScrolling ? 
               <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 10}}>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    { userInfo.userInfo?.avatar.includes('rgb') ? 
+                    { userInfo.userInfo?.avatar.substring(0, 3) === 'rgb' ? 
                       <View style={{height: 30, width: 30, backgroundColor: userInfo.userInfo?.avatar , borderRadius: 15}} />
                     : 
                       <Image source={{uri: userInfo.userInfo?.avatar}} style={{height: 30, width: 30, borderRadius: 15}} />
@@ -320,7 +319,7 @@ export const Profile = ({navigation, route}) => {
         <View style={[styles.header, {width: '100%', height: height * 0.3}]}>
           <View style={{width: '100%', height: '100%', zIndex: 0}}>
             {userInfo.userInfo?.userInfo?.coverImage.includes('localhost') ?
-              <Image source={{uri: 'https://res.cloudinary.com/${CLOUD_NAME}/image/upload/v1714486268/bgVsCode/kbdwbuprkwqyz54zovxu.jpg'}} style={{height:"100%", width:"100%"}} />
+              <Image source={{uri: 'https://res.cloudinary.com/ngocvu1932/image/upload/v1714486268/bgVsCode/kbdwbuprkwqyz54zovxu.jpg'}} style={{height:"100%", width:"100%"}} />
             : 
               <Image source={{uri: userInfo.userInfo?.userInfo?.coverImage}} style={{height:"100%", width:"100%"}} />
             }
@@ -330,7 +329,7 @@ export const Profile = ({navigation, route}) => {
         <View style={{alignItems: 'center', marginTop: '-20%'}} >  
           {/* khúc này là ảnh đại diện và bio */}
           <View style={{alignItems: 'center'}}>
-            {userInfo.userInfo?.avatar.includes('rgb') ?
+            {userInfo.userInfo?.avatar.substring(0, 3) === 'rgb' ?
               <View style={{height: 140, width: 140, borderRadius: 100, backgroundColor: userInfo.userInfo?.avatar, borderWidth: 3, borderColor: '#FFFFFF'}} /> 
             : 
               <Image source={{uri: userInfo.userInfo?.avatar }} style={{height: 140, width: 140, borderRadius: 100, borderWidth: 3, borderColor: '#FFFFFF'}} />

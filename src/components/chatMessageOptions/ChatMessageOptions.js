@@ -265,7 +265,7 @@ export const ChatMessageOptions = ({navigation, route}) => {
                         navigation.navigate('Profile', {phoneNumber: items.phoneNumber, isUser: isUser })
                     }}>
                         {items.type ==="PRIVATE_CHAT" ? 
-                            items.avatar.includes('rgb') ?
+                            items.avatar.substring(0, 3) === 'rgb' ?
                                 <View style={{height: 100, width: 100, borderRadius: 55, backgroundColor: items.avatar}}></View>
                             : 
                                 <Image source={{uri: items.avatar}} style={{height: 100, width: 100, borderRadius: 50}}></Image>

@@ -128,7 +128,7 @@ export const AddMember = ({navigation, route}) => {
                             <View style={[styles.viewCheck, listId.map(item => item.id).includes(data?.id) ? {backgroundColor: '#1194FE', borderColor: '#1194FE'} : {}]}>
                                 <FontAwesomeIcon color='#FFFFFF' icon={faCheck} size={18} />
                             </View>
-                            {data?.avatar?.includes('rgb') ? 
+                            {data?.avatar?.substring(0, 3) === 'rgb' ? 
                                 <View style={{height: 50, width: 50, backgroundColor: data?.avatar, borderRadius: 25, marginLeft: 15}} />
                             : 
                                 <Image style={{height: 50, width: 50, borderRadius: 25, marginLeft: 15}} source={{uri: data?.avatar}} />
@@ -144,7 +144,7 @@ export const AddMember = ({navigation, route}) => {
     const renderItemChooseMember = ({ item }) => {
         return(
             <Pressable key={item.id} style={{justifyContent: 'center', marginLeft: 10}} onPress={()=> chooseMember(item.id, item.avatar)}>
-                {item.avatar.includes('rgb') ? 
+                {item.avatar.substring(0, 3) === 'rgb' ? 
                     <View style={{}}>
                         <View style={{height: 55, width: 55, borderRadius: 30, backgroundColor: item.avatar}}></View>
                         <View style={{position: 'absolute',top: 0, right: 0, height: 18, width: 18, borderRadius: 10, backgroundColor: '#E5E4E0', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFFFFF'}} >

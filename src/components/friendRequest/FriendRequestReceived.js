@@ -116,7 +116,7 @@ export const FriendRequestReceived = ({ navigation }) => {
     return (
       <View style={{height: 180, width: '100%', marginBottom: 10}}>
         <View style={{flexDirection: 'row', marginLeft: 15, marginTop: 10}}>
-          {item.sender?.avatar?.includes('rgb') ? 
+          {item.sender?.avatar?.substring(0, 3) === 'rgb' ? 
             <View style={{height: 50, width: 50, borderRadius: 25, backgroundColor: item.sender.avatar}}></View> 
           : 
             <Image source={{uri: item.sender?.avatar}} style={{height: 50, width: 50, borderRadius: 25 }} />  

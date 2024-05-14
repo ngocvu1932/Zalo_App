@@ -71,7 +71,7 @@ export const ContactGroups = ({navigation}) => {
                             styles.position2
                         ]}
                       >
-                        {participant.avatar.includes('rgb') ? 
+                        {participant.avatar.substring(0, 3)==='rgb' ? 
                           <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
                         : 
                           <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
@@ -86,7 +86,7 @@ export const ContactGroups = ({navigation}) => {
                             styles.position3_1
                         ]}
                       >
-                        {participant.avatar.includes('rgb') ? 
+                        {participant.avatar.substring(0, 3)==='rgb' ? 
                           <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
                         : 
                           <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
@@ -101,7 +101,7 @@ export const ContactGroups = ({navigation}) => {
                             [styles.position3_1, {backgroundColor: '#E9ECF3', justifyContent: 'center', alignItems: 'center', borderRadius: 15, height: 28, width: 28}]
                         ]}
                       >
-                        {participant.avatar.includes('rgb') ? 
+                        {participant.avatar.substring(0, 3)==='rgb' ? 
                           <View style={{}}>
                             {index === 3 ? 
                               <Text>{item.item.participants.length - index}</Text> 

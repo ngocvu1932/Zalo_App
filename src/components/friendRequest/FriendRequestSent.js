@@ -80,7 +80,7 @@ export const FriendRequestSent = ({ navigation }) => {
     const duration = moment.duration(now.diff(createdAt));
     return (
       <Pressable style={styles.btnMain} onPress={()=> {navigation.navigate('Profile', {phoneNumber: item.friendShip.receiver.phoneNumber})}}>
-        {item.friendShip?.receiver?.avatar.includes('rgb') ? 
+        {item.friendShip?.receiver?.avatar.substring(0, 3) === 'rgb' ? 
             <View style={[styles.viewAvt, {backgroundColor: item.friendShip.receiver.avatar}]} />
           : 
             <Image source={{uri: item.friendShip?.receiver?.avatar}} style={[styles.viewAvt]} />

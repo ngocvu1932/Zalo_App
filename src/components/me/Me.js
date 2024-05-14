@@ -24,10 +24,10 @@ export const Me = ({navigation}) => {
 
       <ScrollView style={styles.body}>
         <Pressable style={styles.pressViewInfo} onPress={()=>{navigation.navigate('Profile', {phoneNumber: user.user?.user.phoneNumber, isUser: isUser})}}>
-          { user.user?.user?.avatar?.includes('rgb') ? 
-              <View style={[styles.avatar, {backgroundColor: user.user?.user?.avatar}]} ></View> 
+          { user.user?.user?.avatar?.substring(0, 3) === 'rgb' ? 
+              <View style={[styles.avatar, {backgroundColor: user.user?.user?.avatar}]} />
             :  
-              <Image source={{uri: user.user?.user?.avatar}} style={styles.avatar}></Image>
+              <Image source={{uri: user.user?.user?.avatar}} style={styles.avatar} />
           }          
           <View style={{flex: 1}}>
             <Text style={styles.txtViewNameInfo}>{user.user?.user?.userName}</Text> 

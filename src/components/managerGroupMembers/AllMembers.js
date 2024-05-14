@@ -103,7 +103,7 @@ export const AllMembers = ({navigation, items}) => {
   const renderItem = ({ item })=>{
     return (
       <Pressable style={styles.btnChooseMember} onPress={()=>{handleChooseMember(item)}}>
-        {item.avatar?.includes('rgb') ? 
+        {item.avatar?.substring(0, 3) === 'rgb' ? 
           <View style={{height: 55, width: 55, marginLeft: 15}}>
             <View style={{height: 55, width: 55, backgroundColor: item.avatar, borderRadius: 30}}></View>
             {item.id === idAdmin ? 
@@ -170,7 +170,7 @@ export const AllMembers = ({navigation, items}) => {
 
               <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                 <View style={{height: 70, justifyContent: 'center', alignItems: 'center'}}>
-                  {idMember.avatar?.includes('rgb') ? 
+                  {idMember.avatar?.substring(0, 3) === 'rgb' ? 
                     <View style={{height: 55, width: 55, marginLeft: 15}}>
                       <View style={{height: 55, width: 55, backgroundColor: idMember.avatar, borderRadius: 30}}></View>
                       {idMember.id === idAdmin ? 

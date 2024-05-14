@@ -161,7 +161,7 @@ export const ChatMessage = ({ navigation, route }) => {
                         updatedAt: item.updatedAt,
                         isDelete: item.isDelete,
                         unViewList: item.unViewList,
-                        urls: item.urls,
+                        urls: [item.urls],
                         type: item.type,
                     }));
                     setMessages(filteredMessages);
@@ -329,7 +329,7 @@ export const ChatMessage = ({ navigation, route }) => {
                     updatedAt: new Date(),
                     unViewList: [],
                     isDelete: false,
-                    urls: data.secure_url,
+                    urls: [data.secure_url],
                     reactions: []
                 }
 
@@ -493,7 +493,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={[styles.viewStart, firstItemBySender ? { flexDirection: 'row' } : {}]}>
                                         {firstItemBySender ?
-                                            item.sender.avatar.includes('rgb') ?
+                                            item.sender.avatar.substring(0, 3) === 'rgb' ?
                                             <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
                                             : 
                                             <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
@@ -524,7 +524,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                     <View style={[styles.viewStart]}>
                                         <View style={firstItemBySender ? { flexDirection: 'row' } : {}}>
                                         {firstItemBySender ?
-                                            item.sender.avatar.includes('rgb') ?
+                                            item.sender?.avatar?.substring(0, 3) === 'rgb' ?
                                             <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
                                             : 
                                             <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
@@ -572,7 +572,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                     <View style={[styles.viewStart]}>
                                         <View style={firstItemBySender ? { flexDirection: 'row' } : {}}>
                                             {firstItemBySender ?
-                                                item.sender.avatar.includes('rgb') ?
+                                                item.sender?.avatar?.substring(0, 3) === 'rgb' ?
                                                 <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
                                                 : 
                                                 <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
@@ -622,7 +622,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             return (
                                 <View style={[styles.viewStart, firstItemBySender ? { flexDirection: 'row' } : {}]}>
                                     {firstItemBySender ?
-                                        item.sender.avatar.includes('rgb') ?
+                                        item.sender?.avatar?.substring(0, 3) === 'rgb' ?
                                             <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
                                         : 
                                             <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
@@ -658,7 +658,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={[styles.viewStart, firstItemBySender ? { flexDirection: 'row' } : {}]}>
                                         {firstItemBySender ?
-                                            item.sender.avatar.includes('rgb') ?
+                                            item.sender?.avatar?.substring(0, 3) === 'rgb' ?
                                             <View>
                                                 <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
                                                 {adminId === item.sender.id ? 
@@ -705,7 +705,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={[styles.viewStart, firstItemBySender ? { flexDirection: '' } : {}]}>
                                         {firstItemBySender ?
-                                            item.sender.avatar.includes('rgb') ?
+                                            item.sender?.avatar?.substring(0, 3) === 'rgb' ?
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
                                                     <View>
                                                     <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }} />
@@ -781,7 +781,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={[styles.viewStart]}>
                                         {firstItemBySender ?
-                                            item.sender.avatar.includes('rgb') ?
+                                            item.sender?.avatar?.substring(0, 3) === 'rgb' ?
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
                                                     <View>
                                                         <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }} />
@@ -853,7 +853,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             return (
                                 <View style={[styles.viewStart, firstItemBySender ? { flexDirection: 'row' } : {}]}>
                                     {firstItemBySender ?
-                                            item.sender.avatar.includes('rgb') ?
+                                            item.sender?.avatar?.substring(0, 3) === 'rgb'?
                                             <View>
                                                 <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
                                                 {adminId === item.sender.id ? 
@@ -971,7 +971,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                 <View style={{alignItems: 'center'}}>
                                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                                         {items.type?.includes('PRIVATE_CHAT') ? 
-                                            items.avatar?.includes('rgb')? 
+                                            items.avatar?.substring(0, 3) === 'rgb' ? 
                                                 <View style={{height: 40, width: 40, backgroundColor: items.avatar, borderRadius: 20, marginLeft: 20}}></View> 
                                             : 
                                                 <Image style={{height: 60, width: 60, borderRadius: 30, marginLeft: 20}} source={{uri: items.avatar}}></Image> 
@@ -991,7 +991,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                                                         styles.position2
                                                                     ]}
                                                                 >
-                                                                {participant.avatar.includes('rgb') ? 
+                                                                {participant.avatar.substring(0, 3) === 'rgb' ? 
                                                                     <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
                                                                 : 
                                                                     <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
@@ -1006,7 +1006,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                                                         styles.position3_1
                                                                     ]}
                                                                 >
-                                                                    {participant.avatar.includes('rgb') ? 
+                                                                    {participant.avatar?.substring(0, 3) === 'rgb'? 
                                                                         <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
                                                                     : 
                                                                         <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
@@ -1021,7 +1021,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                                                         [styles.position3_1, {backgroundColor: '#E9ECF3', justifyContent: 'center', alignItems: 'center', borderRadius: 15, height: 28, width: 28}]
                                                                     ]}
                                                                 >
-                                                                    {participant.avatar.includes('rgb') ? 
+                                                                    {participant.avatar?.substring(0, 3) === 'rgb' ? 
                                                                         <View style={{}}>
                                                                             {index === 3 ? 
                                                                                 <Text>{groupChatInfo.participants.length - index}</Text> 

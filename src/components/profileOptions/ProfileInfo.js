@@ -31,7 +31,7 @@ export const ProfileInfo = ({navigation, route}) => {
             {/* avtt */}
             <View style={{position: 'absolute', top: '23%', left: 0, right: 0, zIndex: 10, width: '100%'}}>
                 <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 10}}>
-                    {userInfo.userInfo?.avatar.includes('rgb') ? (
+                    {userInfo.userInfo?.avatar.substring(0, 3) === 'rgb' ? (
                         <View style={{height: 55, width: 55, backgroundColor: userInfo.userInfo.avatar, borderRadius: 30, borderWidth: 2, borderColor: '#FFFFFF'}}></View>
                     ): 
                         <Image source={{uri : userInfo.userInfo.avatar }} style={{height: 55, width: 55, borderRadius: 30, borderWidth: 2, borderColor: '#FFFFFF'}} />
@@ -43,7 +43,7 @@ export const ProfileInfo = ({navigation, route}) => {
             <View style={{width: '100%', height: height * 0.3}}>
                 <View style={{width: '100%', height: '100%', zIndex: 0}}>
                 {userInfo.userInfo?.userInfo?.coverImage.includes('localhost') ?
-                    <Image source={{uri: 'https://res.cloudinary.com/${CLOUD_NAME}/image/upload/v1714486268/bgVsCode/kbdwbuprkwqyz54zovxu.jpg'}} style={{height:"100%", width:"100%"}} />
+                    <Image source={{uri: 'https://res.cloudinary.com/ngocvu1932/image/upload/v1714486268/bgVsCode/kbdwbuprkwqyz54zovxu.jpg'}} style={{height:"100%", width:"100%"}} />
                 : 
                     <Image source={{uri: userInfo.userInfo?.userInfo?.coverImage}} style={{height:"100%", width:"100%"}} />
                 }

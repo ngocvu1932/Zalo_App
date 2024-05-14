@@ -268,7 +268,7 @@ export const EditProfile = ({navigation}) => {
 
             <View style={styles.body}>
                 <View style={{width: '100%', flexDirection: 'row', backgroundColor: '#FFFFFF'}}>
-                    {userUpdate.avatar?.includes('rgb') ? 
+                    {userUpdate.avatar?.substring(0, 3) === 'rgb' ? 
                         <Pressable style={{flex: 1, alignItems: 'center', marginTop: 20}} onPress={() => setModalVisible(true)}>
                             <View style={{height: 60, width: 60, borderRadius: 30, backgroundColor: userInfo.userInfo?.avatar}}>
                                 <View style={{position: 'absolute', bottom: 1, right: 2, height: 20, width: 20, borderRadius: 10, backgroundColor: '#FFFFFF', borderColor: '#DADAD8', borderWidth: 2, justifyContent: 'center', alignItems: 'center'}}>
