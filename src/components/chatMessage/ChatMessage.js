@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Keyboard,  Modal,  Pressable,  Text, TextInput, View } from "react-native";
 import { styles } from "./style";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faPhone, faVideo, faList, faEllipsis,  faLaughWink, faChevronLeft, faPaperPlane, faTrashCan, faRotateRight, faCheckDouble, faCheck, faMicrophoneLines } from '@fortawesome/free-solid-svg-icons';
+import { faPhone, faVideo, faList, faEllipsis,  faLaughWink, faChevronLeft, faPaperPlane, faTrashCan, faRotateRight, faCheckDouble, faCheck, faMicrophoneLines, faReply, faShare, faCircleInfo, faKey } from '@fortawesome/free-solid-svg-icons';
 import { faImage} from '@fortawesome/free-regular-svg-icons';
 import { socket } from '../../config/io';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,7 +14,6 @@ import { setIsCreateGroup, setisCreateGroup } from '../../redux/stateCreateGroup
 import {CLOUD_NAME, UPLOAD_PRESET} from '@env'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Video, Audio } from 'expo-av';
-import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import { setGroupChatInfo } from '../../redux/groupChatInfoSlice';
 
 export const ChatMessage = ({ navigation, route }) => {
@@ -25,6 +24,7 @@ export const ChatMessage = ({ navigation, route }) => {
     const [messages, setMessages] = useState([]);
     const { items, flag } = route.params;
     const user = useSelector(state => state.user);
+    const currentId = useSelector(state => state.user.user?.user?.id);
     const device = useSelector(state => state.device);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible1, setModalVisible1] = useState(false);
@@ -44,7 +44,15 @@ export const ChatMessage = ({ navigation, route }) => {
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const videoRefs = useRef([]);
     const [isControl, setIsControl] = useState(false);
-    const delayTime = 300;
+    const delayTime = 100;
+    const [isMessageRecall, setIsMessageRecall] = useState(false);
+    const adminId = groupChatInfo?.administrator;
+    // console.log('adminId',adminId); 
+
+    // console.log(isAdmin);
+    // console.log("Group chat info: ", groupChatInfo.administrator);
+    // console.log('id',currentId);
+    
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
@@ -96,25 +104,28 @@ export const ChatMessage = ({ navigation, route }) => {
 
     // cập nhật cuộn flatlist
     useEffect(() => {
-        if ( messages.length > 0 && isKeyboardOpen) {
-            setTimeout(() => scrollToBottomWithOffset(80), 100);
-        }
-    }, [messages, isLoadingMessages, isKeyboardOpen]);
+        // if ( messages.length) {
+        //     setTimeout(() => scrollToBottomWithOffset(80), 100);
+        // } 
 
-    useEffect(() => {
-        setTimeout(()=> {
-            if (flatListRef.current) {
-                flatListRef.current.scrollToEnd({animated: true});
-            }
-        }, 500);
-    }, []);
+        // if (isKeyboardOpen === true) { 
+        //     flatListRef.current.scrollToEnd({animated: true});
+        // }
+    }, [messages, isLoadingMessages, isKeyboardOpen]); 
+
+    // useEffect(() => {
+    //     setTimeout(()=> {
+    //         if (flatListRef.current) {
+    //             flatListRef.current.scrollToEnd({animated: true});
+    //         }
+    //     }, 500);
+    // }, []);
 
     // Lấy thông tin group chat
     useEffect(() => { 
         const getGroupChat = async () => {
             try {
                 const response = await axios.get(`/chat/access?chatId=${items._id}`);
-                console.log('check load group chat!');
                 if (response.errCode === 0) {
                     dispatch(setGroupChatInfo(response.data));
                     setIsLoadingGroupChat(false);
@@ -140,7 +151,6 @@ export const ChatMessage = ({ navigation, route }) => {
         const fetchMessages = async () => {
             try {
                 const response = await axios.get(`/chat/message/pagination?chatId=${items._id}&limit=50`);
-                console.log('check load message!');
                 if (response.errCode === 0) {
                     const filteredMessages = response.data.map(item => ({
                         _id: `${item._id}`,
@@ -174,29 +184,26 @@ export const ChatMessage = ({ navigation, route }) => {
         }
     }, [items._id, loadAgain1]);
 
+    const handleReceiveMessage = async (data) => {
+        if (data.type.includes('TEXT')) {
+            console.log("Receive messgae: ", data.content, "|", data.chat);
+            setIsMessage(true);
+            setMessages(premessages => [...premessages, data]);
+        } else if (data.type.includes('IMAGES')) {
+            console.log("Receive messgae: ", data.urls, "|", data.chat);
+            setIsMessage(true);
+            setMessages(premessages => [...premessages, data]);
+        } else if (data.type.includes('VIDEO')) {
+            console.log("Receive messgae: ", data.urls, "|", data.chat);
+            setIsMessage(true);
+            setMessages(premessages => [...premessages, data]);
+        }
+    }
+
     // socket
     useEffect(() => {
         socket.then(socket => {
-            socket.emit('setup', items._id); 
-            socket.on('connected', (data) => {
-                console.log('Connected to server chat');
-            });
-
-            socket.on('receive-message', (data) => {
-                if (data.type.includes('TEXT')) {
-                    console.log("Receive messgae: ", data.content, "|", data.chat);
-                    setIsMessage(true);
-                    setMessages(premessages => [...premessages, data]);
-                } else if (data.type.includes('IMAGES')) {
-                    console.log("Receive messgae: ", data.urls, "|", data.chat);
-                    setIsMessage(true);
-                    setMessages(premessages => [...premessages, data]);
-                } else if (data.type.includes('VIDEO')) {
-                    console.log("Receive messgae: ", data.urls, "|", data.chat);
-                    setIsMessage(true);
-                    setMessages(premessages => [...premessages, data]);
-                }
-            });
+            socket.on('receive-message', handleReceiveMessage);
 
             socket.on('receive-modify-message', (data) => {
                 if (data) {
@@ -214,7 +221,7 @@ export const ChatMessage = ({ navigation, route }) => {
         return () => {
             socket.then(socket => {
                 socket.off('connected');
-                socket.off('receive-message');
+                socket.off('receive-message',handleReceiveMessage);
                 socket.off('receive-modify-message');
                 socket.off('receive-issend-message');
             });
@@ -225,7 +232,6 @@ export const ChatMessage = ({ navigation, route }) => {
     const handleVideoPress = (index) => {
         if (videoRefs.current[index]) {
             videoRefs.current[index].playAsync();
-            console.log("videoRefs: ", videoRefs.current[index]);
         }
     };
 
@@ -239,15 +245,15 @@ export const ChatMessage = ({ navigation, route }) => {
     }; 
 
     //cuộn xuống phần tử cuối cùng trong FlatList
-    const scrollToBottomWithOffset = (offset) => {
-        if (flatListRef.current) {
-            const itemCount = messages.length;
-            const itemHeight = 50;
-            const listHeight = itemCount * itemHeight;
-            const bottomOffset = listHeight + offset;
-            flatListRef.current.scrollToOffset({ offset: bottomOffset, animated: true });
-        }
-    };
+    // const scrollToBottomWithOffset = (offset) => {
+    //     if (flatListRef.current) {
+    //         const itemCount = messages.length;
+    //         const itemHeight = 50;
+    //         const listHeight = itemCount * itemHeight;
+    //         const bottomOffset = listHeight + offset;
+    //         flatListRef.current.scrollToOffset({ offset: bottomOffset, animated: true });
+    //     }
+    // };
 
     const openImagePickerAsync = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -261,7 +267,7 @@ export const ChatMessage = ({ navigation, route }) => {
             allowsEditing: false,
             quality: 1,
             allowsMultipleSelection: true,
-            selectionLimit: 20,
+            selectionLimit: 1,
             videoExportPreset: ImagePicker.VideoExportPreset.Passthrough,
             videoMaxDuration: 10
         });
@@ -439,7 +445,7 @@ export const ChatMessage = ({ navigation, route }) => {
 
     // render tin nhắn qua FlatList
     const renderItem = ({ item }) => { 
-        // console.log("Item: ", JSON.stringify(item._id));
+        // console.log("Item: ", JSON.stringify(item.sender.id));
         const firstIduserPositions = {};
         let lastSenderId = null;
 
@@ -477,7 +483,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             if (item.sender?.id === user.user?.user?.id) {
                                 return (
                                     <View style={styles.viewEnd}>
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} style={styles.messsagePressEnd}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(false) }} style={styles.messsagePressEnd}>
                                             <Text style={[styles.textMessagePress]}>{item.content}</Text>
                                             {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
                                         </Pressable>
@@ -486,7 +492,12 @@ export const ChatMessage = ({ navigation, route }) => {
                             } else {
                                 return (
                                     <View style={[styles.viewStart, firstItemBySender ? { flexDirection: 'row' } : {}]}>
-                                        {firstItemBySender && <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}></View>}
+                                        {firstItemBySender ?
+                                            item.sender.avatar.includes('rgb') ?
+                                            <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
+                                            : 
+                                            <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
+                                        :''}
                                         <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
                                             <Text style={[styles.textMessagePress]}>{item.content}</Text>
                                             {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
@@ -498,7 +509,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             if (item.sender?.id === user.user?.user?.id) { 
                                 return (
                                     <View style={styles.viewEnd}>
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} style={styles.messsagePressEnd}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(false) }} style={styles.messsagePressEnd}>
                                             <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode='contain' />
                                         </Pressable>
                                         {isLastItem && 
@@ -512,7 +523,12 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={[styles.viewStart]}>
                                         <View style={firstItemBySender ? { flexDirection: 'row' } : {}}>
-                                            {firstItemBySender && <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}></View>}
+                                        {firstItemBySender ?
+                                            item.sender.avatar.includes('rgb') ?
+                                            <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
+                                            : 
+                                            <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
+                                        :''}
                                             <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
                                                 <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode='contain' />
                                             </Pressable>
@@ -530,9 +546,6 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={styles.viewEnd}>
                                         <Pressable style={styles.messsagePressEnd} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} onPress={()=> {
-                                            alert('video');
-                                            console.log(isControl);
-                                            
                                             if (!isControl) {
                                                 handleVideoPress(item._id);
                                                 setIsControl(true);
@@ -558,8 +571,13 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={[styles.viewStart]}>
                                         <View style={firstItemBySender ? { flexDirection: 'row' } : {}}>
-                                            {firstItemBySender && <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}></View>}
-                                            <Pressable style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} onPress={()=> {
+                                            {firstItemBySender ?
+                                                item.sender.avatar.includes('rgb') ?
+                                                <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
+                                                : 
+                                                <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
+                                            :''}
+                                            <Pressable style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id), setIsMessageRecall(false) }} onPress={()=> {
                                                 if (!isControl) {
                                                     handleVideoPress(item._id);
                                                     setIsControl(true);
@@ -594,7 +612,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             return (
                                 <View style={styles.viewEnd}>
                                     {firstItemBySender && <Text style={styles.name}></Text>}
-                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} style={styles.messsagePressEnd}>
+                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(true) }} style={styles.messsagePressEnd}>
                                         <Text style={[styles.textMessagePress, { opacity: 0.7 }]}>Tin nhắn đã được thu hồi</Text>
                                         {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
                                     </Pressable>
@@ -603,7 +621,12 @@ export const ChatMessage = ({ navigation, route }) => {
                         } else {
                             return (
                                 <View style={[styles.viewStart, firstItemBySender ? { flexDirection: 'row' } : {}]}>
-                                    {firstItemBySender && <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}></View>}
+                                    {firstItemBySender ?
+                                        item.sender.avatar.includes('rgb') ?
+                                            <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
+                                        : 
+                                            <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
+                                    :''}
                                     <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
                                         <Text style={[styles.textMessagePress, { opacity: 0.7 }]}>Tin nhắn đã được thu hồi</Text>
                                         {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
@@ -625,7 +648,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             if (item.sender?.id === user.user?.user?.id) {
                                 return (
                                     <View style={styles.viewEnd}>
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} style={styles.messsagePressEnd}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(false)  }} style={[styles.messsagePressEnd, adminId === item.sender?.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
                                             <Text style={[styles.textMessagePress]}>{item.content}</Text>
                                             {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
                                         </Pressable>
@@ -634,8 +657,29 @@ export const ChatMessage = ({ navigation, route }) => {
                             } else {
                                 return (
                                     <View style={[styles.viewStart, firstItemBySender ? { flexDirection: 'row' } : {}]}>
-                                        {firstItemBySender && <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}></View>}
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
+                                        {firstItemBySender ?
+                                            item.sender.avatar.includes('rgb') ?
+                                            <View>
+                                                <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
+                                                {adminId === item.sender.id ? 
+                                                    <View style={{height: 10, width: 10, backgroundColor: '#7C8596', borderRadius: 10, justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: 0, right: 0}}>
+                                                        <FontAwesomeIcon style={{}} size={7} color='yellow' icon={faKey} />
+                                                    </View> 
+                                                : '' 
+                                                }
+                                            </View>
+                                            : 
+                                            <View>
+                                                <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
+                                                {adminId === item.sender.id ? 
+                                                    <View style={{height: 10, width: 10, backgroundColor: '#7C8596', borderRadius: 10, justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: 0, right: 0}}>
+                                                        <FontAwesomeIcon style={{}} size={7} color='yellow' icon={faKey} />
+                                                    </View> 
+                                                : '' 
+                                                }
+                                            </View>
+                                        :''}
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]}>
                                             {firstItemBySender && <Text style={styles.name}>{item.sender.userName}</Text>}
                                             <Text style={[styles.textMessagePress, firstItemBySender ? { paddingTop: 5 } : {}]}>{item.content}</Text>
                                             {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
@@ -647,7 +691,7 @@ export const ChatMessage = ({ navigation, route }) => {
                             if (item.sender?.id === user.user?.user?.id) {
                                 return (
                                     <View style={[styles.viewEnd, {}]}>
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} style={styles.messsagePressEnd}>
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(false) }} style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]}>
                                             <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode="contain" />
                                         </Pressable>
                                         {isLastItem && 
@@ -660,15 +704,41 @@ export const ChatMessage = ({ navigation, route }) => {
                             } else {
                                 return (
                                     <View style={[styles.viewStart, firstItemBySender ? { flexDirection: '' } : {}]}>
-                                        {firstItemBySender &&
-                                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-                                                <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}></View>
-                                                <View style={{ backgroundColor: '#FFFFFF', marginLeft: 5, padding: 2, borderRadius: 25 }}>
-                                                    <Text style={{ fontSize: 12, opacity: 0.8, paddingLeft: 4, paddingRight: 4 }}>{item.sender.userName}</Text>
+                                        {firstItemBySender ?
+                                            item.sender.avatar.includes('rgb') ?
+                                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+                                                    <View>
+                                                    <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }} />
+                                                        {adminId === item.sender.id ? 
+                                                            <View style={{height: 10, width: 10, backgroundColor: '#7C8596', borderRadius: 10, justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: 0, right: 0}}>
+                                                                <FontAwesomeIcon style={{}} size={7} color='yellow' icon={faKey} />
+                                                            </View> 
+                                                        : '' 
+                                                        }
+                                                    </View>
+
+                                                    <View style={{ backgroundColor: '#FFFFFF', marginLeft: 5, padding: 2, borderRadius: 25 }}>
+                                                        <Text style={{ fontSize: 12, opacity: 0.8, paddingLeft: 4, paddingRight: 4 }}>{item.sender.userName}</Text>
+                                                    </View>
                                                 </View>
-                                            </View>
-                                        }
-                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart]}>
+                                            : 
+                                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+                                                    <View>
+                                                        <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
+                                                        {adminId === item.sender.id ? 
+                                                            <View style={{height: 10, width: 10, backgroundColor: '#7C8596', borderRadius: 10, justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: 0, right: 0}}>
+                                                                <FontAwesomeIcon style={{}} size={7} color='yellow' icon={faKey} />
+                                                            </View> 
+                                                        : '' 
+                                                        }
+                                                    </View>
+
+                                                    <View style={{ backgroundColor: '#FFFFFF', marginLeft: 5, padding: 2, borderRadius: 25 }}>
+                                                        <Text style={{ fontSize: 12, opacity: 0.8, paddingLeft: 4, paddingRight: 4 }}>{item.sender.userName}</Text>
+                                                    </View>
+                                                </View>
+                                        :''}
+                                        <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
                                             <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode='contain' />
                                         </Pressable>
                                         {isLastItem && 
@@ -684,7 +754,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={styles.viewEnd}>
                                         <View style={styles.viewEnd}>
-                                            <Pressable style={styles.messsagePressEnd} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} onPress={()=> {
+                                            <Pressable style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(false) }} onPress={()=> {
                                                 if (!isControl) {
                                                     handleVideoPress(item._id);
                                                     setIsControl(true);
@@ -710,16 +780,39 @@ export const ChatMessage = ({ navigation, route }) => {
                             } else {
                                 return (
                                     <View style={[styles.viewStart]}>
-                                        {firstItemBySender &&
-                                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
-                                                <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}></View>
-                                                <View style={{ backgroundColor: '#FFFFFF', marginLeft: 5, padding: 2, borderRadius: 25 }}>
-                                                    <Text style={{ fontSize: 12, opacity: 0.8, paddingLeft: 4, paddingRight: 4 }}>{item.sender.userName}</Text>
+                                        {firstItemBySender ?
+                                            item.sender.avatar.includes('rgb') ?
+                                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+                                                    <View>
+                                                        <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }} />
+                                                        {adminId === item.sender.id ? 
+                                                            <View style={{height: 10, width: 10, backgroundColor: '#7C8596', borderRadius: 10, justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: 0, right: 0}}>
+                                                                <FontAwesomeIcon style={{}} size={7} color='yellow' icon={faKey} />
+                                                            </View> 
+                                                        : '' 
+                                                        }
+                                                    </View>
+                                                    <View style={{ backgroundColor: '#FFFFFF', marginLeft: 5, padding: 2, borderRadius: 25 }}>
+                                                        <Text style={{ fontSize: 12, opacity: 0.8, paddingLeft: 4, paddingRight: 4 }}>{item.sender.userName}</Text>
+                                                    </View>
                                                 </View>
-                                            </View>
-                                        }
-
-                                        <Pressable style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, {marginLeft: 30}]} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} onPress={()=> {
+                                            : 
+                                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}>
+                                                    <View>
+                                                        <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
+                                                        {adminId === item.sender.id ? 
+                                                            <View style={{height: 10, width: 10, backgroundColor: '#7C8596', borderRadius: 10, justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: 0, right: 0}}>
+                                                                <FontAwesomeIcon style={{}} size={7} color='yellow' icon={faKey} />
+                                                            </View> 
+                                                        : '' 
+                                                        }
+                                                    </View>
+                                                    <View style={{ backgroundColor: '#FFFFFF', marginLeft: 5, padding: 2, borderRadius: 25 }}>
+                                                        <Text style={{ fontSize: 12, opacity: 0.8, paddingLeft: 4, paddingRight: 4 }}>{item.sender.userName}</Text>
+                                                    </View>
+                                                </View>
+                                        :''}
+                                        <Pressable style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, {marginLeft: 30}, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} onPress={()=> {
                                                 if (!isControl) {
                                                     handleVideoPress(item._id);
                                                     setIsControl(true);
@@ -750,7 +843,7 @@ export const ChatMessage = ({ navigation, route }) => {
                         if (item.sender?.id === user.user?.user?.id) {
                             return (
                                 <View style={styles.viewEnd}>
-                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id) }} style={styles.messsagePressEnd}>
+                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChooseId(item._id), setIsMessageRecall(true)  }} style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
                                         <Text style={[styles.textMessagePress, { opacity: 0.7 }]}>Tin nhắn đã được thu hồi</Text>
                                         {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
                                     </Pressable>
@@ -759,12 +852,33 @@ export const ChatMessage = ({ navigation, route }) => {
                         } else {
                             return (
                                 <View style={[styles.viewStart, firstItemBySender ? { flexDirection: 'row' } : {}]}>
-                                    {firstItemBySender && <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}></View>}
-                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
+                                    {firstItemBySender ?
+                                            item.sender.avatar.includes('rgb') ?
+                                            <View>
+                                                <View style={{ height: 20, width: 20, backgroundColor: item.sender.avatar, borderRadius: 20, marginLeft: 5 }}/>
+                                                {adminId === item.sender.id ? 
+                                                    <View style={{height: 10, width: 10, backgroundColor: '#7C8596', borderRadius: 10, justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: 0, right: 0}}>
+                                                        <FontAwesomeIcon style={{}} size={7} color='yellow' icon={faKey} />
+                                                    </View> 
+                                                : '' 
+                                                }
+                                            </View>
+                                            : 
+                                            <View>
+                                                <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
+                                                {adminId === item.sender.id ? 
+                                                    <View style={{height: 10, width: 10, backgroundColor: '#7C8596', borderRadius: 10, justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: 0, right: 0}}>
+                                                        <FontAwesomeIcon style={{}} size={7} color='yellow' icon={faKey} />
+                                                    </View> 
+                                                : '' 
+                                                }
+                                            </View>
+                                        :''}
+                                    <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChooseId(item._id) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
                                         {firstItemBySender && <Text style={styles.name}>{item.sender.userName}</Text>}
                                         <Text style={[styles.textMessagePress, { opacity: 0.7 }]}>Tin nhắn đã được thu hồi</Text>
                                         {isLastItem && <Text style={styles.dateTime}>{moment.utc(item.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>}
-                                    </Pressable>
+                                    </Pressable> 
                                 </View>
                             )
                         }
@@ -774,7 +888,7 @@ export const ChatMessage = ({ navigation, route }) => {
         }
     }
 
-    function objectId() {
+    function objectId() { 
         return hex(Date.now() / 1000) +
             ' '.repeat(16).replace(/./g, () => hex(Math.random() * 16))
     }
@@ -845,15 +959,15 @@ export const ChatMessage = ({ navigation, route }) => {
                                 data={messages}
                                 renderItem={renderItem}
                                 keyExtractor={(item, index) => index.toString()}
-                                onContentSizeChange={() => scrollToBottomWithOffset(80)}
-                                onLayout={() => scrollToBottomWithOffset(80)}
+                                // onContentSizeChange={() => scrollToBottomWithOffset(80)}
+                                // onLayout={() => scrollToBottomWithOffset(80)}
                                 style={{height: '100%'}}
                             ></FlatList>
                             
                         </View>
                     ) : (
                         <View style={{flex: 1, justifyContent: 'flex-end', alignItems: 'center', marginBottom: 100}}>
-                            <View style={{backgroundColor: '#FFFFFF', height: '25%', width: '80%', borderRadius: 20, justifyContent: 'center'}}>
+                            <View style={{backgroundColor: '#FFFFFF', height: 150, width: '80%', borderRadius: 20, justifyContent: 'center'}}>
                                 <View style={{alignItems: 'center'}}>
                                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                                         {items.type?.includes('PRIVATE_CHAT') ? 
@@ -977,38 +1091,47 @@ export const ChatMessage = ({ navigation, route }) => {
             
             {/* Overlay và Modal */}
             {modalVisible && (
-                <View style={styles.overlay}>
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={() => setModalVisible(false)}
-                    >
-                        <View style={[styles.modalContainer, { position: 'absolute' }]}>
-                            <View style={styles.modalContent}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Pressable onPress={() => { setModalVisible1(true); setModalVisible(false) }} style={styles.longPress}>
-                                        <FontAwesomeIcon size={20} color='red' icon={faTrashCan} />
-                                        <Text style={{ fontSize: 15, marginTop: 5 }}>Xóa</Text>
-                                    </Pressable>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <Pressable style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.3)', justifyContent: 'center', alignItems: 'center'}} onPress={()=> {setModalVisible(false)}}>
+                        <Pressable style={styles.modalContent}>  
+                            <View style={{ flexDirection: 'row', marginTop: 5, flexWrap: 'wrap',}}>
+                                <Pressable onPress={() => { }} style={styles.longPress}>
+                                    <FontAwesomeIcon size={18} color='#6F58A8' icon={faReply} />
+                                    <Text style={{ fontSize: 13, marginTop: 5 }}>Trả lời</Text>
+                                </Pressable>
 
-                                    {isUserChoose ? (
+                                <Pressable onPress={() => { }} style={styles.longPress}>
+                                    <FontAwesomeIcon size={18} color='#4879D8' icon={faShare} />
+                                    <Text style={{ fontSize: 13, marginTop: 5, textAlign: 'center' }}>Chuyển tiếp</Text>
+                                </Pressable>
+
+                                <Pressable onPress={() => { setModalVisible1(true); setModalVisible(false) }} style={styles.longPress}>
+                                    <FontAwesomeIcon size={18} color='red' icon={faTrashCan} />
+                                    <Text style={{ fontSize: 13, marginTop: 5 }}>Xóa</Text>
+                                </Pressable>
+
+                                {isUserChoose ? 
+                                    !isMessageRecall ? 
                                         <Pressable onPress={() => { deleteMessage() }} style={styles.longPress}>
-                                            <FontAwesomeIcon size={21} color='orange' icon={faRotateRight} />
-                                            <Text style={{ fontSize: 15, marginTop: 5 }}>Thu hồi</Text>
-                                        </Pressable>
-                                    ) : (
-                                        <View></View>
-                                    )}
-                                </View>
+                                            <FontAwesomeIcon size={18} color='#F18338' icon={faRotateRight} />
+                                            <Text style={{ fontSize: 13, marginTop: 5 }}>Thu hồi</Text>
+                                        </Pressable> 
+                                    : '' 
+                                : ''}
 
-                                <Pressable onPress={() => setModalVisible(false)} style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
-                                    <Text>Close</Text>
+                                <Pressable onPress={() => { }} style={styles.longPress}>
+                                    <FontAwesomeIcon size={18} color='#5B5C60' icon={faCircleInfo} />
+                                    <Text style={{ fontSize: 13, marginTop: 5 }}>Chi tiết</Text>
                                 </Pressable>
                             </View>
-                        </View>
-                    </Modal>
-                </View>
+                        </Pressable>
+                    </Pressable>
+                </Modal>
             )}
 
             {modalVisible1 && (

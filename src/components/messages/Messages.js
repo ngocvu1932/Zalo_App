@@ -12,12 +12,14 @@ import { socket } from '../../config/io';
 
 export const Messages = ({ navigation }) => {
   const user = useSelector(state => state.user);
+  const currentId = user.user?.user?.id;
   const [chatData, setChatData] = useState([]);
   const [isLoading, setIsLoading] = useState(true); 
   const [access_token, setAccess_Token] = useState('');
   const [chatInfo, setChatInfo] = useState([]);
   const [loadAgain, setLoadAgain] =useState();
   const [loadAgainFocus, setLoadAgainFocus] =useState();
+  const [joined, setJoined] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -30,41 +32,44 @@ export const Messages = ({ navigation }) => {
   // socket
   useEffect(() => {
     socket.then(socket => {
-        socket.emit('setup'); 
-        socket.on('connected', (data) => {
-            console.log('Connected to server chat');
-        });
-
-        socket.on('receive-message', (data) => {
-            console.log('receive-message', data);
-        });
-
-        // socket.on('re-sendMessageRe', (data) => {
-        //   console.log('re-sendMessageRe', data);
-        // });
-
-        // socket.on('receive-modify-message', (data) => {
-        //     if (data) {
-        //         setLoadAgain(true);
-        //     }
-        // });
-
-        // socket.on('receive-issend-message', (data) => {
-        //     if (data) {
-        //         setIsSend(true);
-        //     }
-        // });
+      socket.emit('setup'); 
+      socket.on('connected', (data) => {
+        console.log('Connected');
+      }); 
     });
 
     return () => {
-        socket.then(socket => {
-            socket.off('connected');
-            socket.off('receive-message');
-            // socket.off('receive-modify-message');
-            // socket.off('receive-issend-message');
-        });
+      socket.then(socket => {
+        socket.off('connected');
+      });
     };
-}, []);
+  }, []);
+
+  useEffect(() => {
+    if (chatData){
+      socket.then(socket => {
+        chatData.forEach(chat => {
+          socket.emit('join-room', chat._id);
+        } );
+        setJoined(true);
+      });
+    }
+  },  [chatData]);
+ 
+  useEffect(() => {
+    if (joined) {
+      socket.then(socket => {
+        socket.on('receive-message', (data) => {
+            console.log('receive-message', data.content);
+        });
+      });
+    }
+    return () => {
+      socket.then(socket => {
+        socket.off('receive-message');
+      });
+    };
+  }, [joined]);
 
   useEffect(() => {
     setAccess_Token(user.user?.access_token);

@@ -2,12 +2,12 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { styles } from './style'
 import { Text, View, Pressable, Image, ActivityIndicator, ScrollView, Dimensions } from 'react-native'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faChevronLeft, faEllipsis, faGear, faPhone, faUserPlus } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faEllipsis, faGear, faPhone, faUserPlus, faVideoCamera } from '@fortawesome/free-solid-svg-icons';
 import axios from '../../config/axios';
 import Toast from 'react-native-easy-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { socket } from '../../config/io';
-import { faCommentDots } from '@fortawesome/free-regular-svg-icons';
+import { faCommentDots, faImage } from '@fortawesome/free-regular-svg-icons';
 import { setUserInfo } from '../../redux/userInfoSlice';
 import { Video, Audio } from 'expo-av';
 
@@ -262,6 +262,16 @@ export const Profile = ({navigation, route}) => {
         :
         ''
       }
+
+      { !isUser ? 
+        isFriend ? 
+          <View style={{position: 'absolute', right: 20, bottom: 30, zIndex: 3}}>
+            <Pressable style={[styles.btnChat, {width: 120}]} onPress={()=> alert('re')}>
+              <FontAwesomeIcon icon={faCommentDots} color='#0763EA' size={18} />
+              <Text style={{color: '#0763EA', fontSize: 16, fontWeight: '500', marginLeft: 10}}>Nhắn tin</Text> 
+            </Pressable>
+          </View> 
+      : '' : ''}
       <View style={[{position: 'absolute', top: '4.5%', left: 0, right: 0,  width: '100%', zIndex: 10}, isScrolling ? {backgroundColor: '#FFFFFF', borderBottomWidth: 1, borderBottomColor: '#D4D4D4'}: '']} >
         <View style={{flexDirection: 'row'}}>
           <Pressable style={{marginLeft: 10, flexDirection: 'row', height: 40, alignItems: 'center', justifyContent: 'flex-start', minWidth: 40}} onPress={()=>{navigation.goBack()}}>
@@ -274,7 +284,6 @@ export const Profile = ({navigation, route}) => {
                     : 
                       <Image source={{uri: userInfo.userInfo?.avatar}} style={{height: 30, width: 30, borderRadius: 15}} />
                     }
-
                     <Text style={{fontWeight:'bold', fontSize: 18, marginLeft: 10}}>{userInfo.userInfo?.userName}</Text>
                   </View>
               </View> 
@@ -318,7 +327,7 @@ export const Profile = ({navigation, route}) => {
           </View> 
         </View>
 
-        <View style={{alignItems: 'center', marginTop: '-15%'}} >  
+        <View style={{alignItems: 'center', marginTop: '-20%'}} >  
           {/* khúc này là ảnh đại diện và bio */}
           <View style={{alignItems: 'center'}}>
             {userInfo.userInfo?.avatar.includes('rgb') ?
@@ -326,46 +335,36 @@ export const Profile = ({navigation, route}) => {
             : 
               <Image source={{uri: userInfo.userInfo?.avatar }} style={{height: 140, width: 140, borderRadius: 100, borderWidth: 3, borderColor: '#FFFFFF'}} />
             }
-            <Text style={{fontWeight:'bold', fontSize: 18, marginBottom: 20}}> {userInfo.userInfo?.userName} </Text>
-            <Text>{userInfo.userInfo.userInfo.description}</Text>
+            <Text style={{fontWeight:'bold', fontSize: 20, marginBottom: 10, marginTop: 10}}> {userInfo.userInfo?.userName} </Text>
+            <Text style={{fontSize: 13}}>
+              {userInfo.userInfo?.userInfo?.description !== null ? 
+                userInfo.userInfo.userInfo.description 
+              : 
+                isUser ? 'Cập nhật giới thiệu bản thân' : ''
+              }
+            </Text>
           </View>
-        
-          {
-            userInfo?.userInfo?.description ? 
-              <Text>{userInfo.userInfo.description}</Text> : 
-              isUser ? 
-              <View>
-                <Text>Cập nhật giới thiệu bản thân</Text>
-              </View> 
-              : '' 
-          }
         </View>
 
         { !isUser ? 
           isFriend ? (
             // Không phải chính mình và là bạn bè
-            <View style={{width: '100%', alignItems: 'center', height: '100%'}}>
-              <View style={{flexDirection: 'row'}}>
-                <Pressable>
-                  <Text> Ảnh</Text>
+            <View style={{width: '100%', alignItems: 'center', marginTop: 10}}>
+              <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '90%'}}>
+                <Pressable style={styles.btnOptions}>
+                  <FontAwesomeIcon style={{marginLeft: 20}} color='blue' size={18} icon={faImage} />
+                  <Text style={{marginLeft: 10}}> Ảnh</Text>
                 </Pressable>
 
-                <Pressable>
-                  <Text> Video</Text>
-                </Pressable>
-              </View>
-
-              <View style={{}}>
-                <Pressable style={[styles.btnChat]} onPress={()=> alert('re')}>
-                  <FontAwesomeIcon icon={faCommentDots} color='#0763EA' size={18} />
-                  <Text style={{color: '#0763EA', fontSize: 16, fontWeight: '500', marginLeft: 10}}>Nhắn tin</Text> 
+                <Pressable style={styles.btnOptions}>
+                  <FontAwesomeIcon style={{marginLeft: 20}} color='#22B14C' size={19} icon={faVideoCamera} />
+                  <Text style={{marginLeft: 10}}> Video</Text>
                 </Pressable>
               </View>
-
             </View>
           ) : (
             // Không phải chính mình và không là bạn bè
-            <View style={{width: '100%', alignItems: 'center', backgroundColor: 'red'}} >
+            <View style={{width: '100%', alignItems: 'center', marginTop: 10}} >
               <View style={{width: '80%', alignItems: 'center'}}>
                 {sendRequestFriend ? 
                   checkUserSendRequest ? <Text style={{marginBottom: 10, textAlign: 'center'}}>Lời mời kết bạn đã được gửi đi. Hãy để lại tin nhắn cho {userInfo?.userName} trong lúc đợi chờ nhé!</Text> 
@@ -376,7 +375,7 @@ export const Profile = ({navigation, route}) => {
                 }
               </View>
 
-              <View style={{width: '85%', flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'violet' }}>
+              <View style={{width: '85%', flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Pressable style={[styles.btnChat, sendRequestFriend ? {width: '48%'} : {width: '78%'}]} onPress={()=> joinChat()}>
                   <FontAwesomeIcon icon={faCommentDots} color='#0763EA' size={18} />
                   <Text style={{color: '#0763EA', fontSize: 16, fontWeight: '500', marginLeft: 10}}>Nhắn tin</Text> 
@@ -403,61 +402,16 @@ export const Profile = ({navigation, route}) => {
         : 
           (
             // Chính mình
-            <View style={{ alignItems: 'center'}}>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Text>Cập nhật giới thiệu bản thân</Text>
-              <Video
-                source={{uri: 'http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4'}} // Đường dẫn đến video
-                style={{width: 300, height: 200}}
-                useNativeControls // Sử dụng controls mặc định của hệ thống
-                resizeMode="contain" // Đặt chế độ hiển thị của video
-              />
-              <Text>Vũ đây nè</Text>
+            <View style={{ alignItems: 'center', marginTop: 30}}>
+              <Pressable style={styles.btnYouFeel}>
+                <Text style={{paddingLeft: 15, fontSize: 15, opacity: 0.6}}>Bạn đang nghĩ gì?</Text>
+                <Pressable style={styles.btnImageFeel}>
+                  <FontAwesomeIcon size={20} color='#8CC749' icon={faImage} />
+                </Pressable>
+              </Pressable>
             </View>
           )
         }
-
-       
       </ScrollView>
       <Toast style={{backgroundColor: 'green'}} ref={toastRef} position='center' />
     </View>

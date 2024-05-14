@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Modal, FlatList } from 'react-native';
+import { View, Text, Pressable, Modal, FlatList, Image } from 'react-native';
 import React, { useRef, useState } from 'react';
 import { styles } from './style';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,8 +16,6 @@ export const ChangeAdminGroup = ({navigation, route}) => {
     const toastRef = useRef(null);
     const dispatch = useDispatch();
     const [idMember, setIdMember] = useState();
-
-    console.log("GroupChatInfo: ", groupChatInfo._id);
 
     const getGroupChat = async () => {
         try {
@@ -66,7 +64,7 @@ export const ChangeAdminGroup = ({navigation, route}) => {
                         {item.avatar?.includes('rgb') ? 
                             <View style={{height: 50, width: 50, borderRadius: 30, backgroundColor: item.avatar, marginLeft: 15}}></View>
                         : 
-                            <Image />
+                            <Image style={{height: 50, width: 50, borderRadius: 30, marginLeft: 15}} source={{uri: item.avatar}} />
                         }
                         <Text numberOfLines={1} style={{marginLeft: 10, fontSize: 16}}>{item.userName}</Text>
                     </Pressable> 

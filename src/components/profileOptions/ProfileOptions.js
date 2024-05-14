@@ -515,7 +515,9 @@ export const ProfileOptions = ({navigation, route}) => {
 
               <View style={{width: '90%', flex: 1}}>
                 <TextInput style={styles.textBio} value={bio} onChangeText={(text) => {setBio(text)}} multiline={true} numberOfLines={5} maxLength={150} placeholder='Thêm lời giới thiệu của bạn...' />
-                <Text style={{position: 'absolute', bottom: 55, right: 10}}>{bio.length}/150</Text>
+                <Text style={{position: 'absolute', bottom: 55, right: 10}}>
+                  {bio === null ? '0' : bio.length}/150
+                </Text>
               </View>
 
               <View style={{width: '100%', marginBottom: 10, alignItems: 'flex-end'}}>

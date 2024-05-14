@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
 
     modalContent: {
         height: 250,
-        width: 300,
+        width: '85%',
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 10,
@@ -142,11 +142,12 @@ export const styles = StyleSheet.create({
     },
 
     longPress: {
-        height: 55, 
+        height: 70, 
         width: '25%', 
-        justifyContent: 'center', 
+        justifyContent: 'flex-start', 
         alignItems: 'center', 
-        padding: 2
+        padding: 2,
+        // backgroundColor: 'red'
     },
 
     name: {

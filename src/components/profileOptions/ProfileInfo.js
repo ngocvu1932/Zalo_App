@@ -20,7 +20,7 @@ export const ProfileInfo = ({navigation, route}) => {
     )
 
     return(
-        <View style={styles.container}>
+        <View style={styles.container}> 
             {/* thanh option */}
             <View style={{position: 'absolute', top: '4.5%', left: 0, right: 0, zIndex: 10, width: '100%'}}>
                 <Pressable style={{height: 40, width: 40, justifyContent: 'center', alignItems: 'center'}} onPress={()=> {navigation.goBack()}}>

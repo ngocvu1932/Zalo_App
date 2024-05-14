@@ -43,4 +43,32 @@ export const styles = StyleSheet.create({
         justifyContent: 'center', 
         alignItems: 'center',
     },
+
+    btnYouFeel: {
+        flexDirection: 'row', 
+        backgroundColor: '#FFFFFF', 
+        width: '90%', 
+        justifyContent: 'space-between', 
+        height: 50, 
+        alignItems: 'center',
+        borderRadius: 5,
+    },
+
+    btnImageFeel: {
+        height: 35, 
+        width: 50, 
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderLeftWidth: 1,
+        borderLeftColor: '#DFDFDF',
+    },
+
+    btnOptions: {
+        height: 50, 
+        backgroundColor: '#FFFFFF', 
+        width: '48%', 
+        alignItems: 'center',
+        borderRadius: 10,
+        flexDirection: 'row',
+    }
 });
