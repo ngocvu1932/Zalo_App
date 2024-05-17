@@ -8,7 +8,7 @@ const deviceSlice = createSlice({
     name: 'device',
     initialState,
     reducers: {
-      setDevice(state, action) {
+      setDevice(state, action) { 
         state.device = action.payload;
       },
     }

@@ -7,9 +7,6 @@ import { faArrowLeft, faArrowRight, faCamera, faCheck, faChevronLeft, faChevronR
 import axios from '../../config/axios';
 import Toast from 'react-native-easy-toast';
 import { useDispatch, useSelector } from 'react-redux';
-import { CheckBox } from 'react-native-elements';
-import { setIsCreateGroup, setisCreateGroup } from '../../redux/stateCreateGroupSlice';
-import { set } from 'zod';
 import {socket} from '../../config/io';
 import { setListFriend } from '../../redux/friendSlice';
 import { setGroupChatInfo } from '../../redux/groupChatInfoSlice';

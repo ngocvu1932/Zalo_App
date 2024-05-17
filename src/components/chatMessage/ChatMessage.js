@@ -10,7 +10,6 @@ import axios, { setAuthorizationAxios } from '../../config/axios';
 import moment from 'moment';
 import { CommonActions } from '@react-navigation/native';
 import * as ImagePicker from "expo-image-picker";
-import { setIsCreateGroup, setisCreateGroup } from '../../redux/stateCreateGroupSlice';
 import {CLOUD_NAME, UPLOAD_PRESET} from '@env'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Video, Audio } from 'expo-av';
@@ -138,7 +137,7 @@ export const ChatMessage = ({ navigation, route }) => {
             }
         };
 
-        if (items.type?.includes('GROUP_CHAT')) {
+        if (items.type === 'GROUP_CHAT') {
             getGroupChat();
             setLoadAgain(false)
             setLoadAgain1(true)
@@ -186,15 +185,15 @@ export const ChatMessage = ({ navigation, route }) => {
     }, [items._id, loadAgain1]);
 
     const handleReceiveMessage = async (data) => {
-        if (data.type.includes('TEXT')) {
+        if (data.type === 'TEXT') {
             console.log("Receive messgae: ", data.content, "|", data.chat);
             setIsMessage(true);
             setMessages(premessages => [...premessages, data]);
-        } else if (data.type.includes('IMAGES')) {
+        } else if (data.type === 'IMAGES') {
             console.log("Receive messgae: ", data.urls, "|", data.chat);
             setIsMessage(true);
             setMessages(premessages => [...premessages, data]);
-        } else if (data.type.includes('VIDEO')) {
+        } else if (data.type === 'VIDEO') {
             console.log("Receive messgae: ", data.urls, "|", data.chat);
             setIsMessage(true);
             setMessages(premessages => [...premessages, data]);
@@ -303,9 +302,9 @@ export const ChatMessage = ({ navigation, route }) => {
 
     const sendToCloud = async (type, formData) => {
         let typesend = ''
-        if (type.includes('IMAGES')) {
+        if (type ==='IMAGES') {
             typesend = 'image';
-        } else if (type.includes('VIDEO')) {
+        } else if (type === 'VIDEO') {
             typesend = 'video';
         }
         try {
@@ -336,7 +335,6 @@ export const ChatMessage = ({ navigation, route }) => {
 
                 console.log("Data send: ", dataSend);
                 setMessages(premessages => [...premessages, dataSend]);
-                dispatch(setIsCreateGroup());
 
                 const res = await axios.post('/chat/message', {
                     ...dataSend,
@@ -383,7 +381,6 @@ export const ChatMessage = ({ navigation, route }) => {
         try {
             // console.log("Data send: ", dataSend);
             setMessages(premessages => [...premessages, dataSend]);
-            dispatch(setIsCreateGroup());
             const res = await axios.post('/chat/message', {
                 ...dataSend,
                 sender: user.user?.user.id,
@@ -473,15 +470,15 @@ export const ChatMessage = ({ navigation, route }) => {
         const isLastItem = item === lastItemBySender[item.sender.id];
 
         // kiểm tra xem tin nhắn có phải là tin nhắn riêng tư không
-        if (items.type.includes('PRIVATE_CHAT')) {
+        if (items.type === 'PRIVATE_CHAT') {
             //so sánh phòng chat
-            if (item.chat.includes(items._id)) {
+            if (item.chat === items._id) {
                 //kiểm tra xem tin nhắn đã thu hồi chưa
                 if (!item.isDelete) {
                     // kiểm tra xem người dùng có xóa tin nhắn không
-                    if (!item.unViewList.includes(user.user?.user?.id)) {
-                        if (item.type.includes('TEXT')) {
-                            if (item.sender?.id === user.user?.user?.id) {
+                    if (!item.unViewList.includes(currentId)) {
+                        if (item.type === ('TEXT')) {
+                            if (item.sender?.id === currentId) {
                                 return (
                                     <View style={styles.viewEnd}>
                                         <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false) }} style={styles.messsagePressEnd}>
@@ -506,8 +503,8 @@ export const ChatMessage = ({ navigation, route }) => {
                                     </View>
                                 )
                             }
-                        } else if (item.type.includes('IMAGES')) {
-                            if (item.sender?.id === user.user?.user?.id) { 
+                        } else if (item.type === 'IMAGES') {
+                            if (item.sender?.id === currentId) { 
                                 return (
                                     <View style={styles.viewEnd}>
                                         <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false) }} style={styles.messsagePressEnd}>
@@ -542,8 +539,8 @@ export const ChatMessage = ({ navigation, route }) => {
                                     </View>
                                 )
                             }
-                        } else if (item.type.includes('VIDEO')) { 
-                            if (item.sender?.id === user.user?.user?.id) {
+                        } else if (item.type === 'VIDEO') { 
+                            if (item.sender?.id === currentId) {
                                 return (
                                     <View style={styles.viewEnd}>
                                         <Pressable style={styles.messsagePressEnd} delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item) }} onPress={()=> {
@@ -607,9 +604,9 @@ export const ChatMessage = ({ navigation, route }) => {
                     }
                 } else {
                     // chỗ này la tin nhắn đã thu hồi
-                    if (!item.unViewList.includes(user.user?.user?.id)) {
+                    if (!item.unViewList === (currentId)) {
                         //so sánh người gửi
-                        if (item.sender?.id === user.user?.user?.id) {
+                        if (item.sender?.id === currentId) {
                             return (
                                 <View style={styles.viewEnd}>
                                     {firstItemBySender && <Text style={styles.name}></Text>}
@@ -639,14 +636,14 @@ export const ChatMessage = ({ navigation, route }) => {
                 }
             }
         } else { // khúc này là public chat
-            if (item.chat.includes(items._id)) {
+            if (item.chat === (items._id)) {
                 //kiểm tra xem tin nhắn đã thu hồi chưa
                 if (!item.isDelete) {
                     // kiểm tra xem người dùng có xóa tin nhắn không
-                    if (!item.unViewList.includes(user.user?.user?.id)) {
+                    if (!item.unViewList.includes(currentId)) {
                         //so sánh người gửi
-                        if (item.type.includes('TEXT')) {
-                            if (item.sender?.id === user.user?.user?.id) {
+                        if (item.type === 'TEXT') {
+                            if (item.sender?.id === currentId) {
                                 return (
                                     <View style={styles.viewEnd}>
                                         <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false)  }} style={[styles.messsagePressEnd, adminId === item.sender?.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
@@ -688,8 +685,8 @@ export const ChatMessage = ({ navigation, route }) => {
                                     </View>
                                 )
                             }
-                        } else if (item.type.includes('IMAGES')) {
-                            if (item.sender?.id === user.user?.user?.id) {
+                        } else if (item.type === 'IMAGES') {
+                            if (item.sender?.id === currentId) {
                                 return (
                                     <View style={[styles.viewEnd, {}]}>
                                         <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false) }} style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]}>
@@ -750,8 +747,8 @@ export const ChatMessage = ({ navigation, route }) => {
                                     </View>
                                 )
                             } 
-                        } else if (item.type.includes('VIDEO')) {
-                            if (item.sender?.id === user.user?.user?.id) {
+                        } else if (item.type === 'VIDEO') {
+                            if (item.sender?.id === currentId) {
                                 return (
                                     <View style={styles.viewEnd}>
                                         <View style={styles.viewEnd}>
@@ -839,9 +836,9 @@ export const ChatMessage = ({ navigation, route }) => {
                         }
                     }
                 } else {
-                    if (!item.unViewList.includes(user.user?.user?.id)) {
+                    if (!item.unViewList.includes(currentId)) {
                         //so sánh người gửi
-                        if (item.sender?.id === user.user?.user?.id) {
+                        if (item.sender?.id === currentId) {
                             return (
                                 <View style={styles.viewEnd}>
                                     <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(true)  }} style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
@@ -927,8 +924,8 @@ export const ChatMessage = ({ navigation, route }) => {
                     </Pressable>
 
                     <Pressable style={{ flex: 1, marginLeft: 5, marginRight: 5}} onPress={() => navigation.navigate('ChatMessageOptions', { items: items })}>
-                        <Text numberOfLines={1} style={styles.nameTxt}>{items.type?.includes('GROUP_CHAT') ? !isLoadingGroupChat ? groupChatInfo.name: '' : items.userName}</Text>
-                        <Text style={[styles.stateTxt]}>{items.type?.includes('GROUP_CHAT') ? 'Bấm để xem thông tin' : !items.lastedOnline ? 'Vừa mới truy cập' : onlineTime(items.lastedOnline)}</Text>
+                        <Text numberOfLines={1} style={styles.nameTxt}>{items.type === 'GROUP_CHAT' ? !isLoadingGroupChat ? groupChatInfo.name: '' : items.userName}</Text>
+                        <Text style={[styles.stateTxt]}>{items.type === 'GROUP_CHAT' ? 'Bấm để xem thông tin' : !items.lastedOnline ? 'Vừa mới truy cập' : onlineTime(items.lastedOnline)}</Text>
                     </Pressable>  
 
                     <View style={{ flexDirection: 'row', width: '25%', justifyContent: 'space-between', marginRight: 10 }}>
@@ -947,7 +944,7 @@ export const ChatMessage = ({ navigation, route }) => {
                 </View>
             </LinearGradient>
 
-            <View style={[styles.body, device.device.includes('ios') ? isKeyboardOpen ? {paddingBottom: keyboardHeight + 85 + 90 }: {paddingBottom: 90 + 85} : '']}>
+            <View style={[styles.body, device.device === 'ios' ? isKeyboardOpen ? {paddingBottom: keyboardHeight + 85 + 90 }: {paddingBottom: 90 + 85} : '']}>
                 {isLoading ? 
                     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                         <ActivityIndicator size="large" color="black" />
@@ -963,15 +960,14 @@ export const ChatMessage = ({ navigation, route }) => {
                                 // onContentSizeChange={() => scrollToBottomWithOffset(80)}
                                 // onLayout={() => scrollToBottomWithOffset(80)}
                                 style={{height: '100%'}}
-                            ></FlatList>
-                            
+                            />
                         </View>
                     ) : (
                         <View style={{flex: 1, justifyContent: 'flex-end', alignItems: 'center', marginBottom: 100}}>
                             <View style={{backgroundColor: '#FFFFFF', height: 150, width: '80%', borderRadius: 20, justifyContent: 'center'}}>
                                 <View style={{alignItems: 'center'}}>
                                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                        {items.type?.includes('PRIVATE_CHAT') ? 
+                                        {items.type === 'PRIVATE_CHAT' ? 
                                             items.avatar?.substring(0, 3) === 'rgb' ? 
                                                 <View style={{height: 40, width: 40, backgroundColor: items.avatar, borderRadius: 20, marginLeft: 20}}></View> 
                                             : 
@@ -1048,7 +1044,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                             :
                                             ''
                                         }
-                                        <Text numberOfLines={1} style={{marginLeft: 20, width: '70%', fontSize: 17, fontWeight: '500'}}>{items.type?.includes('GROUP_CHAT') ? !isLoadingGroupChat ? groupChatInfo.name: '' : items.userName}</Text>
+                                        <Text numberOfLines={1} style={{marginLeft: 20, width: '70%', fontSize: 17, fontWeight: '500'}}>{items.type === 'GROUP_CHAT' ? !isLoadingGroupChat ? groupChatInfo.name: '' : items.userName}</Text>
                                     </View>
                                     <Text style={{marginTop: '5%'}}>Chưa có tin nhắn, hãy trò chuyện ngay nào!</Text>
                                 </View>
@@ -1058,7 +1054,7 @@ export const ChatMessage = ({ navigation, route }) => {
                 }
             </View>
 
-            <View style={[styles.footer, device.device.includes('ios') ? isKeyboardOpen ? {height: keyboardHeight + 85 }: {height: 85} : '']}>
+            <View style={[styles.footer, device.device === 'ios' ? isKeyboardOpen ? {height: keyboardHeight + 85 }: {height: 85} : '']}>
                 <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 64, backgroundColor: '#FFFFFF', width: '100%'}}>
                     <Pressable style={{ marginLeft: 10 }}>
                         <FontAwesomeIcon size={22} color="#5E5E5E" icon={faLaughWink} />

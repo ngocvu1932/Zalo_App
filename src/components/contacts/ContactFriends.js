@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { faCakeCandles, faCalculator, faList, faMessage, faPhone, faUserPlus, faVideo } from "@fortawesome/free-solid-svg-icons";
+import { faCakeCandles, faList, faPhone, faUserPlus, faVideo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { View, Text, Pressable, ScrollView, StyleSheet, FlatList, ActivityIndicator, Image} from "react-native";
+import { View, Text, Pressable, ScrollView, FlatList, Image} from "react-native";
 import axios from "../../config/axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setListFriend } from "../../redux/friendSlice";
@@ -147,21 +147,24 @@ export const ContactFriends = ({ navigation }) => {
     }
     
     return(
-      <Pressable style={styles.btnItem} onPress={()=> joinChatWithFriend(data.id)}>
+      <Pressable style={styles.btnItem} onPress={()=> {joinChatWithFriend(data.id)}}>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
           {data?.avatar.substring(0, 3) ==='rgb' ? 
             <View>
               <View style={{height: 45, width: 45, backgroundColor: data?.avatar, borderRadius: 25, marginLeft: 15}}></View> 
-              {!data.lastedOnline? 
+              {!data?.lastedOnline ? 
                 <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
               : ''}
             </View>
           : 
             <View>
               <Image source={{uri: data?.avatar}} style={{height: 45, width: 45, borderRadius: 25, marginLeft: 15}} />
-              {!data.lastedOnline? 
-                <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
-              : ''}
+              {
+                !data?.lastedOnline ? 
+                  <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
+                : 
+                ''
+              }
             </View>
           }
           <Text style={{marginLeft: 15, fontSize: 16, flex: 1}}>{data?.userName}</Text>

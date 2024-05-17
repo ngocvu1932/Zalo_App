@@ -61,7 +61,7 @@ export const ChangeAdminGroup = ({navigation, route}) => {
             <View>
                 {groupChatInfo.administrator !== item.id ? 
                     <Pressable style={{height: 70, flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF'}} onPress={()=> {setIdMember(item); setModalVisible(true)}}>
-                        {item.avatar?.includes('rgb') ? 
+                        {item.avatar.substring(0 ,3) === 'rgb' ? 
                             <View style={{height: 50, width: 50, borderRadius: 30, backgroundColor: item.avatar, marginLeft: 15}}></View>
                         : 
                             <Image style={{height: 50, width: 50, borderRadius: 30, marginLeft: 15}} source={{uri: item.avatar}} />

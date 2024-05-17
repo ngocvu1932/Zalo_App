@@ -164,9 +164,9 @@ export const ProfileOptions = ({navigation, route}) => {
 
   const sendToCloud = async (type, formData) => {
     let typesend = ''
-    if (type.includes('IMAGES')) {
+    if (type === 'IMAGES') {
         typesend = 'image';
-    } else if (type.includes('VIDEO')) {
+    } else if (type === 'VIDEO' ) {
         typesend = 'video';
     }
     try {

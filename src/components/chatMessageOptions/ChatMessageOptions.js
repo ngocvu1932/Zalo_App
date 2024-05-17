@@ -24,9 +24,8 @@ export const ChatMessageOptions = ({navigation, route}) => {
     const [isToggled, setToggled] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisibleChangeName, setModalVisibleChangeName] = useState(false);
-    const [groupName, setGroupName] = useState(groupChatInfo.name)
+    const [groupName, setGroupName] = useState(groupChatInfo?.name)
     const dispatch = useDispatch();
-
     const handleToggle = () => {
         setToggled(!isToggled);
     };
@@ -163,9 +162,9 @@ export const ChatMessageOptions = ({navigation, route}) => {
 
     const sendToCloud = async (type, formData) => {
         let typesend = ''
-        if (type.includes('IMAGES')) {
+        if (type === 'IMAGES') {
             typesend = 'image';
-        } else if (type.includes('VIDEO')) {
+        } else if (type === 'VIDEO') {
             typesend = 'video';
         }
         try {
@@ -261,7 +260,7 @@ export const ChatMessageOptions = ({navigation, route}) => {
 
             <ScrollView style={styles.body}>
                 <View style={{alignItems: 'center', backgroundColor: '#FFFFFF'}}>
-                    <Pressable disabled={items.type?.includes('GROUP_CHAT')} style={{alignItems: 'center', marginTop: 20}} onPress={()=>{
+                    <Pressable disabled={items.type === 'GROUP_CHAT'} style={{alignItems: 'center', marginTop: 20}} onPress={()=>{
                         navigation.navigate('Profile', {phoneNumber: items.phoneNumber, isUser: isUser })
                     }}>
                         {items.type ==="PRIVATE_CHAT" ? 
@@ -293,7 +292,7 @@ export const ChatMessageOptions = ({navigation, route}) => {
 
 
                         <View style={{marginTop: 10, alignItems: 'center'}}>
-                            {items.type.includes('GROUP_CHAT') ? 
+                            {items.type === 'GROUP_CHAT' ? 
                                 <View style={{flexDirection: 'row'}} >
                                     <Text numberOfLines={1} style={{fontSize: 18, fontWeight: 'bold', maxWidth: 320}}>{groupChatInfo.name}</Text>                 
                                     <Pressable style={{width: 30, height: 30, backgroundColor: '#F6F6F6', alignItems: 'center', justifyContent: 'center', borderRadius: 20}} onPress={()=> setModalVisibleChangeName(true)}>
@@ -314,7 +313,7 @@ export const ChatMessageOptions = ({navigation, route}) => {
                             <Text style={{marginTop:10, textAlign: 'center'}} >Tìm tin nhắn</Text>
                         </Pressable> 
                         
-                        {items.type=="PRIVATE_CHAT" ? (
+                        {items.type === "PRIVATE_CHAT" ? (
                             <Pressable onPress={()=> {navigation.navigate('Profile', {phoneNumber: items.phoneNumber , isUser: isUser})}} style={styles.pressbtnOP}>
                                 <View style={styles.iconInPress}>
                                     <FontAwesomeIcon color='#505050' size={22} icon={faUser} />
@@ -347,7 +346,7 @@ export const ChatMessageOptions = ({navigation, route}) => {
                 </View>
 
                 <View style={{marginTop: 10}}>
-                    {items.type=="PRIVATE_CHAT" ? 
+                    {items.type === "PRIVATE_CHAT" ? 
                         <View>
                             <Pressable style={styles.btnOpts}>
                                 <FontAwesomeIcon style={{marginLeft: 15}} color='#787D80' size={20} icon={faPencil} />
@@ -382,7 +381,7 @@ export const ChatMessageOptions = ({navigation, route}) => {
 
                             <Pressable style={[styles.btnOpts, {marginTop: 10}]}>
                                 <FontAwesomeIcon style={{marginLeft: 15}} color='#787D80' size={20} icon={faImage} />
-                                <Text style={styles.txt}>Tạo nhóm với {items.type.includes('GROUP_CHAT') ? groupChatInfo.name : items.userName}</Text>
+                                <Text style={styles.txt}>Tạo nhóm với {items.type === 'GROUP_CHAT' ? groupChatInfo.name : items.userName}</Text>
                                 <FontAwesomeIcon style={{marginRight: 10}} color='#787D80' size={15} icon={faChevronRight} />
                             </Pressable>
 
@@ -390,7 +389,7 @@ export const ChatMessageOptions = ({navigation, route}) => {
 
                             <Pressable style={[styles.btnOpts]}>
                                 <FontAwesomeIcon style={{marginLeft: 15}} color='#787D80' size={20} icon={faUserPlus} />
-                                <Text style={styles.txt}>Thêm {items.type.includes('GROUP_CHAT') ? groupChatInfo.name : items.userName} vào nhóm</Text>
+                                <Text style={styles.txt}>Thêm {items.type === 'GROUP_CHAT' ? groupChatInfo.name : items.userName} vào nhóm</Text>
                                 <FontAwesomeIcon style={{marginRight: 10}} color='#787D80' size={15} icon={faChevronRight} />
                             </Pressable>
                             
@@ -458,7 +457,7 @@ export const ChatMessageOptions = ({navigation, route}) => {
                                 <Text style={styles.txt}>Xóa lịch sử trò chuyện</Text>
                             </Pressable>
                         </View>
-                    : items.type == "GROUP_CHAT" ? 
+                    : items.type === "GROUP_CHAT" ? 
                         <View>
                             <Pressable style={[styles.btnOpts, {justifyContent: 'space-between'}]}>
                                 <FontAwesomeIcon style={{marginLeft: 15}} color='#787D80' size={20} icon={faPencil} />

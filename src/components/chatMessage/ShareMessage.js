@@ -1,10 +1,10 @@
-import { View, Text, Pressable, FlatList, TextInput, Image } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { styles } from './style'
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { faSearch, faXmark } from '@fortawesome/free-solid-svg-icons'
-import axios from '../../config/axios'
-import { useSelector } from 'react-redux'
+import { View, Text, Pressable, FlatList, TextInput, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { styles } from './style';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faSearch, faXmark } from '@fortawesome/free-solid-svg-icons';
+import axios from '../../config/axios';
+import { useSelector } from 'react-redux';
 
 export const ShareMessage = ({navigation, route}) => {
     const {data} = route.params;

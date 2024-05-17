@@ -40,7 +40,7 @@ export const AccountAndSecurity = ({navigation}) => {
           <Text style={styles.txtTitle}>Tài khoản</Text>
           <View style={{alignItems: 'center'}} >
             <Pressable style={styles.pressAccount} onPress={()=> {alert('Thông tin cá nhân')}}>
-              { user.user?.user?.avatar?.includes('rgb') ? 
+              { user.user?.user?.avatar?.substring(0 ,3) === 'rgb' ? 
                 <View style={[styles.avatar, {backgroundColor: user.user?.user?.avatar}]} /> 
               :  
                 <Image source={{uri: user.user?.user?.avatar}} style={styles.avatar}></Image>

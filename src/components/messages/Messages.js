@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faSearch, faQrcode, faPlus } from '@fortawesome/free-solid-svg-icons';
 import axios, { setAuthorizationAxios } from '../../config/axios'
 import { CommonActions } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { LinearGradient } from 'expo-linear-gradient';
 import { socket } from '../../config/io';
 
@@ -99,7 +99,7 @@ export const Messages = ({ navigation }) => {
 
   useEffect(() => {
     const dataChat = chatData.map((item) => {
-      if (item.type?.includes('PRIVATE_CHAT')) {
+      if (item.type === 'PRIVATE_CHAT' ) {
         if (item.participants[0]?.id === user.user?.user?.id) {
           return {
             _id: item._id,
@@ -125,7 +125,7 @@ export const Messages = ({ navigation }) => {
             lastedOnline: item.participants[0]?.lastedOnline
           };
         }
-      } else if (item.type.includes('GROUP_CHAT')) {
+      } else if (item.type === 'GROUP_CHAT') {
         return {
           _id: item._id,
           userName: item.name,
@@ -143,7 +143,6 @@ export const Messages = ({ navigation }) => {
     setChatInfo(dataChat);
   }, [chatData]);
 
-  // Trong một component hoặc bất kỳ nơi nào muốn thực hiện việc xóa các màn hình trước đó
   const resetToScreen = (navigation, routeName) => {
     navigation.dispatch(CommonActions.reset({
       index: 0,
@@ -153,7 +152,6 @@ export const Messages = ({ navigation }) => {
 
   const renderItem = ({ item }) => {
     const { lastedMessage, ...rest } = item;
-    // console.log('item', item);
     let content;
     let time;
     if (item.lastedMessage === null) {
@@ -200,8 +198,8 @@ export const Messages = ({ navigation }) => {
       <View style={{width: '100%'}}>
         <Pressable style={styles.btnSelectChat} onPress={() => {navigation.navigate('ChatMessage', { items: {...rest}, flag: false})}}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '95%' }}>
-          {item.type?.includes('PRIVATE_CHAT') ? 
-            item.avatar?.includes('rgb')? 
+          {item.type === 'PRIVATE_CHAT' ? 
+            item.avatar?.substring(0 ,3) === 'rgb' ? 
               <View style={{height: 60, width: 60, backgroundColor: item.avatar, borderRadius: 30}} />
             : 
               <Image style={{height: 60, width: 60, borderRadius: 30}} source={{uri: item.avatar}} />
@@ -220,7 +218,7 @@ export const Messages = ({ navigation }) => {
                             styles.position2
                         ]}
                       >
-                        {participant.avatar.includes('rgb') ? 
+                        {participant.avatar?.substring(0 ,3) === 'rgb' ? 
                           <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
                         : 
                           <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
@@ -235,7 +233,7 @@ export const Messages = ({ navigation }) => {
                             styles.position3_1
                         ]}
                       >
-                        {participant.avatar.includes('rgb') ? 
+                        {participant.avatar?.substring(0 ,3) === 'rgb' ? 
                           <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
                         : 
                           <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
@@ -250,7 +248,7 @@ export const Messages = ({ navigation }) => {
                             [styles.position3_1, {backgroundColor: '#E9ECF3', justifyContent: 'center', alignItems: 'center', borderRadius: 15, height: 28, width: 28}]
                         ]}
                       >
-                        {participant.avatar.includes('rgb') ? 
+                        {participant.avatar?.substring(0 ,3) === 'rgb' ? 
                           <View style={{}}>
                             {index === 3 ? 
                               <Text>{item.participants.length - index}</Text> 
