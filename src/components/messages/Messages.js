@@ -80,7 +80,7 @@ export const Messages = ({ navigation }) => {
   useEffect(() => {
     const fetchChat = async () => {
       try {
-        const response = await axios.get('/chat/pagination?page=1&limit=100');
+        const response = await axios.get('/chat/pagination?limit=100');
         if (response.errCode === 0) { 
           setChatData(response.data);
           setIsLoading(false);
@@ -153,6 +153,49 @@ export const Messages = ({ navigation }) => {
 
   const renderItem = ({ item }) => {
     const { lastedMessage, ...rest } = item;
+    // console.log('item', item);
+    let content;
+    let time;
+    if (item.lastedMessage === null) {
+      content = "Chưa có tin nhắn";
+      const now = moment();
+      const updatedAt = moment(item.updatedAt);
+      const duration = moment.duration(now.diff(updatedAt));
+      time = duration.days() > 0 
+        ? `${duration.days()} ngày trước` 
+        : duration.hours() > 0 
+        ? `${duration.hours()} giờ trước` 
+        : duration.minutes() > 0 
+        ? `${duration.minutes()} phút trước` 
+        : duration.seconds() > 0 
+        ? `${duration.seconds()} giây trước` 
+        : 'Ngay bây giờ';
+    } else {
+      const now = moment();
+      const updatedAt = moment(item.lastedMessage?.updatedAt);
+      const duration = moment.duration(now.diff(updatedAt));
+      const fullName = item.lastedMessage?.sender.userName.split(" ");
+      const lastName = fullName[fullName.length - 1];
+      time = duration.days() > 0 
+        ? `${duration.days()} ngày trước` 
+        : duration.hours() > 0 
+        ? `${duration.hours()} giờ trước` 
+        : duration.minutes() > 0 
+        ? `${duration.minutes()} phút trước` 
+        : duration.seconds() > 0 
+        ? `${duration.seconds()} giây trước` 
+        : 'Ngay bây giờ';
+
+      if (item.lastedMessage.type === 'TEXT') {
+        content = `${lastName}: ${item.lastedMessage.content}`
+      } else if (item.lastedMessage.type === 'IMAGES') {
+        content = `${lastName}: Đã gửi ảnh`
+      } else if (item.lastedMessage.type === 'VIDEO') {
+        content = `${lastName}: Đã gửi video`
+      } else {
+        content = `${lastName}: Đã gửi gì đó`
+      }
+    }
     return (
       <View style={{width: '100%'}}>
         <Pressable style={styles.btnSelectChat} onPress={() => {navigation.navigate('ChatMessage', { items: {...rest}, flag: false})}}>
@@ -234,15 +277,9 @@ export const Messages = ({ navigation }) => {
 
             <View style={{ flex: 1, marginLeft: 15 }}> 
               <Text numberOfLines={1} style={{ fontSize: 20, marginBottom: 3 }}>{item?.userName}</Text>
-              <Text style={{ marginTop: 3 }}>
-                {
-                  item.lastedMessage?.type === 'TEXT' ?
-                    item.lastedMessage?.content
-                    : item.lastedMessage?.type === 'IMAGE' ? 'Đã gửi 1 ảnh' : 'Đã gửi 1 video'
-                }
-              </Text>
+              <Text style={{ marginTop: 3 }}>{content}</Text>
             </View>
-            <Text>{moment.utc(item.lastedMessage?.updatedAt).utcOffset('+07:00').format('HH:mm')}</Text>
+            <Text>{time}</Text>
           </View>
         </Pressable>
         {renderLine()}

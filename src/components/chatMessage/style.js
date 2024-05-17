@@ -233,8 +233,75 @@ export const styles = StyleSheet.create({
 
     position3_1: {
         position: 'absolute',
-        bottom: 3,
+        bottom: 4,
         right: 3,
+        zIndex: 4
+    },
+
+    position3_2: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        zIndex: 4
+    },
+
+    viewShareMess: {
+        height: 120, 
+        width: '100%', 
+        backgroundColor: '#FFFFFF',
+        position: 'absolute',
+        bottom: 0, 
+        left: 0,
+        borderTopWidth: 1,
+        borderTopColor: '#E5E5E5',
+    },
+
+    position0_3: {
+        position: 'absolute',
+        top: 0,
+        left: 11,
+        zIndex: 6
+    },
+
+    position1_3: {
+        position: 'absolute',
+        bottom: 5,
+        left: 0,
+        zIndex: 5
+    },
+
+    position2_3: {
+        position: 'absolute',
+        bottom: 5,
+        right: 3,
+        zIndex: 4
+    },
+
+    position0_4: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 6
+    },
+
+    position1_4: {
+        position: 'absolute',
+        top: 0,
+        right: 5,
+        zIndex: 5
+    },
+
+    position2_4: {
+        position: 'absolute',
+        bottom: 5,
+        left: 0,
+        zIndex: 4
+    },
+
+    position3_4: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
         zIndex: 4
     },
 
