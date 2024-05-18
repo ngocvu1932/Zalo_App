@@ -22,7 +22,7 @@ import { LoginPage } from './src/components/loginPage/LoginPage';
 import { useEffect, useState } from 'react';
 import { ChatMessage} from './src/components/chatMessage/ChatMessage';
 import { ChatMessageOptions } from './src/components/chatMessageOptions/ChatMessageOptions';
-import QRCodeScanner from './src/components/qrCodeScanner/QRCodeScanner';
+import { QRCodeScanner } from './src/components/qrCodeScanner/QRCodeScanner';
 import { RegisterPageL } from './src/components/registerPageL/RegisterPageL';
 import {RegisterPage2}  from './src/components/registerPage2/RegisterPage2';
 import { RegisterAuth } from './src/components/registerAuth/RegisterAuth';

@@ -43,17 +43,10 @@ export const ChatMessage = ({ navigation, route }) => {
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const videoRefs = useRef([]);
     const [isControl, setIsControl] = useState(false);
-    const delayTime = 100;
+    const delayTime = 200;
     const [isMessageRecall, setIsMessageRecall] = useState(false);
     const adminId = groupChatInfo?.administrator;
-    // console.log(items._id)
-    // console.log('adminId',adminId); 
-
-    // console.log(isAdmin);
-    // console.log("Group chat info: ", groupChatInfo.administrator);
-    // console.log('id',currentId);
     
-
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
             setLoadAgainFocus(new Date());
@@ -477,7 +470,7 @@ export const ChatMessage = ({ navigation, route }) => {
                 if (!item.isDelete) {
                     // kiểm tra xem người dùng có xóa tin nhắn không
                     if (!item.unViewList.includes(currentId)) {
-                        if (item.type === ('TEXT')) {
+                        if (item.type === 'TEXT') {
                             if (item.sender?.id === currentId) {
                                 return (
                                     <View style={styles.viewEnd}>
@@ -604,7 +597,7 @@ export const ChatMessage = ({ navigation, route }) => {
                     }
                 } else {
                     // chỗ này la tin nhắn đã thu hồi
-                    if (!item.unViewList === (currentId)) {
+                    if (!item.unViewList.includes(currentId)) {
                         //so sánh người gửi
                         if (item.sender?.id === currentId) {
                             return (
@@ -1097,15 +1090,23 @@ export const ChatMessage = ({ navigation, route }) => {
                     <Pressable style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.3)', justifyContent: 'center', alignItems: 'center'}} onPress={()=> {setModalVisible(false)}}>
                         <Pressable style={styles.modalContent}>  
                             <View style={{ flexDirection: 'row', marginTop: 5, flexWrap: 'wrap',}}>
-                                <Pressable onPress={() => { }} style={styles.longPress}>
-                                    <FontAwesomeIcon size={18} color='#6F58A8' icon={faReply} />
-                                    <Text style={{ fontSize: 13, marginTop: 5 }}>Trả lời</Text>
-                                </Pressable>
+                                {
+                                    !isMessageRecall ? 
+                                        <Pressable onPress={() => { }} style={styles.longPress}>
+                                            <FontAwesomeIcon size={18} color='#6F58A8' icon={faReply} />
+                                            <Text style={{ fontSize: 13, marginTop: 5 }}>Trả lời</Text>
+                                        </Pressable>
+                                    : ''
+                                }
 
-                                <Pressable onPress={() => {navigation.navigate('ShareMessage', {data: messageIsChoose}) }} style={styles.longPress}>
-                                    <FontAwesomeIcon size={18} color='#4879D8' icon={faShare} />
-                                    <Text style={{ fontSize: 13, marginTop: 5, textAlign: 'center' }}>Chuyển tiếp</Text>
-                                </Pressable>
+                                {
+                                    !isMessageRecall ? 
+                                        <Pressable onPress={() => {navigation.navigate('ShareMessage', {data: {type: messageIsChoose.type, content: messageIsChoose.content, urls: messageIsChoose.urls}}) }} style={styles.longPress}>
+                                            <FontAwesomeIcon size={18} color='#4879D8' icon={faShare} />
+                                            <Text style={{ fontSize: 13, marginTop: 5, textAlign: 'center' }}>Chuyển tiếp</Text>
+                                        </Pressable>
+                                    : ''
+                                }
 
                                 <Pressable onPress={() => { setModalVisible1(true); setModalVisible(false) }} style={styles.longPress}>
                                     <FontAwesomeIcon size={18} color='red' icon={faTrashCan} />

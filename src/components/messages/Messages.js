@@ -196,90 +196,95 @@ export const Messages = ({ navigation }) => {
     }
     return (
       <View style={{width: '100%'}}>
-        <Pressable style={styles.btnSelectChat} onPress={() => {navigation.navigate('ChatMessage', { items: {...rest}, flag: false})}}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '95%' }}>
-          {item.type === 'PRIVATE_CHAT' ? 
-            item.avatar?.substring(0 ,3) === 'rgb' ? 
-              <View style={{height: 60, width: 60, backgroundColor: item.avatar, borderRadius: 30}} />
-            : 
-              <Image style={{height: 60, width: 60, borderRadius: 30}} source={{uri: item.avatar}} />
+        {
+          item.lastedMessage === null ? 
+            ''
           : 
-          // group chat
-            <View style={{height: 60, width: 60}}>
-              {item.avatar ? 
-                <Image source={{uri: item.avatar}} style={{height: 60, width: 60, borderRadius: 30}} /> 
-              : item.participants?.map((participant, index) => (
-                  index < 4 ? 
-                    item.participants?.length <= 3 ? // nhoms cos 3 nguowif
-                      <View key={index} style={[
-                        {height: 30, width: 30}, 
-                        index === 0 ? styles.position0 :
-                          index === 1 ? styles.position1 :
-                            styles.position2
-                        ]}
-                      >
-                        {participant.avatar?.substring(0 ,3) === 'rgb' ? 
-                          <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
-                        : 
-                          <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
-                        }
-                      </View>
-                    : item.participants?.length === 4 ? //nhoms cos 4 nguoi
-                      <View key={index} style={[
-                        {height: 30, width: 30}, 
-                        index === 0 ? styles.position0_1 :
-                          index === 1 ? styles.position1_1 : 
-                            index === 2 ? styles.position2_1 :
-                            styles.position3_1
-                        ]}
-                      >
-                        {participant.avatar?.substring(0 ,3) === 'rgb' ? 
-                          <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
-                        : 
-                          <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
-                        }
-                      </View>
-                    : item.participants?.length > 4 ? // nhoms 5 nguoi tro len
-                      <View key={index} style={[
-                        {height: 30, width: 30}, 
-                        index === 0 ? styles.position0_1 :
-                          index === 1 ? styles.position1_1 : 
-                            index === 2 ? styles.position2_1 :
-                            [styles.position3_1, {backgroundColor: '#E9ECF3', justifyContent: 'center', alignItems: 'center', borderRadius: 15, height: 28, width: 28}]
-                        ]}
-                      >
-                        {participant.avatar?.substring(0 ,3) === 'rgb' ? 
-                          <View style={{}}>
-                            {index === 3 ? 
-                              <Text>{item.participants.length - index}</Text> 
-                            : 
+            <Pressable style={styles.btnSelectChat} onPress={() => {navigation.navigate('ChatMessage', { items: {...rest}, flag: false})}}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '95%' }}>
+              {item.type === 'PRIVATE_CHAT' ? 
+                item.avatar?.substring(0 ,3) === 'rgb' ? 
+                  <View style={{height: 60, width: 60, backgroundColor: item.avatar, borderRadius: 30}} />
+                : 
+                  <Image style={{height: 60, width: 60, borderRadius: 30}} source={{uri: item.avatar}} />
+              : 
+              // group chat
+                <View style={{height: 60, width: 60}}>
+                  {item.avatar ? 
+                    <Image source={{uri: item.avatar}} style={{height: 60, width: 60, borderRadius: 30}} /> 
+                  : item.participants?.map((participant, index) => (
+                      index < 4 ? 
+                        item.participants?.length <= 3 ? // nhoms cos 3 nguowif
+                          <View key={index} style={[
+                            {height: 30, width: 30}, 
+                            index === 0 ? styles.position0 :
+                              index === 1 ? styles.position1 :
+                                styles.position2
+                            ]}
+                          >
+                            {participant.avatar?.substring(0 ,3) === 'rgb' ? 
                               <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
-                            }
-                          </View>
-                        : 
-                          <View style={{}}>
-                            {index === 3 ? 
-                              <Text>{item.participants.length - index}</Text> 
                             : 
                               <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
                             }
                           </View>
-                        }
-                      </View>
-                    : ''
-                  : ''
-              ))
+                        : item.participants?.length === 4 ? //nhoms cos 4 nguoi
+                          <View key={index} style={[
+                            {height: 30, width: 30}, 
+                            index === 0 ? styles.position0_1 :
+                              index === 1 ? styles.position1_1 : 
+                                index === 2 ? styles.position2_1 :
+                                styles.position3_1
+                            ]}
+                          >
+                            {participant.avatar?.substring(0 ,3) === 'rgb' ? 
+                              <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
+                            : 
+                              <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
+                            }
+                          </View>
+                        : item.participants?.length > 4 ? // nhoms 5 nguoi tro len
+                          <View key={index} style={[
+                            {height: 30, width: 30}, 
+                            index === 0 ? styles.position0_1 :
+                              index === 1 ? styles.position1_1 : 
+                                index === 2 ? styles.position2_1 :
+                                [styles.position3_1, {backgroundColor: '#E9ECF3', justifyContent: 'center', alignItems: 'center', borderRadius: 15, height: 28, width: 28}]
+                            ]}
+                          >
+                            {participant.avatar?.substring(0 ,3) === 'rgb' ? 
+                              <View style={{}}>
+                                {index === 3 ? 
+                                  <Text>{item.participants.length - index}</Text> 
+                                : 
+                                  <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
+                                }
+                              </View>
+                            : 
+                              <View style={{}}>
+                                {index === 3 ? 
+                                  <Text>{item.participants.length - index}</Text> 
+                                : 
+                                  <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
+                                }
+                              </View>
+                            }
+                          </View>
+                        : ''
+                      : ''
+                  ))
+                  }
+                </View>
               }
-            </View>
-          }
 
-            <View style={{ flex: 1, marginLeft: 15 }}> 
-              <Text numberOfLines={1} style={{ fontSize: 20, marginBottom: 3 }}>{item?.userName}</Text>
-              <Text style={{ marginTop: 3 }}>{content}</Text>
-            </View>
-            <Text>{time}</Text>
-          </View>
-        </Pressable>
+                <View style={{ flex: 1, marginLeft: 15 }}> 
+                  <Text numberOfLines={1} style={{ fontSize: 20, marginBottom: 3 }}>{item?.userName}</Text>
+                  <Text style={{ marginTop: 3 }}>{content}</Text>
+                </View>
+                <Text>{time}</Text>
+              </View>
+            </Pressable>
+        } 
         {renderLine()}
       </View>
     )

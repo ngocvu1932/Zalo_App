@@ -1,8 +1,8 @@
-import { Image, Pressable, ScrollView, Text, View, Switch, Modal, TextInput } from 'react-native'
-import React, {useRef, useState} from 'react'
+import { Image, Pressable, ScrollView, Text, View, Modal, TextInput } from 'react-native'
+import React, {useEffect, useRef, useState} from 'react'
 import { styles } from './style'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { faMagnifyingGlass, faWandMagicSparkles, faPencil, faUserPlus, faPersonCirclePlus, faArrowRightFromBracket ,faUserGroup, faThumbtack,  faPhoneFlip, faTrash, faChevronLeft, faCamera, faChevronRight, faChartSimple, faGear, faUsers, faUserCheck, faLink, faUserGear, faPhoneVolume, faTriangleExclamation} from '@fortawesome/free-solid-svg-icons' ;
+import { faMagnifyingGlass, faWandMagicSparkles, faPencil, faUserPlus, faArrowRightFromBracket ,faUserGroup, faThumbtack, faChevronLeft, faCamera, faChevronRight, faChartSimple, faGear, faUsers, faUserCheck, faLink, faUserGear, faPhoneVolume, faTriangleExclamation} from '@fortawesome/free-solid-svg-icons' ;
 import { faStar, faClock, faImage, faUser, faBell, faEyeSlash, faCircleXmark, faTrashCan, faImages, faPenToSquare,  } from '@fortawesome/free-regular-svg-icons';
 import axios from '../../config/axios'
 import Toast from 'react-native-easy-toast';
@@ -26,6 +26,22 @@ export const ChatMessageOptions = ({navigation, route}) => {
     const [modalVisibleChangeName, setModalVisibleChangeName] = useState(false);
     const [groupName, setGroupName] = useState(groupChatInfo?.name)
     const dispatch = useDispatch();
+    const [groupsSame, setGroupsSame] = useState(0);
+
+    useEffect(() => {
+        const getGroupsSame= async () => {
+            try {
+                const response = await axios.get(`/chat/total-together?friendId=${items.userId}`)
+                if (response.errCode === 0) {
+                    setGroupsSame(response.data.length)
+                }
+            } catch (error) {
+                console.log('Error: ',error);
+            }
+        }
+        getGroupsSame();
+    }, [])
+
     const handleToggle = () => {
         setToggled(!isToggled);
     };
@@ -397,7 +413,7 @@ export const ChatMessageOptions = ({navigation, route}) => {
 
                             <Pressable style={[styles.btnOpts]}>
                                 <FontAwesomeIcon style={{marginLeft: 15}} color='#787D80' size={20} icon={faUserGroup} />
-                                <Text style={styles.txt}>Xem nhóm chung ()</Text>
+                                <Text style={styles.txt}>Xem nhóm chung ({groupsSame})</Text>
                                 <FontAwesomeIcon style={{marginRight: 10}} color='#787D80' size={15} icon={faChevronRight} />
                             </Pressable>
 

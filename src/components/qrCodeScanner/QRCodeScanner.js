@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { Text, View, Button } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { styles } from './style'
 import { socket } from '../../config/io';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
 
-export default function App() {
-  const [user, setUser] = useState(null);
+export const QRCodeScanner = () => {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [text, setText] = useState('Hướng camera về phía mã QR');
   const [isConnected, setIsConnected] = useState(false);
+  const user = useSelector(state => state.user.user.user);
+
   const askForCameraPermission = () => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
@@ -18,29 +19,6 @@ export default function App() {
     })()
   }
 
-  //get usser 
-
-  useEffect(() => {
-    fetchData(); 
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const dataGetStorage = await AsyncStorage.getItem('dataUser');
-      const dataUser = JSON.parse(dataGetStorage);
-      // console.log("dataUser: ", dataUser.user);
-      if (dataGetStorage !== null) { 
-        setUser(dataUser.user);
-      } else {
-        console.log('MainScreen:  userData dont exist:', false);
-      }
-      
-    } catch (error) {  
-      console.error('Error fetching data from AsyncStorage:', error);
-    }
-  };
-
-  // Yêu cầu quyền sử dụng máy ảnh
   useEffect(() => {
     socket.then((socket) => {
       socket.emit('setup');
@@ -52,7 +30,6 @@ export default function App() {
     askForCameraPermission();
   }, []);
 
-  // What happens when we scan the bar code
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
     setText(data);
@@ -70,13 +47,13 @@ export default function App() {
     })
   };
 
-  // Check permissions and return the screens
   if (hasPermission === null) {
     return (
       <View style={styles.container}>
         <Text>Requesting for camera permission</Text>
       </View>)
   }
+  
   if (hasPermission === false) {
     return (
       <View style={styles.container}>
@@ -85,9 +62,6 @@ export default function App() {
       </View>)
   }
 
-  
-
-  // Return the View
   return (
     <View style={styles.container}>
       <View style={styles.barcodebox}>

@@ -1,6 +1,6 @@
-import { Image, Pressable, Text, View, ScrollView, FlatList, LogBox } from 'react-native'
+import { Image, Pressable, Text, View, ScrollView, FlatList } from 'react-native'
 import React, { useEffect } from 'react'
-import { faMessage, faUserGroup, faVideo } from '@fortawesome/free-solid-svg-icons'
+import { faUserGroup } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import axios from '../../config/axios'
 import { useState } from 'react'
@@ -28,7 +28,7 @@ export const ContactGroups = ({navigation}) => {
     try {
       const res = await axios.get(`/chat/pagination?limit=100`);
       if(res.errCode === 0){
-        const dataGroups = res.data.filter(item => item.type == "GROUP_CHAT")
+        const dataGroups = res.data.filter(item => item.type === "GROUP_CHAT")
         setDataGroups(dataGroups)
       } else {
         setDataGroups([])
@@ -39,7 +39,6 @@ export const ContactGroups = ({navigation}) => {
   }
 
   const joinChatWithGroup = (item) => {
-    // console.log("item", item);
     const newItem = {
       _id: item._id,
       userName: item.name,
@@ -51,17 +50,16 @@ export const ContactGroups = ({navigation}) => {
       administrator: item.administrator,
       participants: item.participants.map(participant => ({...participant}))
     }
-    // console.log("newItem", newItem);
     navigation.navigate('ChatMessage', {items: newItem, flag: true})
   }
 
-  const renderItem = (item) => {
+  const renderItem = ({item}) => {
     let content;
     let time;
-    if (item.item.lastedMessage === null) {
+    if (item.lastedMessage === null) {
       content = "Chưa có tin nhắn";
       const now = moment();
-      const createdAt = moment(item.item.createdAt);
+      const createdAt = moment(item.createdAt);
       const duration = moment.duration(now.diff(createdAt));
       time = duration.days() > 0 
         ? `${duration.days()} ngày trước` 
@@ -74,9 +72,9 @@ export const ContactGroups = ({navigation}) => {
         : 'Ngay bây giờ';
     } else {
       const now = moment();
-      const createdAt = moment(item.item.lastedMessage?.createdAt);
+      const createdAt = moment(item.lastedMessage?.createdAt);
       const duration = moment.duration(now.diff(createdAt));
-      const fullName = item.item.lastedMessage?.sender.userName.split(" ");
+      const fullName = item.lastedMessage?.sender.userName.split(" ");
       const lastName = fullName[fullName.length - 1];
       time = duration.days() > 0 
         ? `${duration.days()} ngày trước` 
@@ -88,11 +86,11 @@ export const ContactGroups = ({navigation}) => {
         ? `${duration.seconds()} giây trước` 
         : 'Ngay bây giờ';
 
-      if (item.item.lastedMessage.type === 'TEXT') {
-        content = `${lastName}: ${item.item.lastedMessage.content}`
-      } else if (item.item.lastedMessage.type === 'IMAGES') {
+      if (item.lastedMessage.type === 'TEXT') {
+        content = `${lastName}: ${item.lastedMessage.content}`
+      } else if (item.lastedMessage.type === 'IMAGES') {
         content = `${lastName}: Đã gửi ảnh`
-      } else if (item.item.lastedMessage.type === 'VIDEO') {
+      } else if (item.lastedMessage.type === 'VIDEO') {
         content = `${lastName}: Đã gửi video`
       } else {
         content = `${lastName}: Đã gửi gì đó`
@@ -100,13 +98,13 @@ export const ContactGroups = ({navigation}) => {
     }
     return (
       <View style={{}}>
-        <Pressable style={styles.btnJoinGroupChat} onPress={()=> joinChatWithGroup(item.item)}>
+        <Pressable style={styles.btnJoinGroupChat} onPress={()=> joinChatWithGroup(item)}>
           <View style={{height: 60, width: 60, marginLeft: 10}}>
-              {item.item.groupPhoto ? 
-                <Image source={{uri: item.item.groupPhoto}} style={{height: 60, width: 60, borderRadius: 30}} /> 
-              : item.item.participants?.map((participant, index) => (
+              {item.groupPhoto ? 
+                <Image source={{uri: item.groupPhoto}} style={{height: 60, width: 60, borderRadius: 30}} /> 
+              : item.participants?.map((participant, index) => (
                 index < 4 ? 
-                item.item.participants?.length <= 3 ? // nhoms cos 3 nguowif
+                item.participants?.length <= 3 ? // nhoms cos 3 nguowif
                     <View key={index} style={[
                       {height: 30, width: 30}, 
                       index === 0 ? styles.position0 :
@@ -120,7 +118,7 @@ export const ContactGroups = ({navigation}) => {
                         <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
                       }
                     </View>
-                  : item.item.participants?.length === 4 ? //nhoms cos 4 nguoi
+                  : item.participants?.length === 4 ? //nhoms cos 4 nguoi
                     <View key={index} style={[
                       {height: 30, width: 30}, 
                       index === 0 ? styles.position0_1 :
@@ -135,7 +133,7 @@ export const ContactGroups = ({navigation}) => {
                         <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
                       }
                     </View>
-                  : item.item.participants?.length > 4 ? // nhoms 5 nguoi tro len
+                  : item.participants?.length > 4 ? // nhoms 5 nguoi tro len
                     <View key={index} style={[
                       {height: 30, width: 30}, 
                       index === 0 ? styles.position0_1 :
@@ -147,7 +145,7 @@ export const ContactGroups = ({navigation}) => {
                       {participant.avatar.substring(0, 3)==='rgb' ? 
                         <View style={{}}>
                           {index === 3 ? 
-                            <Text>{item.item.participants.length - index}</Text> 
+                            <Text>{item.participants.length - index}</Text> 
                           : 
                             <View style={[styles.avtGroup, {backgroundColor: participant.avatar}]} /> 
                           }
@@ -155,7 +153,7 @@ export const ContactGroups = ({navigation}) => {
                       : 
                         <View style={{}}>
                           {index === 3 ? 
-                            <Text>{item.item.participants.length - index}</Text> 
+                            <Text>{item.participants.length - index}</Text> 
                           : 
                             <Image source={{uri: participant.avatar}} style={styles.avtGroup} />
                           }
@@ -169,7 +167,7 @@ export const ContactGroups = ({navigation}) => {
             </View>
 
           <View style={{flex: 1, marginLeft: 10, height: 45, justifyContent: 'space-between'}}>
-            <Text numberOfLines={1} style={{fontSize: 17}}>{item.item?.name}</Text>
+            <Text numberOfLines={1} style={{fontSize: 17}}>{item.name}</Text>
             <Text style={{fontSize: 14, opacity: 0.7}}>{content}</Text>
           </View>
 

@@ -246,7 +246,7 @@ export const styles = StyleSheet.create({
     },
 
     viewShareMess: {
-        height: 120, 
+        height: 100, 
         width: '100%', 
         backgroundColor: '#FFFFFF',
         position: 'absolute',
@@ -304,5 +304,59 @@ export const styles = StyleSheet.create({
         right: 0,
         zIndex: 4
     },
+
+    pressChooseChat: {
+        backgroundColor: '#FFFFFF', 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        marginTop: 10, 
+        marginBottom: 10
+    },
+
+    viewChoose: {
+        height: 23, 
+        width: 23, 
+        borderRadius: 23, 
+        borderColor: '#C2C7C9',  
+        borderWidth: 1, 
+        marginLeft: 15, 
+        justifyContent: 'center', 
+        alignItems: 'center'
+    },
+
+    pressX: {
+        position: 'absolute', 
+        top: 0, 
+        right: 0, 
+        height: 15, 
+        width: 15, 
+        borderRadius: 10, 
+        backgroundColor: '#DFDFDF', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        borderWidth: 1, 
+        borderColor: '#FFFFFF'
+    },
+
+    viewChooseE: {
+        position: 'absolute', 
+        zIndex: 10, 
+        bottom: 100, 
+        left: 0, 
+        height: 65, 
+        backgroundColor: '#FFFFFF', 
+        width: '100%', 
+        borderTopWidth: 1, 
+        borderColor: '#C2C7C9',
+    },
+
+    presssend: {
+        height: 55, 
+        width: 55, 
+        backgroundColor: '#01A1FF', 
+        borderRadius: 30, 
+        justifyContent: 'center', 
+        alignItems: 'center'
+    }
 
 })
