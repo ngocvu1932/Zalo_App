@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import { setGroupChatInfo } from '../../redux/groupChatInfoSlice';
 import { useDispatch } from 'react-redux';
 import axios, { setAuthorizationAxios } from '../../config/axios';
+import { socket } from '../../config/io';
 
 export const ChangeAdminGroup = ({navigation, route}) => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -22,6 +23,9 @@ export const ChangeAdminGroup = ({navigation, route}) => {
             const response = await axios.get(`/chat/access?chatId=${groupChatInfo._id}`);
             if (response.errCode === 0) {
                 dispatch(setGroupChatInfo(response.data));
+                socket.then(socket => {
+                    socket.emit('transfer-disband-group', response.data);
+                });
             } else {
                 console.log("Error: ", response);
             }
@@ -38,6 +42,7 @@ export const ChangeAdminGroup = ({navigation, route}) => {
                 memberId: idMember.id
             });
 
+            // console.log("Response: ", response);
             if (response.errCode === 0) {
                 toastRef.current.props.style.backgroundColor = 'green';
                 toastRef.current.show('Chuyển quyền trưởng nhóm thành công!', 1000);

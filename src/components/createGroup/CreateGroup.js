@@ -70,13 +70,11 @@ export const CreateGroup = ({ navigation }) => {
         }
 
         const pickerResult = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: false,
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
             quality: 1,
-            allowsMultipleSelection: true,
-            selectionLimit: 20,
-            videoExportPreset: ImagePicker.VideoExportPreset.Passthrough,
-            videoMaxDuration: 10
+            selectionLimit: 1,
+            aspect: [1, 1],
         });
 
         if (!pickerResult.canceled) {

@@ -31,9 +31,10 @@ export const ChatMessage = ({ navigation, route }) => {
     const [isLoadingMessages, setIsLoadingMessages] = useState(true);
     const [isUserChoose, setIsUserChoose] = useState(false);
     const [messageIsChoose, setMessageIsChoose] = useState();
-    const [loadAgain, setLoadAgain] = useState(false);
+    const [loadAgainRecall, setLoadAgainRecall] = useState(false);
     const [loadAgainFocus, setLoadAgainFocus] = useState();
-    const [loadAgain1, setLoadAgain1] = useState(false);
+    const [loadAgainChangeAdmin, setLoadAgainChangeAdmin] = useState(false);
+    // const [loadAgain1, setLoadAgain1] = useState(false);
     const [isSend, setIsSend] = useState(false);
     const [isMessage, setIsMessage] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +47,8 @@ export const ChatMessage = ({ navigation, route }) => {
     const delayTime = 200;
     const [isMessageRecall, setIsMessageRecall] = useState(false);
     const adminId = groupChatInfo?.administrator;
+
+    // console.log(loadAgainChangeAdmin);
     
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
@@ -114,6 +117,7 @@ export const ChatMessage = ({ navigation, route }) => {
     //     }, 500);
     // }, []);
 
+
     // Lấy thông tin group chat
     useEffect(() => { 
         const getGroupChat = async () => {
@@ -132,12 +136,9 @@ export const ChatMessage = ({ navigation, route }) => {
 
         if (items.type === 'GROUP_CHAT') {
             getGroupChat();
-            setLoadAgain(false)
-            setLoadAgain1(true)
-        } else {
-            setLoadAgain1(true)
-        }
-    }, [items, loadAgain, loadAgainFocus]);
+            setLoadAgainChangeAdmin(false);
+        } 
+    }, [items, loadAgainFocus, loadAgainChangeAdmin]);
 
     // Lấy tin nhắn từ server
     useEffect(() => {
@@ -159,9 +160,10 @@ export const ChatMessage = ({ navigation, route }) => {
                     }));
                     setMessages(filteredMessages);
                     setIsLoadingMessages(false);
-                    setLoadAgain1(false);
+                    // setLoadAgain1(false);
                     setIsMessage(true);
                     setIsLoading(false);
+                    setLoadAgainRecall(false);
                 } else if (response.errCode === 1) {
                     setIsMessage(false);
                     setIsLoading(false);
@@ -172,51 +174,56 @@ export const ChatMessage = ({ navigation, route }) => {
             }
         };
 
-        if (loadAgain1) {
-            fetchMessages();
-        }
-    }, [items._id, loadAgain1]);
+        // if (loadAgain1) {
+        //     fetchMessages();
+        // }
+        fetchMessages();
+    }, [items._id, loadAgainRecall]);
 
+    //socket ReceiveMessage
     const handleReceiveMessage = async (data) => {
         if (data.type === 'TEXT') {
-            console.log("Receive messgae: ", data.content, "|", data.chat);
+            // console.log("Receive messgae: ", data.content, "|", data.chat);
             setIsMessage(true);
             setMessages(premessages => [...premessages, data]);
         } else if (data.type === 'IMAGES') {
-            console.log("Receive messgae: ", data.urls, "|", data.chat);
+            // console.log("Receive messgae: ", data.urls, "|", data.chat);
             setIsMessage(true);
             setMessages(premessages => [...premessages, data]);
         } else if (data.type === 'VIDEO') {
-            console.log("Receive messgae: ", data.urls, "|", data.chat);
+            // console.log("Receive messgae: ", data.urls, "|", data.chat);
             setIsMessage(true);
             setMessages(premessages => [...premessages, data]);
         }
     }
 
+    //socket RecallMessage
+    const handleRecallMessage = async (data) => {
+        if (data) {
+            setLoadAgainRecall(true);
+        }
+    };
+
+    //socket RecallMessage
+    const transferDisbandGroup = async (data) => {
+        if (data) {
+            setLoadAgainChangeAdmin(true);
+        }
+    };
+ 
     // socket
     useEffect(() => {
         socket.then(socket => {
             socket.on('receive-message', handleReceiveMessage);
-
-            socket.on('receive-modify-message', (data) => {
-                if (data) {
-                    setLoadAgain(true);
-                }
-            });
-
-            socket.on('receive-issend-message', (data) => {
-                if (data) {
-                    setIsSend(true);
-                }
-            });
+            socket.on('receive-modify-message', handleRecallMessage);
+            socket.on('transfer-disband-group', transferDisbandGroup)
         });
 
         return () => {
             socket.then(socket => {
-                socket.off('connected');
-                socket.off('receive-message',handleReceiveMessage);
-                socket.off('receive-modify-message');
-                socket.off('receive-issend-message');
+                socket.off('receive-message', handleReceiveMessage);
+                socket.off('receive-modify-message', handleRecallMessage);
+                socket.off('transfer-disband-group', transferDisbandGroup)
             });
         };
     }, []);
@@ -326,7 +333,7 @@ export const ChatMessage = ({ navigation, route }) => {
                     reactions: []
                 }
 
-                console.log("Data send: ", dataSend);
+                // console.log("Data send: ", dataSend);
                 setMessages(premessages => [...premessages, dataSend]);
 
                 const res = await axios.post('/chat/message', {
@@ -342,7 +349,7 @@ export const ChatMessage = ({ navigation, route }) => {
 
                     setIsMessage(true);
                     setTextMessage('');
-                    console.log("Send message:", dataSend.urls, "|", dataSend.chat);
+                    // console.log("Send message:", dataSend.urls, "|", dataSend.chat);
                 } else {
                     console.log("Error 3: ", res);
                 }
@@ -386,7 +393,7 @@ export const ChatMessage = ({ navigation, route }) => {
                 });
                 setIsMessage(true);
                 setTextMessage('');
-                console.log("Send message:", dataSend.content, "|", dataSend.chat);
+                // console.log("Send message:", dataSend.content, "|", dataSend.chat);
             } else {
                 console.log("Error: ", res);
             }
@@ -402,7 +409,7 @@ export const ChatMessage = ({ navigation, route }) => {
             });
 
             if (res.errCode === 0) {
-                setLoadAgain(true);
+                setLoadAgainRecall(true);
                 setModalVisible1(false);
             } else {
                 console.log("Error: ", res);
@@ -420,7 +427,7 @@ export const ChatMessage = ({ navigation, route }) => {
             });
 
             if (res.errCode === 0) {
-                setLoadAgain(true);
+                setLoadAgainRecall(true);
                 setModalVisible(false);
                 socket.then(socket => {
                     socket.emit('modify-message', res.data);
@@ -436,7 +443,6 @@ export const ChatMessage = ({ navigation, route }) => {
 
     // render tin nhắn qua FlatList
     const renderItem = ({ item }) => { 
-        // console.log("Item: ", JSON.stringify(item.sender.id));
         const firstIduserPositions = {};
         let lastSenderId = null;
 
@@ -501,7 +507,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={styles.viewEnd}>
                                         <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false) }} style={styles.messsagePressEnd}>
-                                            <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode='contain' />
+                                            <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 300, borderRadius: 10 }} resizeMode='contain' />
                                         </Pressable>
                                         {isLastItem && 
                                             <View style={{marginRight: 10, height: 20, width: 50, backgroundColor: '#B0B0B0', alignItems: 'center', borderRadius: 25, justifyContent: 'center' }}>
@@ -521,7 +527,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                             <Image source={{uri : item.sender.avatar}} style={{ height: 20, width: 20, borderRadius: 20, marginLeft: 5 }} />
                                         :''}
                                             <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChoose(item) }} style={[styles.messsagePressStart, firstItemBySender ? { marginLeft: 5 } : {}]}>
-                                                <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode='contain' />
+                                                <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 300, borderRadius: 10 }} resizeMode='contain' />
                                             </Pressable>
                                         </View>
                                         {isLastItem && 
@@ -683,7 +689,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                 return (
                                     <View style={[styles.viewEnd, {}]}>
                                         <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(true); setMessageIsChoose(item), setIsMessageRecall(false) }} style={[styles.messsagePressEnd, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '' ]}>
-                                            <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode="contain" />
+                                            <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 300, borderRadius: 10 }} resizeMode="contain" />
                                         </Pressable>
                                         {isLastItem && 
                                             <View style={{marginRight: 10, height: 20, width: 50, backgroundColor: '#B0B0B0', alignItems: 'center', borderRadius: 25, justifyContent: 'center' }}>
@@ -730,7 +736,7 @@ export const ChatMessage = ({ navigation, route }) => {
                                                 </View>
                                         :''}
                                         <Pressable delayLongPress={delayTime} onLongPress={() => { setModalVisible(true); setIsUserChoose(false); setMessageIsChoose(item) }} style={[styles.messsagePressStart, adminId === item.sender.id ? {borderWidth: 1, borderColor: '#3483C6'} : '']}>
-                                            <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 200, borderRadius: 10 }} resizeMode='contain' />
+                                            <Image source={{ uri: `${item.urls}` }} style={{ width: 200, height: 300, borderRadius: 10 }} resizeMode='contain' />
                                         </Pressable>
                                         {isLastItem && 
                                             <View style={{marginLeft: 30, height: 20, width: 50, backgroundColor: '#B0B0B0', alignItems: 'center', borderRadius: 25, justifyContent: 'center' }}>

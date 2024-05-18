@@ -39,12 +39,14 @@ export const Messages = ({ navigation }) => {
     });
 
     return () => {
+      console.log('Disconnected');
       socket.then(socket => {
         socket.off('connected');
       });
     };
   }, []);
 
+  //socket
   useEffect(() => {
     if (chatData){
       socket.then(socket => {
@@ -56,11 +58,13 @@ export const Messages = ({ navigation }) => {
     }
   },  [chatData]);
  
+  //socket
   useEffect(() => {
     if (joined) {
       socket.then(socket => {
         socket.on('receive-message', (data) => {
             console.log('receive-message', data.content);
+            setLoadAgain(new Date());
         });
       });
     }
