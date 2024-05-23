@@ -94,7 +94,7 @@ export const Timeline = () => {
       <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
         <View style={{flexDirection: 'row', height: '55%', width: '100%', alignItems: 'center', justifyContent: 'space-between'}}>
           <FontAwesomeIcon style={{marginLeft: 10}} color='#F1FFFF' size={22} icon={faMagnifyingGlass} />
-          <TextInput style={styles.txtInHeader} placeholder='Tìm kiếm' placeholderTextColor={'#FFFFFF'}></TextInput>
+          <TextInput style={styles.txtInHeader} placeholder='Tìm kiếm' placeholderTextColor={'#FFFFFF'} editable={false}></TextInput>
 
           <View style={{width: '22%', flexDirection: 'row', justifyContent: 'space-between'}}>
             <Pressable style={{height: 30, width: 30, justifyContent: 'center', alignItems: 'center'}}>

@@ -21,76 +21,88 @@ export const Profile = ({navigation, route}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [idUserGet, setIdUserGet] = useState();
   const [sendRequestFriend, setSendRequestFriend] = useState(false);
-  const [isCheck, setIsCheck] = useState(false);
+  const [isCheck, setIsCheck] = useState(false); // cái này để check là đã lấy thông tin user chưa, phải có mới gửi axios check bạn bè
   const [checkUserSendRequest, setCheckUserSendRequest] = useState(false);
-  const [loadAgainSocket, setLoadAgainSocket] =useState();
-  const [loadAgain, setLoadAgain] =useState();
+  const [senderIdAccept, setSenderIdAccept] =useState();
+  const [loadAgain, setLoadAgain] =useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const [isScrollable, setIsScrollable] = useState(false);
   const [scrollViewContentHeight, setScrollViewContentHeight] = useState(0);
   const [scrollViewHeight, setScrollViewHeight] = useState(0);
-  const {width, height} = Dimensions.get('screen');
+  const {height} = Dimensions.get('screen');
   const SCROLL_THRESHOLD = height * 0.3;
+  const [loadAgainSocket, setLoadAgainSocket] =useState();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      setLoadAgain(new Date());
       setLoadAgainSocket(new Date());
     });
 
     return unsubscribe;
   }, [navigation]);
 
+  //socket
+  const handleAddFriend = async (data) => {
+    if (data) {
+      setLoadAgain(true); 
+    }
+  }
+
   // socket
   useEffect(() => {
     socket.then(socket => {
-      // socket.emit('setup', currentId);
-      socket.on('need-accept-addFriend', (data) => {
-        setLoadAgain(data.createdAt);
-        console.log('Is received', data.createdAt);
-      });
+      socket.on('need-accept-addFriend', handleAddFriend);
     });
 
     return () => {
       socket.then(socket => {
-        socket.off('need-accept-addFriend');
+        socket.off('need-accept-addFriend', handleAddFriend);
       });
     };
-  }, [loadAgainSocket]);
+  }, []);
 
   // kiểm tra trạng thái bạn bè
   useEffect(() => {
     const getStatusFriend = async () => {
       try {
         const response = await axios.get(`/users/friendShip?userId=${idUserGet}`);
-        // console.log('response1 :', response);
         if (response.errCode === 0) {
+          setSenderIdAccept(response.data?.sender?.id);
           if (response.data.status === 'RESOLVE') {
             setIsFriend(true);
+            setLoadAgain(false);
             setIsLoading(false);
           } else if (response.data.status === 'PENDING') {
             setIsFriend(false);
             setSendRequestFriend(true);
+            setLoadAgain(false);
             setIsLoading(false);
           } else if (response.data.status === 'REJECT') {
             setSendRequestFriend(false);
             setIsFriend(false);
+            setLoadAgain(false);
             setIsLoading(false);
           } else if (response.data.status === 'OLD_FRIEND') {
+            setSendRequestFriend(false);
             setIsFriend(false);
+            setLoadAgain(false);
             setIsLoading(false);
           }
 
           if (response.data.sender.id === currentId) {
             setCheckUserSendRequest(true);
+            setLoadAgain(false);
             setIsLoading(false);
           } else {
             setCheckUserSendRequest(false);
+            setLoadAgain(false);
             setIsLoading(false);
           }
         } else if (response.errCode === 1) {
+          setSenderIdAccept();
           setIsFriend(false);
           setSendRequestFriend(false);
+          setLoadAgain(false);
           setIsLoading(false);
         }
       } catch (error) {
@@ -101,23 +113,23 @@ export const Profile = ({navigation, route}) => {
     if (isCheck && idUserGet) {
       getStatusFriend();
     }
-    
-  }, [idUserGet, isCheck, loadAgain]);
+  }, [idUserGet, loadAgain, isCheck, loadAgainSocket]);
 
   // lấy thông tin user
   useEffect(() => {
     const getProlife = async () => {
       try {
         const response = await axios.get(`/users/detail?phoneNumber=${phoneNumber}`);
+        // console.log(response);
         if (response.errCode === 0) {
-          setIsCheck(true);
           setIdUserGet(response.data.id);
           dispatch(setUserInfo(response.data));
+          setIsCheck(true);
         } else {
           console.log("Error 2: ", response);
         }
       } catch (error) {
-        console.log("Error 3: ",error);
+        console.log("Error 3: ", error);
       } 
     }
       
@@ -141,14 +153,12 @@ export const Profile = ({navigation, route}) => {
         content: 'Xin chào, tôi muốn kết bạn với bạn'
       });
 
-      // console.log('res', JSON.stringify(response));
       if (response.errCode === 0) {
-        
         if (response.data.status === 'PENDING') {
-          setLoadAgain(new Date()); 
+          setLoadAgain(true); 
           setSendRequestFriend(true);
           socket.then(socket => {
-            socket.emit('send-add-friend', response.data);
+            socket.emit('send-add-friend', response);
           });
         }
       } else if (response.errCode === 3) {
@@ -163,6 +173,26 @@ export const Profile = ({navigation, route}) => {
       console.log('Error 4: ', error.message);
     }
   };
+
+  // chấp nhận lời mời
+  const acceptFriendRequest = async () => {
+    try {
+      const response = await axios.put(`/users/friendShip`, {
+        userId: senderIdAccept,
+      });
+      
+      if (response.errCode === 0) {
+        setLoadAgain(true);
+        socket.then(socket => {
+          socket.emit('send-add-friend', {createdAt: new Date()});
+        });
+      } else {
+        console.log('Error', response);
+      }
+    } catch (error) {
+      console.log('error 2', error);
+    }
+  }
 
   const joinChat = async () => {
     try {
@@ -309,10 +339,13 @@ export const Profile = ({navigation, route}) => {
           </View>
         </View>
 
-        {!isScrolling ? 
-        (<View>
-          <Text>Ở đây là nhạc</Text>
-        </View>): ''}
+        {
+          !isScrolling ? 
+            <View>
+              <Text style={{marginLeft: 10}}>Ở đây là nhạc</Text>
+            </View>
+          : ''
+        }
       </View>
 
       <ScrollView onScroll={handleScroll} scrollEventThrottle={70} showsVerticalScrollIndicator={false} >
@@ -366,9 +399,9 @@ export const Profile = ({navigation, route}) => {
             <View style={{width: '100%', alignItems: 'center', marginTop: 10}} >
               <View style={{width: '80%', alignItems: 'center'}}>
                 {sendRequestFriend ? 
-                  checkUserSendRequest ? <Text style={{marginBottom: 10, textAlign: 'center'}}>Lời mời kết bạn đã được gửi đi. Hãy để lại tin nhắn cho {userInfo?.userName} trong lúc đợi chờ nhé!</Text> 
+                  checkUserSendRequest ? <Text style={{marginBottom: 10, textAlign: 'center'}}>Lời mời kết bạn đã được gửi đi. Hãy để lại tin nhắn cho {userInfo.userInfo?.userName} trong lúc đợi chờ nhé!</Text> 
                   :
-                  <Text style={{marginBottom: 10, textAlign: 'center'}}> {userInfo?.userName} đã gửi cho bạn lời mời kết bạn!</Text>
+                  <Text style={{marginBottom: 10, textAlign: 'center'}}> {userInfo.userInfo?.userName} đã gửi cho bạn lời mời kết bạn!</Text>
                 : 
                 ''
                 }
@@ -387,7 +420,7 @@ export const Profile = ({navigation, route}) => {
                         <Text style={{fontSize: 16, fontWeight: '500'}}>Hủy lời mời</Text> 
                       </Pressable>
                       : 
-                      <Pressable style={[styles.btnAddFriend, {width: '100%'}]} onPress={()=> alert('Chấp nhận')}>
+                      <Pressable style={[styles.btnAddFriend, {width: '100%'}]} onPress={()=> acceptFriendRequest()}>
                         <Text style={{fontSize: 16, fontWeight: '500'}}>Chấp nhận</Text>
                       </Pressable>
                     :

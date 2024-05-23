@@ -16,6 +16,7 @@ import {CLOUD_NAME, UPLOAD_PRESET, FOLDER} from '@env';
 import { useDispatch } from 'react-redux';
 import { setUserInfo } from '../../redux/userInfoSlice';
 import { setUser } from '../../redux/userSlice';
+import { socket } from '../../config/io';
 
 export const ProfileOptions = ({navigation, route}) => {
   const {isUser, isFriend } = route.params;
@@ -46,9 +47,11 @@ export const ProfileOptions = ({navigation, route}) => {
   const handleUnfriend = async () => {
     try {
         const response = await axios.put(`users/friendShip/unfriend`, {userId: userInfo.userInfo?.id})
-        // console.log(response);
         if(response.errCode === 0){
             setModalVisible(false);
+            socket.then(socket => {
+              socket.emit('send-add-friend', 'có nè');
+            });
             toastRef.current.show('Xóa bạn bè thành công!', 1000);
             setTimeout(() => {
                 navigation.goBack();

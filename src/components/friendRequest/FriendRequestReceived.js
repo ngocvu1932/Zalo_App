@@ -1,7 +1,7 @@
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, LogBox, Pressable, ScrollView, Text, View } from "react-native";
-import axios, { setAuthorizationAxios } from "../../config/axios";
+import { FlatList, Image, Pressable, Text, View } from "react-native";
+import axios from "../../config/axios";
 import { socket } from '../../config/io';
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -12,35 +12,34 @@ export const FriendRequestReceived = ({ navigation }) => {
   const user = useSelector(state => state.user);
   const [listFriendRequestReceived, setListFriendRequestReceived] = useState([]);
   const [loadAgainSocket, setLoadAgainSocket] =useState();
-  const [loadAgain, setLoadAgain] =useState();
+  const [loadAgain, setLoadAgain] =useState(false);
   const currentId = user.user?.user?.id;
    
-
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       setLoadAgainSocket(new Date());
-      setLoadAgain(new Date());
     });
 
     return unsubscribe;
   }, [navigation]);
 
+  //socket
+  const handleAddFriend = async (data) => {
+    setLoadAgain(true);
+  }
+
   // socket
   useEffect(() => {
     socket.then(socket => {
-      // socket.emit('setup', currentId);
-      socket.on('need-accept-addFriend', (data) => {
-        setLoadAgain(data.createdAt);
-        console.log('Is received FriendRequestReceived: ', data.createdAt);
-      });
+      socket.on('need-accept-addFriend', handleAddFriend);
     });
 
     return () => {
       socket.then(socket => {
-        socket.off('need-accept-addFriend');
+        socket.off('need-accept-addFriend', handleAddFriend);
       });
     };
-  }, [loadAgainSocket]);
+  }, []);
 
   useEffect(()=>{
     const getFriendRequestReceived = async () => {
@@ -59,6 +58,7 @@ export const FriendRequestReceived = ({ navigation }) => {
           });
         }
         setListFriendRequestReceived(listFriendRequest);
+        setLoadAgain(false);
       } catch (error) { 
         console.log('error 1', error);
       }
@@ -68,22 +68,19 @@ export const FriendRequestReceived = ({ navigation }) => {
   }, [loadAgain])
 
   const acceptFriendRequest = async (senderId) => {
-    console.log('senderId', senderId);
     try {
       const response = await axios.put(`/users/friendShip`, {
         userId: senderId,
       });
       
       if (response.errCode === 0) {
-        setLoadAgain(new Date());
+        setLoadAgain(true);
         socket.then(socket => {
           socket.emit('send-add-friend', {createdAt: new Date()});
-          console.log('send-add-friend', {createdAt: new Date()});
         });
       } else {
         console.log('Error', response);
       }
-
     } catch (error) {
       console.log('error 2', error);
     }
@@ -95,10 +92,9 @@ export const FriendRequestReceived = ({ navigation }) => {
         userId: senderId,
       });
       if (response.errCode === 0) {
-        setLoadAgain(new Date());
+        setLoadAgain(true);
         socket.then(socket => {
           socket.emit('send-add-friend', {createdAt: new Date()});
-          console.log('send-add-friend', {createdAt: new Date()});
         });
       } else {
         console.log('Error', response);

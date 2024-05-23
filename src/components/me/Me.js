@@ -15,7 +15,7 @@ export const Me = ({navigation}) => {
       <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
         <View style={{flexDirection: 'row', justifyContent: 'space-between', height: '55%', alignItems: 'center'}}>
           <FontAwesomeIcon style={{marginLeft: 10}} color='#F1FFFF' size={22} icon={faMagnifyingGlass} />
-          <TextInput style={styles.txtInHeader} placeholder='Tìm kiếm' placeholderTextColor={'#FFFFFF'}></TextInput> 
+          <TextInput style={styles.txtInHeader} placeholder='Tìm kiếm' placeholderTextColor={'#FFFFFF'} editable={false}></TextInput> 
           <Pressable style={styles.btnSetting} onPress={()=> {navigation.navigate('Setting')}}>
             <FontAwesomeIcon color='#F1FFFF' size={22} icon={faGear} /> 
           </Pressable>

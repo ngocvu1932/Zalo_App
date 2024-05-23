@@ -14,36 +14,36 @@ export const ContactFriends = ({ navigation }) => {
   const [friendList, setFriendList] = useState([])
   const dispatch = useDispatch();
   const [loadAgainSocket, setLoadAgainSocket] =useState();
-  const [loadAgain, setLoadAgain] =useState();
+  const [loadAgain, setLoadAgain] =useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       setLoadAgainSocket(new Date());
-      setLoadAgain(new Date());
     });
 
     return unsubscribe;
   }, [navigation]);
 
+  //socket này có chức năng khi hủy kết bạn thì load lại danh sách bạn bè
+  const handleAddFriend = async (data) => {
+    if (data) {
+      setLoadAgain(true); 
+    }
+  }
+
   // socket
   useEffect(() => {
     socket.then(socket => {
-      // socket.emit('setup', currentId);
-      socket.on('need-accept-addFriend', (data) => {
-        setLoadAgain(data.createdAt);
-        console.log('Is received ContactFriends: ', data.createdAt);
-        console.log('currentId: ', currentId);
-      });
+      socket.on('need-accept-addFriend', handleAddFriend);
     });
 
     return () => {
       socket.then(socket => {
-        socket.off('need-accept-addFriend');
+        socket.off('need-accept-addFriend', handleAddFriend);
       });
     };
-  }, [loadAgainSocket]);
+  }, []);
  
-
   // lấy danh sách bạn bè
   useEffect(() => {
     const fetchFriendList = async () => {
@@ -52,13 +52,14 @@ export const ContactFriends = ({ navigation }) => {
         if (response.errCode === 0) {
           setFriendList(response.data); 
           dispatch(setListFriend(response.data));
+          setLoadAgain(false);
         }
       } catch (error) {
         console.log('Error 1', error);
       }
     }
     fetchFriendList();
-  }, [loadAgain]);
+  }, [loadAgain, loadAgainSocket]);
 
   const joinChatWithFriend = async (friendId) => {
     try {

@@ -6,7 +6,7 @@ import { styles } from "./style";
 import { socket } from "../../config/io";
 
 export const FriendRequestSent = ({ navigation }) => {
-  const [loadAgain, setLoadAgain] = useState();
+  const [loadAgain, setLoadAgain] = useState(false);
   const [listFriendRequestSent, setListFriendRequestSent] = useState([]);
   const [loadAgainSocket, setLoadAgainSocket] =useState();
 
@@ -19,29 +19,35 @@ export const FriendRequestSent = ({ navigation }) => {
     return unsubscribe;
   }, [navigation]);
 
+  //socket
+  const handleAddFriend = async (data) => {
+    // console.log('data', data);
+    setLoadAgain(true);
+  }
+
+  // console.log('listFriendRequestSent', listFriendRequestSent);
+
   // socket
   useEffect(() => {
     socket.then(socket => {
-      socket.on('need-accept-addFriend', (data) => {
-        setLoadAgain(data.createdAt);
-        console.log('Is received FriendRequestSent: ', data.createdAt);
-      });
+      socket.on('need-accept-addFriend', handleAddFriend);
     });
 
     return () => {
       socket.then(socket => {
-        socket.off('need-accept-addFriend');
+        socket.off('need-accept-addFriend', handleAddFriend);
       });
     };
-  }, [loadAgainSocket]);
+  }, []);
 
   // lấy lời mời đã gửi
   useEffect(()=> {
     const getAllFriendRequestSent = async () => {
       try {
         const response = await axios.get('/users/notifications/friendShip/sentInvited');
-        if (response.errCode === 0) {
-          setListFriendRequestSent(response.data);
+        if (response.errCode === 0) { 
+          setListFriendRequestSent(response.data); 
+          setLoadAgain(false);
         } else { 
           console.log('Error 2:', response);
         }
@@ -49,7 +55,7 @@ export const FriendRequestSent = ({ navigation }) => {
         console.log('Error 1:', error);
       }
     }
-
+    
     getAllFriendRequestSent();
   }, [loadAgain])
 

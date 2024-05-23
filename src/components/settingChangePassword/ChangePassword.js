@@ -10,18 +10,44 @@ import { useSelector } from 'react-redux'
 import { LinearGradient } from 'expo-linear-gradient'
 
 export const ChangePassword = ({navigation}) => {
-  const user = useSelector(state => state.user);
+  const user = useSelector(state => state.user.user.user);
   const toastRef = useRef(null);
   const [isShow, setIsShow] = useState(true);
   const [isDone, setIsDone] = useState(false);
-  const [newData, setNewData] = useState({
-    oldpassword: null,
-    newPassword: null ,
-  });
-
   const [newPassword, setNewPassword] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [newPasswordAgain, setNewPasswordAgain] = useState('');
+  const [userInfoData, setUserInfoData] = useState({
+    userName: null,
+    birthdate: null
+  });
+  const [newData, setNewData] = useState({
+    oldPassword: null,
+    newPassword: null ,
+  });
+
+  useEffect(() => {
+    const getInfo = async() => {
+      try {
+        const response = await axios.get(`/users/detail?phoneNumber=${user.phoneNumber}`);
+        if (response.errCode === 0) {
+          if (response.data.userInfo.birthdate === null) {
+            setUserInfoData({...userInfoData, userName: removeVietnameseDiacriticsAndSpaces(response.data.userName), birthdate: null });
+          } else {
+            setUserInfoData({...userInfoData, userName: removeVietnameseDiacriticsAndSpaces(response.data.userName), birthdate: response.data.userInfo.birthdate.substring(0, 4)})
+          }
+        } else {
+          setUserInfoData({...userInfoData, userName: null , birthdate: null});
+        }
+      } catch (error) {
+        console.log("Error: ", error);
+      }
+    };
+
+    if (user) {
+      getInfo();
+    }
+  }, [user]);
 
   useEffect(() => {
     setNewData({...newData, newPassword: newPassword, oldPassword: oldPassword});
@@ -36,14 +62,20 @@ export const ChangePassword = ({navigation}) => {
   }, [newData, newPasswordAgain]);
 
   const changePassword = async(newPassword) => {
-    try {
-      const response = await axios.put('/auth/change-password', { 
-        oldPassword: newPassword.oldPassword,
-        newPassword: newPassword.newPassword
-       });
-      return response;
-    } catch (error) {
-      console.log("Error: ", error);
+    if (newPassword.newPassword.toLowerCase().includes(userInfoData.userName.toLowerCase()) || newPassword.newPassword.includes(userInfoData.birthdate)) {
+      toastRef.current.props.style.backgroundColor = 'red';
+      toastRef.current.show('Mật khẩu không được chứa tên hoặc năm sinh của bạn', 2000);
+      return false;
+    } else {
+      try {
+        const response = await axios.put('/auth/change-password', { 
+          oldPassword: newPassword.oldPassword,
+          newPassword: newPassword.newPassword
+         });
+        return response;
+      } catch (error) {
+        console.log("Error: ", error);
+      }
     }
   }
   
@@ -57,10 +89,9 @@ export const ChangePassword = ({navigation}) => {
             navigation.goBack();
           }, 2000);
         } else if (response.errCode === 3)  {
+          toastRef.current.props.style.backgroundColor = 'red';
           toastRef.current.show('Mật khẩu hiện tại không chính xác', 2000);
-        } else {
-          toastRef.current.show('Đổi mật khẩu thất bại', 2000);
-        }
+        } 
       }
     } catch (error) {
       console.log("Error: ", error);
@@ -69,6 +100,7 @@ export const ChangePassword = ({navigation}) => {
 
   const checkNewPassword = () => {
     if (newPassword !== newPasswordAgain) {
+      toastRef.current.props.style.backgroundColor = 'red';
       toastRef.current.show('Mật khẩu mới không trùng khớp', 2000);
       return false;
     } else {
@@ -76,6 +108,12 @@ export const ChangePassword = ({navigation}) => {
     }
   };
 
+  function removeVietnameseDiacriticsAndSpaces(str) {
+    // Normalize the string and remove diacritics
+    str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+    // Remove spaces
+    return str.replace(/\s+/g, '');
+  }
   return (
     <View style={styles.container}>
       <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
@@ -117,7 +155,7 @@ export const ChangePassword = ({navigation}) => {
           </Pressable>
         </View>
 
-        <Toast ref={toastRef} position='top' />
+        <Toast ref={toastRef} style={{backgroundColor: 'green'}} position='top' />
       </View>
     </View>
   )

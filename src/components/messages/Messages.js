@@ -308,7 +308,7 @@ export const Messages = ({ navigation }) => {
       <LinearGradient colors={['#008BFA', '#00ACF4']} style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
         <View style={{height: '55%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around'}}>
           <FontAwesomeIcon size={22} style={styles.icon} icon={faSearch} />
-          <TextInput style={styles.searchTxt} placeholder="Tìm kiếm" placeholderTextColor={'#FFFFFF'}/>
+          <TextInput style={styles.searchTxt} placeholder="Tìm kiếm" placeholderTextColor={'#FFFFFF'} editable={false}/>
           
           <View style={styles.actionIcons}>
             <Pressable onPress={() => {navigation.navigate('QRCodeScanner')}}>

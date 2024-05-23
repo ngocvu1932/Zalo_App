@@ -11,7 +11,7 @@ export const Discovery = () => {
       <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
         <View style={{height: '55%', flexDirection: 'row', width: '100%', alignItems: 'center', justifyContent: 'space-between'}}>
           <FontAwesomeIcon style={{marginLeft: 10}} color='#F1FFFF' size={22} icon={faMagnifyingGlass} />
-          <TextInput style={styles.txtInHeader} placeholder='Tìm kiếm' placeholderTextColor={'#FFFFFF'}></TextInput>
+          <TextInput style={styles.txtInHeader} placeholder='Tìm kiếm' placeholderTextColor={'#FFFFFF'} editable={false}></TextInput>
           <Pressable style={{height: 40, width: 40, justifyContent: 'center', alignItems: 'center', marginRight: 5}}>
             <FontAwesomeIcon style={{}} color='#F1FFFF' size={22} icon={faQrcode} />
           </Pressable>
