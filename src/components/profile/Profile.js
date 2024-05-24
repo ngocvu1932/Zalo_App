@@ -295,7 +295,7 @@ export const Profile = ({navigation, route}) => {
       { !isUser ? 
         isFriend ? 
           <View style={{position: 'absolute', right: 20, bottom: 30, zIndex: 3}}>
-            <Pressable style={[styles.btnChat, {width: 120}]} onPress={()=> alert('re')}>
+            <Pressable style={[styles.btnChat, {width: 120}]} onPress={()=> joinChat()}>
               <FontAwesomeIcon icon={faCommentDots} color='#0763EA' size={18} />
               <Text style={{color: '#0763EA', fontSize: 16, fontWeight: '500', marginLeft: 10}}>Nhắn tin</Text> 
             </Pressable>

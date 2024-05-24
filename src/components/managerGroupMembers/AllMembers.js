@@ -91,6 +91,9 @@ export const AllMembers = ({navigation, items}) => {
         setLoadAgain(true);
         toastRef.current.props.style.backgroundColor = 'green';
         toastRef.current.show('Xóa thành viên thành công!', 1000);
+        socket.then(socket => {
+          socket.emit('delete-member', response);
+        }); 
       } else {
         toastRef.current.props.style.backgroundColor = 'red';
         toastRef.current.show('Xóa thành viên thất bại!', 1000);

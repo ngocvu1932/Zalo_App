@@ -15,6 +15,8 @@ export const ContactFriends = ({ navigation }) => {
   const dispatch = useDispatch();
   const [loadAgainSocket, setLoadAgainSocket] =useState();
   const [loadAgain, setLoadAgain] =useState(false);
+  const [stateListFriend, setStateListFriend] = useState('all');
+  const [count, setCount] = useState(0); // count số người online
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -43,6 +45,19 @@ export const ContactFriends = ({ navigation }) => {
       });
     };
   }, []);
+
+  useEffect(() => {
+    let data = [];
+    friendList.forEach((item) => {
+      if (item.receiver.id === currentId) {
+        data.push(item.sender);
+      } else if (item.sender.id === currentId) {
+        data.push(item.receiver); // Change this line to item.receiver
+      }
+    });
+    const count = data.filter(item => item.lastedOnline === null).length;
+    setCount(count);
+  }, [friendList]);
  
   // lấy danh sách bạn bè
   useEffect(() => {
@@ -148,37 +163,76 @@ export const ContactFriends = ({ navigation }) => {
     }
     
     return(
-      <Pressable style={styles.btnItem} onPress={()=> {joinChatWithFriend(data.id)}}>
-        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-          {data?.avatar.substring(0, 3) ==='rgb' ? 
-            <View>
-              <View style={{height: 45, width: 45, backgroundColor: data?.avatar, borderRadius: 25, marginLeft: 15}}></View> 
-              {!data?.lastedOnline ? 
-                <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
-              : ''}
-            </View>
-          : 
-            <View>
-              <Image source={{uri: data?.avatar}} style={{height: 45, width: 45, borderRadius: 25, marginLeft: 15}} />
-              {
-                !data?.lastedOnline ? 
-                  <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
+      <>
+        {
+          stateListFriend === 'all' ? 
+            <Pressable style={styles.btnItem} onPress={()=> {joinChatWithFriend(data.id)}}>
+              <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                {data?.avatar.substring(0, 3) ==='rgb' ? 
+                  <View>
+                    <View style={{height: 45, width: 45, backgroundColor: data?.avatar, borderRadius: 25, marginLeft: 15}}></View> 
+                    {!data?.lastedOnline ? 
+                      <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
+                    : ''}
+                  </View>
                 : 
-                ''
-              }
-            </View>
-          }
-          <Text style={{marginLeft: 15, fontSize: 16, flex: 1}}>{data?.userName}</Text>
-          <View style={{flexDirection: 'row', marginRight: 25}}>
-            <Pressable style={[styles.btnIcon, {marginRight: 5}]}>
-              <FontAwesomeIcon color="#616161" size={19} icon={faPhone} />
+                  <View>
+                    <Image source={{uri: data?.avatar}} style={{height: 45, width: 45, borderRadius: 25, marginLeft: 15}} />
+                    {
+                      !data?.lastedOnline ? 
+                        <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
+                      : 
+                      ''
+                    }
+                  </View>
+                }
+                <Text style={{marginLeft: 15, fontSize: 16, flex: 1}}>{data?.userName}</Text>
+                <View style={{flexDirection: 'row', marginRight: 25}}>
+                  <Pressable style={[styles.btnIcon, {marginRight: 5}]}>
+                    <FontAwesomeIcon color="#616161" size={19} icon={faPhone} />
+                  </Pressable>
+                  <Pressable style={[styles.btnIcon, {}]}>
+                    <FontAwesomeIcon color="#616161" size={20} icon={faVideo} />
+                  </Pressable>
+                </View>
+              </View>
             </Pressable>
-            <Pressable style={[styles.btnIcon, {}]}>
-              <FontAwesomeIcon color="#616161" size={20} icon={faVideo} />
-            </Pressable>
-          </View>
-        </View>
-      </Pressable>
+          : 
+            !data?.lastedOnline ? 
+              <Pressable style={styles.btnItem} onPress={()=> {joinChatWithFriend(data.id)}}>
+                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                  {data?.avatar.substring(0, 3) ==='rgb' ? 
+                    <View>
+                      <View style={{height: 45, width: 45, backgroundColor: data?.avatar, borderRadius: 25, marginLeft: 15}}></View> 
+                      {!data?.lastedOnline ? 
+                        <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
+                      : ''}
+                    </View>
+                  : 
+                    <View>
+                      <Image source={{uri: data?.avatar}} style={{height: 45, width: 45, borderRadius: 25, marginLeft: 15}} />
+                      {
+                        !data?.lastedOnline ? 
+                          <View style={{backgroundColor: '#3FD78C', height: 15, width: 15, borderRadius: 10, position: 'absolute', top: 32, left: 47, borderWidth: 2, borderColor: '#ffffff'}}></View> 
+                        : 
+                        ''
+                      }
+                    </View>
+                  }
+                  <Text style={{marginLeft: 15, fontSize: 16, flex: 1}}>{data?.userName}</Text>
+                  <View style={{flexDirection: 'row', marginRight: 25}}>
+                    <Pressable style={[styles.btnIcon, {marginRight: 5}]}>
+                      <FontAwesomeIcon color="#616161" size={19} icon={faPhone} />
+                    </Pressable>
+                    <Pressable style={[styles.btnIcon, {}]}>
+                      <FontAwesomeIcon color="#616161" size={20} icon={faVideo} />
+                    </Pressable>
+                  </View>
+                </View>
+              </Pressable>
+            : ''
+        }
+      </>
     )
   }
 
@@ -210,14 +264,16 @@ export const ContactFriends = ({ navigation }) => {
       {renderLine(10)}
       
       <View style={{flexDirection: 'row', marginTop: 10, marginBottom: 10}}>
-        <Pressable style={styles.btnSelect}> 
+        <Pressable style={styles.btnSelect} onPress={()=> {setStateListFriend('all')}}> 
           <Text style={{fontWeight: "bold", fontSize:14}}>Tất cả</Text>
           <Text style={{fontSize:16, marginLeft: 10}}>{friendList.length}</Text>
         </Pressable>
         
-        <Pressable style={[styles.btnSelect, {width: 130}]}> 
+        <Pressable style={[styles.btnSelect, {width: 130}]} onPress={()=> {setStateListFriend('online')}}> 
           <Text style={{fontWeight: "bold", fontSize:14}}>Mới truy cập</Text>
-          <Text style={{fontSize:16, marginLeft: 10}}>{friendList.length}</Text>
+          <Text style={{fontSize:16, marginLeft: 10}}>
+            {count}
+          </Text>
         </Pressable>
       </View>
 
@@ -229,7 +285,7 @@ export const ContactFriends = ({ navigation }) => {
         renderItem={renderItem}
         scrollEnabled={false}
       ></FlatList>
-      <View style={{height: 300, width: '100%'}}></View>
+      <View style={{height: 50, width: '100%'}}></View>
     </ScrollView>
   );
 };

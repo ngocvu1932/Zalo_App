@@ -103,6 +103,10 @@ export const AddMember = ({navigation, route}) => {
                 setListId([]);
                 setModalVisible(false);
                 toastRef.current.show('Thêm thành viên thành công', 2000);
+                socket.then(socket => {
+                    socket.emit('add-member', response);
+                    socket.emit('leave-group', response);
+                });
             }
         } catch (error) {
             console.log('Error adding member:', error);

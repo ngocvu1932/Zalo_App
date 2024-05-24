@@ -58,14 +58,14 @@ export const Messages = ({ navigation }) => {
     }
   },  [chatData]);
  
-  //socket
+  //socket 
   useEffect(() => {
     if (joined) {
       socket.then(socket => {
         socket.on('receive-message', (data) => {
-            console.log('receive-message', data.content);
-            setLoadAgain(new Date());
-        });
+          console.log('receive-message', data.content);
+          setLoadAgain(new Date());
+        }); 
       });
     }
     return () => {
@@ -75,6 +75,34 @@ export const Messages = ({ navigation }) => {
     };
   }, [joined]);
 
+  // này là thêm member nè
+  const leaveGroup = async (data) => {
+    if (data) {
+      setLoadAgain(true);
+    } 
+  }
+
+  const deleteMember = async (data) => {
+    if (data) {
+      setLoadAgain(true);
+    }
+  }
+
+  // socket
+  useEffect(() => {
+    socket.then(socket => {
+      socket.on('leave-group', leaveGroup);
+      socket.on('delete-member', deleteMember);
+    });
+
+    return () => {
+        socket.then(socket => {
+          socket.on('leave-group', leaveGroup);
+          socket.on('delete-member', deleteMember);
+        });
+    };
+  }, []);
+ 
   useEffect(() => {
     setAccess_Token(user.user?.access_token);
     setAuthorizationAxios(user.user?.access_token);
@@ -88,9 +116,11 @@ export const Messages = ({ navigation }) => {
         if (response.errCode === 0) { 
           setChatData(response.data);
           setIsLoading(false);
+          setLoadAgain(false);
         } else if (response.errCode === 1) {
           setChatData([]);
           setIsLoading(false);
+          setLoadAgain(false);
         }
       } catch (error) {
         console.log('Error fetching chat  1:', error);
@@ -145,7 +175,7 @@ export const Messages = ({ navigation }) => {
       return null;
     });
     setChatInfo(dataChat);
-  }, [chatData]);
+  }, [chatData, loadAgain]);
 
   const resetToScreen = (navigation, routeName) => {
     navigation.dispatch(CommonActions.reset({

@@ -13,6 +13,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import {CLOUD_NAME, UPLOAD_PRESET} from '@env'
 import { useDispatch } from 'react-redux'
 import { setGroupChatInfo } from '../../redux/groupChatInfoSlice'
+import { socket } from '../../config/io';
  
 export const ChatMessageOptions = ({navigation, route}) => { 
     const {items} = route.params; 
@@ -93,12 +94,15 @@ export const ChatMessageOptions = ({navigation, route}) => {
             if (response.errCode === 0){
                 toastRef.current.props.style.backgroundColor = 'green';
                 toastRef.current.show('Bạn đã rời nhóm!', 1000);
+                socket.then(socket => {
+                    socket.emit('leave-group', response);
+                });
                 setTimeout(() => {
                     navigation.navigate('MainScreen', { screen: 'Messages' })
                 }, 1000)
-            } else {
+            } else if (response.errCode === 1) {
                 toastRef.current.props.style.backgroundColor = 'red';
-                toastRef.current.show('Có lỗi xảy ra!', 1000);
+                toastRef.current.show(<Text style={{textAlign: 'center', color: '#FFFFFF'}}>Bạn đang là trưởng nhóm, hãy chuyển trưởng nhóm cho thành viên khác!</Text>, 1500);
             }
         } catch (error) {
             console.log('Error: ',error);

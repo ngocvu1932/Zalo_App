@@ -14,6 +14,7 @@ import {CLOUD_NAME, UPLOAD_PRESET} from '@env'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Video, Audio } from 'expo-av';
 import { setGroupChatInfo } from '../../redux/groupChatInfoSlice';
+import Toast from 'react-native-easy-toast';
 
 export const ChatMessage = ({ navigation, route }) => {
     const groupChatInfo = useSelector(state => state.groupChatInfo.groupChatInfo);
@@ -34,7 +35,7 @@ export const ChatMessage = ({ navigation, route }) => {
     const [loadAgainRecall, setLoadAgainRecall] = useState(false);
     const [loadAgainFocus, setLoadAgainFocus] = useState();
     const [loadAgainChangeAdmin, setLoadAgainChangeAdmin] = useState(false);
-    // const [loadAgain1, setLoadAgain1] = useState(false);
+    const [loadAgain, setLoadAgain] = useState(false);
     const [isSend, setIsSend] = useState(false);
     const [isMessage, setIsMessage] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -47,8 +48,7 @@ export const ChatMessage = ({ navigation, route }) => {
     const delayTime = 200;
     const [isMessageRecall, setIsMessageRecall] = useState(false);
     const adminId = groupChatInfo?.administrator;
-
-    // console.log(loadAgainChangeAdmin);
+    const toastRef = useRef();
     
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
@@ -126,6 +126,7 @@ export const ChatMessage = ({ navigation, route }) => {
                 if (response.errCode === 0) {
                     dispatch(setGroupChatInfo(response.data));
                     setIsLoadingGroupChat(false);
+                    setLoadAgain(false);
                 } else {
                     console.log("Error: ", response);
                 }
@@ -138,7 +139,7 @@ export const ChatMessage = ({ navigation, route }) => {
             getGroupChat();
             setLoadAgainChangeAdmin(false);
         } 
-    }, [items, loadAgainFocus, loadAgainChangeAdmin]);
+    }, [items, loadAgainFocus, loadAgainChangeAdmin, loadAgain]);
 
     // Lấy tin nhắn từ server
     useEffect(() => {
@@ -210,20 +211,43 @@ export const ChatMessage = ({ navigation, route }) => {
             setLoadAgainChangeAdmin(true);
         }
     };
+
+    //socket leaveGroup
+    const leaveGroup = async (data) => {
+        if (data) {
+            setLoadAgain(true);
+        }
+    };
+
+    //socket deleteMember
+    const deleteMember = async (data) => {
+        if (data) {
+            setLoadAgain(true);
+            // toastRef.current.props.style.backgroundColor = 'red';
+            toastRef.current.show('Bạn đã bị xóa khỏi nhóm', 1500);
+            setTimeout(() => {
+                navigation.goBack();
+            }, 1500);
+        }
+    };
  
     // socket
     useEffect(() => {
         socket.then(socket => {
             socket.on('receive-message', handleReceiveMessage);
             socket.on('receive-modify-message', handleRecallMessage);
-            socket.on('transfer-disband-group', transferDisbandGroup)
+            socket.on('transfer-disband-group', transferDisbandGroup);
+            socket.on('leave-group', leaveGroup);
+            socket.on('delete-member', deleteMember);
         });
 
         return () => {
             socket.then(socket => {
                 socket.off('receive-message', handleReceiveMessage);
                 socket.off('receive-modify-message', handleRecallMessage);
-                socket.off('transfer-disband-group', transferDisbandGroup)
+                socket.off('transfer-disband-group', transferDisbandGroup);
+                socket.on('leave-group', leaveGroup);
+                socket.on('delete-member', deleteMember);
             });
         };
     }, []);
@@ -1168,6 +1192,8 @@ export const ChatMessage = ({ navigation, route }) => {
                     </Modal>
                 </View>
             )}
+
+            <Toast style={{ backgroundColor: 'green' }} ref={toastRef} position='center' />
         </View>
     );
 }
