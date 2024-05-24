@@ -55,6 +55,7 @@ import { ShareMessage } from './src/components/chatMessage/ShareMessage';
 LogBox.ignoreLogs(['onAnimatedValueUpdate']);
 LogBox.ignoreLogs(['No native ExpoFirebaseCore module found']);
 LogBox.ignoreLogs(['Possible unhandled promise rejection']);
+LogBox.ignoreLogs(['SerializableStateInvariantMiddleware']);
 
 const Tab= createBottomTabNavigator();
 const Stack= createNativeStackNavigator();

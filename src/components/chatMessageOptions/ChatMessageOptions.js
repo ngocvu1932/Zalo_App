@@ -65,26 +65,26 @@ export const ChatMessageOptions = ({navigation, route}) => {
         }
     } 
 
-    // giải tán nhóm
+    //giải tán nhóm
     const handleDissolveGroup = async () => {
-        console.log('items: ', items._id);
-        alert('Đang viết!')
-        // try {
-        //     const response = await axios.delete(`/chat/delete`, {chatId: items._id})
-        //     console.log('response: ', response);
-        //     if (response.errCode === 0 ) {
-        //         toastRef.current.props.style.backgroundColor = 'green';
-        //         toastRef.current.show('Giải tán nhóm thành công!', 1000);
-        //         setTimeout(() => {
-        //             navigation.navigate('MainScreen', { screen: 'Messages' })
-        //         }, 1000)
-        //     } else {
-        //         toastRef.current.props.style.backgroundColor = 'red';
-        //         toastRef.current.show('Có lỗi xảy ra!', 1000);
-        //     }
-        // } catch (error) {
-        //     console.log('Error: ',error);
-        // }
+        try {
+            const response = await axios.post(`/chat/group/dissolution`, {_id: items._id})
+            if (response.errCode === 0 ) {
+                toastRef.current.props.style.backgroundColor = 'green';
+                toastRef.current.show('Giải tán nhóm thành công!', 1000);
+                socket.then(socket => {
+                    socket.emit('dissolutionGroupChat', response);
+                });
+                setTimeout(() => {
+                    navigation.navigate('MainScreen', { screen: 'Messages' })
+                }, 1000)
+            } else {
+                toastRef.current.props.style.backgroundColor = 'red';
+                toastRef.current.show('Có lỗi xảy ra!', 1000);
+            }
+        } catch (error) {
+            console.log('Error: ',error);
+        }
     }
 
     // rời nhóm

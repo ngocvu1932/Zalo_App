@@ -1,5 +1,5 @@
 import { Text, View, FlatList, Image, Pressable, TextInput, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { styles } from './style'
 import moment from "moment";
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -9,6 +9,7 @@ import { CommonActions } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { LinearGradient } from 'expo-linear-gradient';
 import { socket } from '../../config/io';
+import Toast from 'react-native-easy-toast';
 
 export const Messages = ({ navigation }) => {
   const user = useSelector(state => state.user);
@@ -20,6 +21,7 @@ export const Messages = ({ navigation }) => {
   const [loadAgain, setLoadAgain] =useState();
   const [loadAgainFocus, setLoadAgainFocus] =useState();
   const [joined, setJoined] = useState(false);
+  const toastRef = useRef();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -75,7 +77,7 @@ export const Messages = ({ navigation }) => {
     };
   }, [joined]);
 
-  // này là thêm member nè
+  // này là thêm member nè, tạo griup nè
   const leaveGroup = async (data) => {
     if (data) {
       setLoadAgain(true);
@@ -88,17 +90,36 @@ export const Messages = ({ navigation }) => {
     }
   }
 
+  const dissolutionGroupChat = async (data) => {
+    if (data) {
+      setLoadAgain(true);
+      toastRef.current.show( <Text style={{textAlign: 'center', color: '#FFFFFF'}}>Nhóm {data.data?.name} đã được giải tán.</Text>, 2000)
+    }
+  }
+
+  const newChat = async (data) => {
+    console.log('newChat', data);
+    // if (data) {
+    //   setLoadAgain(true);
+    //   toastRef.current.show( <Text style={{textAlign: 'center', color: '#FFFFFF'}}>Nhóm {data.data?.name} đã được giải tán.</Text>, 2000)
+    // }
+  }
+
   // socket
   useEffect(() => {
     socket.then(socket => {
       socket.on('leave-group', leaveGroup);
       socket.on('delete-member', deleteMember);
+      socket.on('dissolutionGroupChat', dissolutionGroupChat);
+      socket.on('new-chat', newChat);
     });
 
     return () => {
         socket.then(socket => {
-          socket.on('leave-group', leaveGroup);
-          socket.on('delete-member', deleteMember);
+          socket.off('leave-group', leaveGroup);
+          socket.off('delete-member', deleteMember);
+          socket.off('dissolutionGroupChat', dissolutionGroupChat);
+          socket.off('dissolutionGroupChat', newChat);
         });
     };
   }, []);
@@ -231,7 +252,7 @@ export const Messages = ({ navigation }) => {
     return (
       <View style={{width: '100%'}}>
         {
-          item.lastedMessage === null ? 
+          item.lastedMessage === null && item.type === 'PRIVATE_CHAT' ? 
             ''
           : 
             <Pressable style={styles.btnSelectChat} onPress={() => {navigation.navigate('ChatMessage', { items: {...rest}, flag: false})}}>
@@ -370,6 +391,7 @@ export const Messages = ({ navigation }) => {
             </View>
         }
       </View>
+      <Toast style={{backgroundColor: 'green'}} ref={toastRef} position='center' />
     </View>
   );
 };

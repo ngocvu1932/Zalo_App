@@ -93,11 +93,13 @@ export const AddMember = ({navigation, route}) => {
     };
 
     const handleAddMember = async() => {
+        console.log('List id:', listId.map(item => item.id));
         try {
             const response = await axios.put(`/chat/addMembers`, {
                 members: listId.map(item => item.id),
                 chatId: items._id
             });
+            console.log('Response:', response);
             if (response.errCode === 0) {
                 getGroupChat();
                 setListId([]);

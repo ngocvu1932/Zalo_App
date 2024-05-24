@@ -230,6 +230,16 @@ export const ChatMessage = ({ navigation, route }) => {
             }, 1500);
         }
     };
+
+    const dissolutionGroupChat = async (data) => {
+        if (data) {
+            setLoadAgain(true);
+            toastRef.current.show( <Text style={{textAlign: 'center', color: '#FFFFFF'}}>Nhóm {data.data?.name} đã được giải tán.</Text>, 2000)
+            setTimeout(() => {
+                navigation.goBack();
+            }, 2000);
+        }
+    }
  
     // socket
     useEffect(() => {
@@ -239,6 +249,7 @@ export const ChatMessage = ({ navigation, route }) => {
             socket.on('transfer-disband-group', transferDisbandGroup);
             socket.on('leave-group', leaveGroup);
             socket.on('delete-member', deleteMember);
+            socket.on('dissolutionGroupChat', dissolutionGroupChat);
         });
 
         return () => {
@@ -246,8 +257,9 @@ export const ChatMessage = ({ navigation, route }) => {
                 socket.off('receive-message', handleReceiveMessage);
                 socket.off('receive-modify-message', handleRecallMessage);
                 socket.off('transfer-disband-group', transferDisbandGroup);
-                socket.on('leave-group', leaveGroup);
-                socket.on('delete-member', deleteMember);
+                socket.off('leave-group', leaveGroup);
+                socket.off('delete-member', deleteMember);
+                socket.off('dissolutionGroupChat', dissolutionGroupChat);
             });
         };
     }, []);

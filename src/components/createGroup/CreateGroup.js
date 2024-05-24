@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { CommonActions } from '@react-navigation/native';
 import * as ImagePicker from "expo-image-picker";
 import {CLOUD_NAME, UPLOAD_PRESET} from '@env'
+import { socket } from '../../config/io';
 
 export const CreateGroup = ({ navigation }) => {
     const listFriend = useSelector(state => state.listFriend.listFriend);
@@ -139,8 +140,6 @@ export const CreateGroup = ({ navigation }) => {
                     participants: listId.map(item => item.id),
                     groupPhoto: linkImageGroup ? linkImageGroup : null,
                 });
-                
-                console.log('Response create group:', response.data);
 
                 if (response.errCode === 0) {
                     const data = {
@@ -154,8 +153,14 @@ export const CreateGroup = ({ navigation }) => {
                         administrator: response.data?.administrator
                     };
 
+                    socket.then(socket => {
+                        socket.emit('new-chat', response.data);
+                        socket.emit('leave-group', response.data);
+                    });
+
                     toastRef.current.props.style.backgroundColor = 'green';
                     toastRef.current.show('Tạo nhóm thành công!', 1000);
+                    
                     setTimeout(() => {
                         navigation.navigate('ChatMessage', {items: data, flag: 'CreateGroup'});
                     }, 1000)
