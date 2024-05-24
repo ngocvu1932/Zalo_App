@@ -365,7 +365,7 @@ export const ChatMessage = ({ navigation, route }) => {
                     updatedAt: new Date(),
                     unViewList: [],
                     isDelete: false,
-                    urls: data.secure_url,
+                    urls: [data.secure_url],
                     reactions: []
                 }
 

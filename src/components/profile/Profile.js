@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { socket } from '../../config/io';
 import { faCommentDots, faImage } from '@fortawesome/free-regular-svg-icons';
 import { setUserInfo } from '../../redux/userInfoSlice';
+import { setFriendRequestRe } from '../../redux/notificationSlide';
 
 export const Profile = ({navigation, route}) => {
   const user = useSelector(state => state.user);

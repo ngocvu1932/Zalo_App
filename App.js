@@ -46,7 +46,6 @@ import {ManagerGroupMembers} from './src/components/managerGroupMembers/ManagerG
 import { AllMembers } from './src/components/managerGroupMembers/AllMembers';
 import { AddMember } from './src/components/createGroup/AddMember';
 import { LogBox, Platform } from 'react-native';
-import { socket } from './src/config/io';
 import { setDevice } from './src/redux/deviceSlice';
 import { ProfileInfo } from './src/components/profileOptions/ProfileInfo';
 import { EditProfile } from './src/components/profileOptions/EditProfile';
@@ -61,7 +60,8 @@ const Tab= createBottomTabNavigator();
 const Stack= createNativeStackNavigator();
 
 const MainScreen = ({ route }) => { 
-  return( 
+
+  return(  
     <Tab.Navigator 
       initialRouteName={route.params?.screen}
       screenOptions={({route}) => ({
@@ -83,8 +83,8 @@ const MainScreen = ({ route }) => {
       })} 
     >
       <Tab.Screen name="Messages" component={Messages} options={{tabBarLabel: 'Tin nhắn', tabBarLabelStyle:{fontSize: 12}, tabBarBadge: '3'}}/>
-      <Tab.Screen name="Contacts" component={Contacts} options={{tabBarLabel: 'Danh bạ', tabBarLabelStyle:{fontSize: 12}}}/>
-      <Tab.Screen name="Discovery" component={Discovery} options={{tabBarLabel: 'Khám phá', tabBarLabelStyle:{fontSize: 12}}}/>
+      <Tab.Screen name="Contacts" component={Contacts} options={{tabBarLabel: 'Danh bạ', tabBarLabelStyle:{fontSize: 12}, tabBarBadge: undefined }}/>
+      <Tab.Screen name="Discovery" component={Discovery} options={{tabBarLabel: 'Khám phá', tabBarLabelStyle:{fontSize: 12}}}/> 
       <Tab.Screen name="Timeline" component={Timeline} options={{tabBarLabel: 'Nhật ký', tabBarLabelStyle:{fontSize: 12}}}/>
       <Tab.Screen name="Me" component={Me} options={{tabBarLabel: 'Cá nhân', tabBarLabelStyle:{fontSize: 12}}}/>
     </Tab.Navigator>

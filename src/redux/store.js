@@ -4,6 +4,7 @@ import friendSlice from './friendSlice';
 import deviceSlice from './deviceSlice';
 import userInfoSlice from './userInfoSlice';
 import groupChatInfoSlice from './groupChatInfoSlice';
+import notificationSlide from './notificationSlide';
 
 export default configureStore({
     reducer: {
@@ -11,6 +12,7 @@ export default configureStore({
       listFriend: friendSlice.reducer,
       device: deviceSlice.reducer,
       userInfo: userInfoSlice.reducer,
-      groupChatInfo: groupChatInfoSlice.reducer
+      groupChatInfo: groupChatInfoSlice.reducer,
+      notificationSlide: notificationSlide.reducer
     }
 });

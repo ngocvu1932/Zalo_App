@@ -76,7 +76,7 @@ export const FriendRequestReceived = ({ navigation }) => {
       if (response.errCode === 0) {
         setLoadAgain(true);
         socket.then(socket => {
-          socket.emit('send-add-friend', {createdAt: new Date()});
+          socket.emit('send-add-friend', response);
         });
       } else {
         console.log('Error', response);
@@ -94,7 +94,7 @@ export const FriendRequestReceived = ({ navigation }) => {
       if (response.errCode === 0) {
         setLoadAgain(true);
         socket.then(socket => {
-          socket.emit('send-add-friend', {createdAt: new Date()});
+          socket.emit('send-add-friend', response);
         });
       } else {
         console.log('Error', response);
