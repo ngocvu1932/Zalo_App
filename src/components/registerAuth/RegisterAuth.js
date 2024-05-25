@@ -47,6 +47,7 @@ export const RegisterAuth = ({navigation, route}) => {
   }, [name, phone])
 
   const confirmCode = async () => {
+    setLoading(true);
     try {
       const credentials = firebase.auth.PhoneAuthProvider.credential(
         confirm,
@@ -59,11 +60,17 @@ export const RegisterAuth = ({navigation, route}) => {
           await successRegisterHandle();
         })
         .catch((error) => {
+          setLoading(false);
+          toastRef.current.props.style.backgroundColor = 'red';
+          toastRef.current.show('Vui lòng kiểm tra lại OTP!', 1999);
           console.log('Invalid code', error);
           setCode('')
         });
 
     } catch (error) {
+      setLoading(false);
+      toastRef.current.props.style.backgroundColor = 'red';
+      toastRef.current.show('Mã đã hết hạn!', 1999);
       console.log('Invalid credentials', error);
     }
   };
@@ -81,11 +88,14 @@ export const RegisterAuth = ({navigation, route}) => {
     const res = await registerUser(userData);
 
     if (res.errCode === 0) {
+      setLoading(false);
       toastRef.current.show('Đăng kí thành công!', 1999);
       setTimeout(() => {
         resetToScreen(navigation, 'Login');
       }, 2000);
     } else {
+      setLoading(false);
+      toastRef.current.props.style.backgroundColor = 'red';
       toastRef.current.show('Số điện thoại đã tồn tại!', 3000);
     }
   }
@@ -131,7 +141,12 @@ export const RegisterAuth = ({navigation, route}) => {
       </View>
       <Toast style={{backgroundColor: 'green'}} ref={toastRef} position='center' />
 
-      
+      {
+        loading && 
+        <View style={{position: 'absolute', top: 0, right: 0, left: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.3)', justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator size='large' colors='black'/>
+        </View>
+      }
       
     </SafeAreaProvider>
   )

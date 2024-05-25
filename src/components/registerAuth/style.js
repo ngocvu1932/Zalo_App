@@ -56,7 +56,7 @@ export const styles = StyleSheet.create({
 
     inputt: {
         width: '35%', 
-        fontSize: 25 , 
+        fontSize: 22 , 
         height: 40, 
         borderBottomWidth: 2,
         borderBottomColor: '#1ED0F1', 
