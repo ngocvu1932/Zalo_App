@@ -5,7 +5,7 @@ import { styles } from "./style";
 import { socket } from "../../config/io";
 import { useSelector } from "react-redux";
 
-export const QRCodeScanner = () => {
+export const QRCodeScanner = ({navigation}) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [text, setText] = useState("Hướng camera về phía mã QR");
@@ -38,7 +38,6 @@ export const QRCodeScanner = () => {
       socket.on("joined", (room) => {
         console.log("room", room);
         if (room) {
-        } else {
           socket.emit("scan-success", {
             phoneNumber: user.phoneNumber,
             id: user.id,
@@ -46,7 +45,7 @@ export const QRCodeScanner = () => {
             room: room,
             userName: user.userName,
           });
-        }
+        } 
       });
     });
   };

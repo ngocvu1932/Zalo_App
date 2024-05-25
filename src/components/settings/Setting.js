@@ -12,6 +12,9 @@ import { LinearGradient } from 'expo-linear-gradient'
 
 export const Setting = ({navigation}) => {
   const clearAllData = async () => {
+    // await AsyncStorage.clear();
+    //       console.log('Tất cả dữ liệu đã được xóa thành công!');
+    //       resetToScreen(navigation, 'Login');
     try {
       const res = await axios.put('/users/updateOnline', {time: new Date()});
       if (res.errCode === 0) {

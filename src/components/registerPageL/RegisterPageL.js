@@ -14,7 +14,7 @@ export const RegisterPageL = ({navigation}) => {
   const toastRef = useRef(null);
 
   useEffect(() => {
-    console.log(name.length, password.length);
+    // console.log(name.length, password.length);
     if(name.length > 1 && name.length < 41 && password.length > 5) {
       setIsData(false)
     } else {
