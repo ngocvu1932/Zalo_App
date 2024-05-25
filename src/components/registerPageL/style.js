@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
     },
 
     txtInHeader: {
-        fontSize: 20,
+        fontSize: 18,
         color: '#F1FFFF',
         marginLeft: 10,
     }, 
@@ -36,8 +36,8 @@ export const styles = StyleSheet.create({
         borderBottomColor: '#1ED0F1', 
         height: 40,
         width: '100%',
-        fontSize: 18,
-        marginTop: 10
+        fontSize: 16,
+        marginTop: 5
     },
 
     blue: {
@@ -49,7 +49,7 @@ export const styles = StyleSheet.create({
     },
 
     texxt: {
-        fontSize: 16
+        fontSize: 15
     },
 
     btnRe: {

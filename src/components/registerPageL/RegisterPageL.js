@@ -9,34 +9,41 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 export const RegisterPageL = ({navigation}) => {
   const [name, setName] = useState('')
+  const [password, setPassword] = useState('')
   const [isData, setIsData] = useState(true)
   const toastRef = useRef(null);
 
   useEffect(() => {
-    if(name.length > 1 && name.length < 41) {
+    console.log(name.length, password.length);
+    if(name.length > 1 && name.length < 41 && password.length > 5) {
       setIsData(false)
     } else {
       setIsData(true)
     }
-  }, [name])
+  }, [name, password])
 
   const successHandle = ()=>{
-    const check= checkName(name);
+    const check= checkName(name, password);
     if (check) {
-      navigation.navigate('RegisterPage2', {name: name})
+      navigation.navigate('RegisterPage2', {name: name, password: password})
     } else {
-      toastRef.current.show('Tên không hợp lệ', 2000)
+      toastRef.current.props.style.backgroundColor='red'
+      toastRef.current.show('Tên hoặc mật khẩu không hợp lệ', 2000)
     }
   }
 
-  const checkName = (name) => {
-    // const regex = /^[^0-9]{2,}\s*$/;
+  const checkName = (name, password) => {
     const regex = /^[^0-9]{2,}$/;
-    if (regex.test(name)) {
+    if (regex.test(name) && !password.toLowerCase().includes(removeVietnameseDiacriticsAndSpaces(name.toLowerCase()))) {
       return true;
     } else {
       return false;
     }
+  }
+
+  function removeVietnameseDiacriticsAndSpaces(str) {
+    str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+    return str.replace(/\s+/g, '');
   }
   
   return (
@@ -44,7 +51,7 @@ export const RegisterPageL = ({navigation}) => {
       <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
         <View style={{height: '55%', justifyContent: 'center'}}>
           <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
-            <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
+            <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={18} />
             <Text style={styles.txtInHeader}>Tạo tài khoản</Text> 
           </Pressable>
         </View>
@@ -52,8 +59,11 @@ export const RegisterPageL = ({navigation}) => {
 
       <View style={styles.body}>
         <View style={{alignItems: 'center', width: '95%'}}>
-          <Text style={{alignSelf: 'flex-start', fontSize: 18, fontWeight: '500', marginTop: 15}}>Tên Zalo</Text>
-          <TextInput style={styles.textNameI} placeholder='Gồm 2-40 ký tự' onChangeText={(name)=>setName(name)} placeholderTextColor={'#7F838E'}></TextInput>
+          <Text style={{alignSelf: 'flex-start', fontSize: 17, fontWeight: '500', marginTop: 10}}>Tên Zalo</Text>
+          <TextInput style={styles.textNameI} placeholder='Gồm 2-40 ký tự, không được số' onChangeText={(name)=>setName(name)} placeholderTextColor={'#7F838E'}></TextInput>
+
+          <Text style={{alignSelf: 'flex-start', fontSize: 17, fontWeight: '500', marginTop: 15}}>Mật khẩu</Text>
+          <TextInput style={styles.textNameI} placeholder='Từ 6 kí tự trở lên, không trùng với tên' onChangeText={(password)=>setPassword(password)} placeholderTextColor={'#7F838E'}></TextInput>
         </View>
 
         <View style={{width: '95%'}}>
@@ -74,7 +84,8 @@ export const RegisterPageL = ({navigation}) => {
             <FontAwesomeIcon size={22} icon={faArrowRight} />
         </Pressable>
       </View>
-      <Toast ref={toastRef} position='top'/>
+
+      <Toast ref={toastRef} style={{backgroundColor: 'green'}} position='top'/>
       
     </View>
   )

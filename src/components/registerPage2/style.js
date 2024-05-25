@@ -28,7 +28,7 @@ export const styles = StyleSheet.create({
     },
 
     txtInHeader: {
-        fontSize: 21,
+        fontSize: 18,
         color: '#F1FFFF',
         marginLeft: 10,
         marginBottom: 2

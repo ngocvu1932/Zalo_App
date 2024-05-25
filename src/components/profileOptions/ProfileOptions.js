@@ -217,7 +217,7 @@ export const ProfileOptions = ({navigation, route}) => {
   const updateAvatar = async (base64) => {
     try {
       const response = await axios.put('/users/avatar', {avatar: base64});
-      console.log(response);
+      // console.log(response);
       if (response.errCode === 0) {
         setModalVisibleChangeAvt(false);
         const userInfoCus = {

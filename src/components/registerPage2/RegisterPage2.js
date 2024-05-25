@@ -11,7 +11,7 @@ import { firebaseConfig } from '../../utils/firebase_config'
 import { LinearGradient } from 'expo-linear-gradient';
 
 export const RegisterPage2 = ({ navigation, route }) => {
-  const { name } = route.params;
+  const { name, password } = route.params;
   const [isData, setIsData] = useState(true);
   const [isChecked1, setIsChecked1] = useState(true);
   const [isChecked2, setIsChecked2] = useState(true);
@@ -48,7 +48,7 @@ export const RegisterPage2 = ({ navigation, route }) => {
       phoneProvider
         .verifyPhoneNumber(phoneNumber, recaptchaVerifiedRef.current)
         .then((confirmation) => {
-          navigation.navigate('RegisterAuth', { name: name, phone: phoneNumber, confirm: confirmation });
+          navigation.navigate('RegisterAuth', { name: name, password: password, phone: phoneNumber, confirm: confirmation });
         })
     }else{
       toastRef.current.show('Số điện thoại không hợp lệ!', 2000);
@@ -61,7 +61,7 @@ export const RegisterPage2 = ({ navigation, route }) => {
       <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
         <View style={{height: '55%', justifyContent: 'center'}}>
           <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
-            <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
+            <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={19} />
             <Text style={styles.txtInHeader}>Tạo tài khoản</Text> 
           </Pressable>
         </View>
@@ -77,7 +77,7 @@ export const RegisterPage2 = ({ navigation, route }) => {
         <View style={{ width: '90%' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20 }}>
             <BouncyCheckbox
-              size={22}
+              size={18}
               fillColor="blue"
               unfillColor="#FFFFFF"
               innerIconStyle={{ borderWidth: 1, borderColor: "gray" }}
@@ -88,7 +88,7 @@ export const RegisterPage2 = ({ navigation, route }) => {
 
           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
             <BouncyCheckbox
-              size={22}
+              size={18}
               fillColor="blue"
               unfillColor="#FFFFFF"
               innerIconStyle={{ borderWidth: 1, borderColor: "gray" }}

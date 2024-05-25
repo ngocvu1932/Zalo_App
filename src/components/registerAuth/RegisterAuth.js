@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, Text, TextInput, View} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View} from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { styles } from './style';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -12,30 +12,38 @@ import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import firebase from 'firebase/compat/app';
 import { firebaseConfig } from '../../utils/firebase_config'
+import { LinearGradient } from 'expo-linear-gradient';
 
 
 export const RegisterAuth = ({navigation, route}) => {
-  const name = route.params.name;
+  const {name, password} = route.params;
   var phone = route.params.phone;
   const [confirm, setConfirm] = useState(route.params.confirm);
-  var [code, setCode] = useState('');   
+  const [code , setCode] = useState('');   
+  const [loading, setLoading] = useState(false);
 
-  // console.log("firebaseeee",firebase);
   if (phone.startsWith("+84")) {
     phone = "0" + phone.slice(3);
-}
+  }
   const [isCode, setIsCode] = useState(true)
   const toastRef = useRef(null);
-
 
   const [userData, setUserData] = useState({
     userName: '',
     phoneNumber: '',
-    password: '123456',
+    password: password,
   });
 
+  useEffect(()=>{
+    if (code.length == 6) {
+      setIsCode(false)
+    } else {
+      setIsCode(true)
+    }
+  }, [code])
+
   useEffect(() => {
-    setUserData({userName: name, phoneNumber: phone, password: '123456'})
+    setUserData({userName: name, phoneNumber: phone, password: password})
   }, [name, phone])
 
   const confirmCode = async () => {
@@ -48,10 +56,6 @@ export const RegisterAuth = ({navigation, route}) => {
         .auth()
         .signInWithCredential(credentials)
         .then( async (result) => {
-
-          // console.log('result: ', result);
-          // console.log('register success');
-          // navigation.navigate('Login');
           await successRegisterHandle();
         })
         .catch((error) => {
@@ -59,18 +63,14 @@ export const RegisterAuth = ({navigation, route}) => {
           setCode('')
         });
 
-      // navigation.navigate('TabTwo', { code });
     } catch (error) {
       console.log('Invalid credentials', error);
     }
   };
 
-
   const registerUser = async (userData) => {
     try {
       const response = await axios.post(`/auth`, userData);
-      // console.log("Response data: ", response.data);
-      // console.log("userData: ", userData);
       return response
     } catch (error) {
       console.error("Error register: ", error);
@@ -79,21 +79,17 @@ export const RegisterAuth = ({navigation, route}) => {
 
   async function successRegisterHandle(){
     const res = await registerUser(userData);
-    // console.log('res: ', res);
-    
+
     if (res.errCode === 0) {
       toastRef.current.show('Đăng kí thành công!', 1999);
-      // dung render trong 2s
       setTimeout(() => {
-        // navigation.replace('MainScreen');
-        // Sử dụng hàm resetToScreen để chuyển đến màn hình mong muốn và xóa các màn hình trước đó
         resetToScreen(navigation, 'Login');
       }, 2000);
     } else {
       toastRef.current.show('Số điện thoại đã tồn tại!', 3000);
     }
   }
-  // Trong một component hoặc bất kỳ nơi nào muốn thực hiện việc xóa các màn hình trước đó
+
   const resetToScreen = (navigation, routeName) => {
     navigation.dispatch(CommonActions.reset({
       index: 0,
@@ -103,13 +99,14 @@ export const RegisterAuth = ({navigation, route}) => {
 
   return (
     <SafeAreaProvider style={styles.container}>
-      <View style={styles.header}>
-        <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
-          <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={20} />
-          <Text style={styles.txtInHeader}>Nhập mã xác thực</Text> 
-          {/* <Text>{todo}</Text> */}
-        </Pressable>
-      </View>
+      <LinearGradient style={styles.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#008BFA', '#00ACF4']}>
+        <View style={{height: '55%', justifyContent: 'center'}}>
+          <Pressable style={styles.pressBack} onPress={()=> {navigation.goBack()}}>
+            <FontAwesomeIcon icon={faChevronLeft} style={{marginLeft: 10}} color='#F5F8FF' size={19} />
+            <Text style={styles.txtInHeader}>Xác thực</Text> 
+          </Pressable>
+        </View>
+      </LinearGradient>
       
       <View style={styles.body}>
         <View style={{backgroundColor: '#F9FAFE', width: '100%', height: 50, justifyContent: 'center'}} >
@@ -122,17 +119,19 @@ export const RegisterAuth = ({navigation, route}) => {
           <Text style={{fontSize: 15, marginTop: 10}}>Điền mã xác đã nhận vào ô bên dưới</Text>
         </View>
 
-        <TextInput style={styles.inputt} placeholder='Mã xác thực' value={code} onChangeText={setCode} ></TextInput>
+        <TextInput style={styles.inputt} placeholder='Mã xác thực' value={code} onChangeText={(code) => setCode(code)} ></TextInput>
 
         <Pressable style={styles.btnReCode} onPress={()=>{alert('Gửi lại mã')}}>
           <Text style={{color: 'blue', fontSize: 15}}>Gửi lại mã</Text>
         </Pressable>
 
-        <Pressable disabled={!isCode} style={[styles.btnRe, isCode ? styles.gray : styles.blue]} onPress={() => confirmCode() }>
+        <Pressable disabled={isCode} style={[styles.btnRe, isCode ? styles.gray : styles.blue]} onPress={() => {confirmCode()} }>
           <Text style={{fontSize: 20}}>Tiếp tục</Text>
         </Pressable>
       </View>
       <Toast style={{backgroundColor: 'green'}} ref={toastRef} position='center' />
+
+      
       
     </SafeAreaProvider>
   )
